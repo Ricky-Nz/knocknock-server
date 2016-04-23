@@ -10,14 +10,14 @@
  */
 
 module.exports.models = {
-
+  migrate: 'drop',
   /***************************************************************************
   *                                                                          *
   * Your app's default connection. i.e. the name of one of your app's        *
   * connections (see `config/connections.js`)                                *
   *                                                                          *
   ***************************************************************************/
-  // connection: 'localDiskDb',
+  connection: 'gcpMysqlServer'
 
   /***************************************************************************
   *                                                                          *
