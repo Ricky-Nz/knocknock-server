@@ -1,3 +1,4 @@
+var validator = require('validator');
 /**
  * UserController
  *
@@ -6,6 +7,11 @@
  */
 
 module.exports = {
-	
+	signup: function (req, res) {
+		if (!validator.isEmail(req.param('email'))) {
+			return res.badRequest('An email address is required!');
+		} else {
+			return res.json('success');
+		}
+	}
 };
-
