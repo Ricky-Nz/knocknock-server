@@ -16,6 +16,11 @@
  */
 
 module.exports = function badRequest(data, options) {
+  if (typeof data === 'string') {
+    data = {
+      error: data
+    };
+  }
 
   // Get access to `req`, `res`, & `sails`
   var req = this.req;

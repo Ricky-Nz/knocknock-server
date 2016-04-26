@@ -34,7 +34,15 @@ module.exports.routes = {
 
   '/': {
     view: 'homepage'
-  }
+  },
+  'POST /api/user/login': 'UserController.logIn',
+  'POST /api/user': 'UserController.signUp',
+  'PUT /api/user/:userId': 'UserController.updateUser',
+  'GET /api/user/:userId': 'UserController.getUser',
+  'GET /api/user': 'UserController.listUsers',
+
+  'POST /api/admin/login': 'AdminController.logIn',
+  'POST /api/admin': 'AdminController.signUp',
 
   /***************************************************************************
   *                                                                          *

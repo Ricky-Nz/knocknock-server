@@ -25,9 +25,12 @@ module.exports.policies = {
   * access)                                                                  *
   *                                                                          *
   ***************************************************************************/
+  '*': false,
 
-  // '*': true,
-
+  UserController: {
+    signUp: true,
+    logIn: true
+  }
   /***************************************************************************
   *                                                                          *
   * Here's an example of mapping some policies to run before a controller    *

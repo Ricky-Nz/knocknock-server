@@ -16,7 +16,12 @@ module.exports.bootstrap = function(cb) {
   Address.count(function (err, value) {
   	if (err) return cb(err);
 
-  	console.log('Count: ' + value);
-  	cb();
+  	Admin.findOrCreate({
+  		email: 'knocknock@knocknockapp.com',
+  		password: '12345678',
+  		root: true
+  	}, function (err, value) {
+  		cb(err);
+  	});
   });
 };
