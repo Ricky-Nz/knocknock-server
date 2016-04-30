@@ -3,13 +3,13 @@ module.exports = function(req, res, next) {
 		return ResponseService.permissionDenied(next);
 	}
 
-	Admin.findOne({uid: req.session.userId}, function (err, admin) {
+	Permission.findOne({ownerId: req.session.userId}, function (err, permission) {
 		if (err) return next(err);
 
-		if (!admin || !admin.root) {
-			ResponseService.permissionDenied(next);
-		} else {
+		if (permission.createWorker) {
 			next();
+		} else {
+			ResponseService.permissionDenied(next);
 		}
 	})
 }

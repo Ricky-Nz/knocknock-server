@@ -4,57 +4,60 @@
  * @description :: Server-side logic for managing Users
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
-module.exports = {
-	signUp: function (req, res) {
-		var err = UserService.checkLoginValidity(req);
-		if (err) return res.badRequest(err);
 
-		User
-			.findOneByEmail(req.param('email'))
-			.then(function (user) {
-				if (user) throw 'email address already registed';
+function login (req, res) {
+	req.session.userId = req.userId;
+  var token = jwt.sign(user, app.get('superSecret'), {
+    expiresInMinutes: 1440 // expires in 24 hours
+  });
+	res.json({token: token});
+}
 
-				return User.create({
-					email: req.param('email'),
-					password: UserService.encryptPassword(req.param('password')),
-					uid: UserService.generateUUID()
-				});
-			})
-			.then(function (created) {
-				if (!created) throw 'create user failed';
+function signUp (req, res, role) {
+	var err = DataProcessService.checkLoginValidity(req);
+	if (err) return res.badRequest(err);
 
-				res.json(created.toJSON());
-			})
-			.catch(function (err) {
-				res.badRequest(err);
-			});
-	},
-	logIn: function (req, res) {
-		var err = UserService.checkLoginValidity(req);
-		if (err) return res.badRequest(err);
+	User
+		.findOneByEmail(req.param('email'))
+		.then(function (user) {
+			if (user) throw 'email address already registed';
 
-		User
-			.find({
+			return User.create({
 				email: req.param('email'),
-				password: UserService.encryptPassword(req.param('password'))
-			})
-			.then(function (user) {
-				if (!user) throw 'email or password not correct';
-
-				req.session.userId = user.uid;
-				return res.ok();
-			})
-			.catch(function (err) {
-				res.badRequest(err);
+				password: req.param('password'),
+				role: role
 			});
+		})
+		.then(function (created) {
+			if (!created) throw 'create user failed';
+
+			res.json(created.toJSON());
+		})
+		.catch(function (err) {
+			res.badRequest(err);
+		});
+}
+
+module.exports = {
+	appLogIn: function (req, res) {
+		login(req, res);
 	},
-	updateUser: function (req, res) {
-		
+	webLogIn: function (req, res) {
+		login(req, res);
 	},
-	getUser: function (req, res) {
-		// body...
+	backendLogIn: function (req, res) {
+		login(req, res);
+	},
+	createUser: function (req, res) {
+		signUp(req, res, 'User');
+	},
+	createWorker: function (req, res) {
+		signUp(req, res, 'Worker');
+	},
+	createAdmin: function (req, res) {
+		signUp(req, res, 'Admin');
 	},
 	listUsers: function (req, res) {
-		// body...
+		res.ok();
 	}
 };

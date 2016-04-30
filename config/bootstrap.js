@@ -10,18 +10,14 @@
  */
 
 module.exports.bootstrap = function(cb) {
-
   // It's very important to trigger this callback method when you are finished
   // with the bootstrap!  (otherwise your server will never lift, since it's waiting on the bootstrap)
-  Address.count(function (err, value) {
-  	if (err) return cb(err);
-
-  	Admin.findOrCreate({
-  		email: 'knocknock@knocknockapp.com',
-  		password: '12345678',
-  		root: true
-  	}, function (err, value) {
-  		cb(err);
-  	});
+  User.create({
+		email: 'knocknock@knocknockapp.com',
+		password: '12345678',
+		role: 'Root'
+  }, function (err, root) {
+  	console.log(root);
+  	cb(err);
   });
 };

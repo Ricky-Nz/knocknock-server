@@ -28,8 +28,12 @@ module.exports.policies = {
   '*': false,
 
   UserController: {
-    signUp: true,
-    logIn: true
+    appLogIn: ['authenticate', 'canLoginApp'],
+    webLogIn: ['authenticate', 'canLoginWeb'],
+    backendLogIn: ['authenticate', 'canLoginBackend'],
+    createUser: true,
+    createWorker: ['authorize', 'canCreateWorker'],
+    createAdmin: ['authorize', 'canCreateAdmin']
   }
   /***************************************************************************
   *                                                                          *
