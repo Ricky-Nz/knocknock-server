@@ -24,6 +24,15 @@ module.exports = {
   		required: true,
   		unique: true
   	},
+    name: {
+      type: 'string'
+    },
+    contact: {
+      type: 'string'
+    },
+    avatarUrl: {
+      type: 'string'
+    },
     password: {
       type: 'string',
       required: true
@@ -43,6 +52,10 @@ module.exports = {
   		type: 'boolean',
   		defaultsTo: false
   	},
+    source: {
+      type: 'string',
+      required: true
+    },
   	toJSON: function () {
   		var obj = this.toObject();
   		obj.id = obj.uid;
@@ -53,7 +66,7 @@ module.exports = {
   	}
   },
   beforeValidate: function (values, cb) {
-    if (['User', 'Worker', 'Admin', 'Root'].indexOf(values.role) < 0) {
+    if (['Client', 'Worker', 'Admin', 'Root'].indexOf(values.role) < 0) {
       return cb('role not supported');
     }
 
@@ -73,7 +86,7 @@ module.exports = {
       ownerId: newUser.uid
     };
 
-    if (newUser.role === 'User') {
+    if (newUser.role === 'Client') {
       permission.loginApp = true;
       permission.loginWeb = true;
     } else if (newUser.role === 'Worker') {

@@ -1,12 +1,13 @@
 module.exports = function(req, res, next) {
-	if (!req.session.userId) {
+	if (!req.userId) {
 		return ResponseService.permissionDenied(next);
 	}
 
-	Permission.findOne({ownerId: req.session.userId}, function (err, permission) {
+	console.log(req.userId);
+	Permission.findOne({ownerId: req.userId}, function (err, permission) {
 		if (err) return next(err);
 
-		if (permission.createWorker) {
+		if (permission&&permission.createWorker) {
 			next();
 		} else {
 			ResponseService.permissionDenied(next);

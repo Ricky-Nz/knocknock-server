@@ -10,11 +10,14 @@ module.exports = function(req, res, next) {
 			return next('username or password not correct');
 		}
 
-  var token = jwt.sign(user, app.get('superSecret'), {
-    expiresInMinutes: 1440 // expires in 24 hours
-  });
+	  jwt.sign({id: user.uid}, 'knocknockserver-secret-token', {
+	    expiresIn: '7d'
+	  }, function (err, token) {
+	  	if (err) return next(err);
 
-		req.userId = user.uid;
-		next();
+	  	req.userId = user.uid;
+			req.jwtToken = token;
+			next();
+	  });
 	});
 };

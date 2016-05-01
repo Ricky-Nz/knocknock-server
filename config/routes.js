@@ -39,10 +39,16 @@ module.exports.routes = {
   'PUT /api/login/web': 'UserController.webLogIn',
   'PUT /api/login/backend': 'UserController.backendLogIn',
 
-  'POST /api/user': 'UserController.createUser',
+  'POST /api/user': 'UserController.register',
+  'POST /api/user/client': 'UserController.createClient',
   'POST /api/user/worker': 'UserController.createWorker',
-  'POST /api/user/admin': 'UserController.createAdmin'
+  'POST /api/user/admin': 'UserController.createAdmin',
 
+  'GET /api/user/client': 'UserController.getClient',
+  'GET /api/user/worker': 'UserController.getWorker',
+  'GET /api/user/admin': 'UserController.getAdmin',
+
+  'POST /api/test': 'UserController.test'
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *

@@ -10,15 +10,16 @@ var jwt = require('jsonwebtoken');
  */
 module.exports = function(req, res, next) {
 	// check header or url parameters or post parameters for token
-  var token = req.body.token || req.query.token || req.headers['x-access-token'];
+  var token = req.headers['x-access-token'];
   if (!token) {
   	return ResponseService.permissionDenied(next);
   }
 
-  jwt.verify(token, app.get('superSecret'), function(err, decoded) {      
-    if (err) {
+  jwt.verify(token, 'knocknockserver-secret-token', function(err, payload) {
+    if (err || !payload || !payload.id) {
       ResponseService.permissionDenied(next);
     } else {
+    	req.userId = payload.id;
       next();
     }
   });

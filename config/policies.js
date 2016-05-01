@@ -31,9 +31,17 @@ module.exports.policies = {
     appLogIn: ['authenticate', 'canLoginApp'],
     webLogIn: ['authenticate', 'canLoginWeb'],
     backendLogIn: ['authenticate', 'canLoginBackend'],
-    createUser: true,
+
+    register: true,
+    createUser: ['authorize'],
     createWorker: ['authorize', 'canCreateWorker'],
-    createAdmin: ['authorize', 'canCreateAdmin']
+    createAdmin: ['authorize', 'canCreateAdmin'],
+
+    getClient: ['authorize'],
+    getWorker: ['authorize'],
+    getAdmin: ['authorize'],
+
+    test: true
   }
   /***************************************************************************
   *                                                                          *

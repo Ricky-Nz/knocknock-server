@@ -15,9 +15,9 @@ module.exports.bootstrap = function(cb) {
   User.create({
 		email: 'knocknock@knocknockapp.com',
 		password: '12345678',
-		role: 'Root'
+		role: 'Root',
+    source: 'SYSTEM'
   }, function (err, root) {
-  	console.log(root);
-  	cb(err);
+  	cb();
   });
 };
