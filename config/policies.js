@@ -40,8 +40,7 @@ module.exports.policies = {
     getClient: ['authorize'],
     getWorker: ['authorize'],
     getAdmin: ['authorize'],
-
-    test: true
+    fileUpload: ['authorize']
   }
   /***************************************************************************
   *                                                                          *

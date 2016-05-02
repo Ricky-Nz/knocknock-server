@@ -10,8 +10,6 @@ function login (req, res) {
 }
 
 function signUp (req, res, role, source) {
-	console.log(req.file('email'));
-	console.log(req.field('email'));
 	var err = DataProcessService.checkLoginValidity(req);
 	if (err) return res.badRequest(err);
 
@@ -25,6 +23,7 @@ function signUp (req, res, role, source) {
 				password: req.param('password'),
 				name: req.param('name'),
 				contact: req.param('contact'),
+				avatarUrl: req.param('avatarUrl'),
 				role: role,
 				source: source
 			});
@@ -32,28 +31,36 @@ function signUp (req, res, role, source) {
 		.then(function (created) {
 			if (!created) throw 'create user failed';
 
-			StorageService.uploadToGCS(req.file('avatar'), function (err, imageUrl) {
-				if (imageUrl) {
-					User.update(created.id, {
-						avatarUrl: imageUrl
-					}, function (err, updated) {
-						res.json(updated.toJSON());
-					})
-				} else {
-					res.json(created.toJSON());
-				}
-			});
+			res.json(created.toJSON());
 		})
 		.catch(function (err) {
 			res.badRequest(err);
 		});
 }
 
+function processGetUser (req, res, role) {
+	var selectId = req.param('id');
+	if (selectId) {
+		getUserById(res, role, selectId);
+	} else {
+		getUser(res, role, req.query);
+	}
+}
+
 function getUser (res, role, query) {
+	var selection = {
+		role: role
+	};
+
+	if (query.search) {
+		selection.or = [
+			{name: {'contains': query.search}},
+			{contact: {'contains': query.search}}
+		];
+	}
+
 	User.find({
-		where: {
-			role: role
-		},
+		where: selection,
 		skip: (query&&query.skip)||0,
 		limit: (query&&query.limit)||20,
 		sort: (query&&query.sort)||'source'
@@ -62,6 +69,17 @@ function getUser (res, role, query) {
 
 		res.json(users);
 	})
+}
+
+function getUserById (res, role, id) {
+	User.findOne({
+		role: role,
+		uid: id
+	}, function (err, user) {
+		if (err||!user) return res.badRequest(err);
+
+		res.json(user.toJSON());
+	});
 }
 
 module.exports = {
@@ -87,15 +105,21 @@ module.exports = {
 		signUp(req, res, 'Admin', req.userId);
 	},
 	getClient: function (req, res) {
-		getUser(res, 'Client', req.query);
+		processGetUser(req, res, 'Client');
 	},
 	getWorker: function (req, res) {
-		getUser(res, 'Worker', req.query);
+		processGetUser(req, res, 'Worker');
 	},
 	getAdmin: function (req, res) {
-		getUser(res, 'Admin', req.query);
+		processGetUser(req, res, 'Admin');
 	},
-	test: function (req, res) {
+	fileUpload: function (req, res) {
+		StorageService.uploadToGCS(req.file('avatar'), function (err, fileUrl) {
+			if (err) return res.badRequest(err);
 
+			res.json({
+				fileUrl: fileUrl
+			});
+		});
 	}
 };

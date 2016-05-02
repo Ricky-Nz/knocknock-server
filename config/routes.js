@@ -48,7 +48,9 @@ module.exports.routes = {
   'GET /api/user/worker': 'UserController.getWorker',
   'GET /api/user/admin': 'UserController.getAdmin',
 
-  'POST /api/test': 'UserController.test'
+  'GET /api/user/worker/:id': 'UserController.getWorker',
+
+  'POST /api/fileupload': 'UserController.fileUpload'
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *
