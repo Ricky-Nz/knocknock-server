@@ -6,6 +6,7 @@ var SERVER_ROOT = 'http://0.0.0.0:1337';
 var email, password;
 
 describe('Admin API Test', function() {
+	var token = null;
 	
 	it('test => "backendLogin"', function (done) {
 		request
@@ -16,42 +17,33 @@ describe('Admin API Test', function() {
 			})
 			.end(function (err, res) {
 				expect(res&&res.ok).to.be.ok;
+				expect(res.body).to.have.property('token');
+				token = res.body.token;
 				done(err);
 			});
 	});
 
-	it('test => "createAdmin"', function (done) {
-		email = uuid.v4()+'@test.com';
+	it('test => "createWorker"', function (done) {
+		var random = uuid.v4();
+		email = random+'@test.com';
 		password = '12345678';
 
 		request
-			.post(SERVER_ROOT+'/api/user/admin')
+			.post(SERVER_ROOT+'/api/user/worker')
+			.set({
+				'x-access-token': token
+			})
 			.send({
 				email: email,
-				password: password
+				password: password,
+				name: random,
+				contact: '99990000'
 			})
 			.end(function (err, res) {
 				expect(res&&res.ok).to.be.ok;
 				expect(res.body).to.have.property('email')
 					.and.equal(email);
-				expect(res.body).to.have.property('root');
-				expect(res.body).to.have.property('createdAt');
-				expect(res.body).to.have.property('updatedAt');
-				expect(res.body).to.have.property('id');
 				done(err);
 			});
 	})
-
-	// it('test => "logIn"', function (done) {
-	// 	request
-	// 		.put(SERVER_ROOT+'/api/admin/login')
-	// 		.send({
-	// 			email: email,
-	// 			password: password
-	// 		})
-	// 		.end(function (err, res) {
-	// 			expect(res&&res.ok).to.be.ok;
-	// 			done(err);
-	// 		});
-	// })
 });

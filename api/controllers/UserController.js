@@ -59,16 +59,25 @@ function getUser (res, role, query) {
 		];
 	}
 
-	User.find({
-		where: selection,
-		skip: (query&&query.skip)||0,
-		limit: (query&&query.limit)||20,
-		sort: (query&&query.sort)||'source'
-	}, function (err, users) {
+	User.count({
+		where: selection	
+	}, function (err, count) {
 		if (err) return res.badRequest(err);
 
-		res.json(users);
-	})
+		User.find({
+			where: selection
+		}).paginate({
+			page: (query&&query.page)||1,
+			limit: (query&&query.limit)||20
+		}).exec(function (err, users) {
+			if (err) return res.badRequest(err);
+
+			res.json({
+				total: count,
+				data: users
+			});
+		});
+	});
 }
 
 function getUserById (res, role, id) {
