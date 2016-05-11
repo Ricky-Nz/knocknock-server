@@ -16,7 +16,8 @@ module.exports.bootstrap = function(cb) {
 		email: 'knocknock@knocknockapp.com',
 		password: '12345678',
 		role: 'Root',
-    source: 'SYSTEM'
+    source: 'SYSTEM',
+    uid: 0
   }, function (err, root) {
   	cb();
   });

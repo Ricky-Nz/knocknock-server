@@ -32,8 +32,8 @@ module.exports.policies = {
     webLogIn: ['authenticate', 'canLoginWeb'],
     backendLogIn: ['authenticate', 'canLoginBackend'],
 
-    register: true,
-    createUser: ['authorize'],
+    register: ['userNotRegisted'],
+    createClient: ['authorize'],
     createWorker: ['authorize', 'canCreateWorker'],
     createAdmin: ['authorize', 'canCreateAdmin'],
 
@@ -41,25 +41,10 @@ module.exports.policies = {
     getWorker: ['authorize'],
     getAdmin: ['authorize'],
     fileUpload: ['authorize']
+  },
+
+  LaundryOrderController: {
+    createOrder: ['authorize', 'canCreateOrder'],
+    updateOrder: ['authorize', 'canCreateOrder']
   }
-  /***************************************************************************
-  *                                                                          *
-  * Here's an example of mapping some policies to run before a controller    *
-  * and its actions                                                          *
-  *                                                                          *
-  ***************************************************************************/
-	// RabbitController: {
-
-		// Apply the `false` policy as the default for all of RabbitController's actions
-		// (`false` prevents all access, which ensures that nothing bad happens to our rabbits)
-		// '*': false,
-
-		// For the action `nurture`, apply the 'isRabbitMother' policy
-		// (this overrides `false` above)
-		// nurture	: 'isRabbitMother',
-
-		// Apply the `isNiceToAnimals` AND `hasRabbitFood` policies
-		// before letting any users feed our rabbits
-		// feed : ['isNiceToAnimals', 'hasRabbitFood']
-	// }
 };

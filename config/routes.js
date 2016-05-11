@@ -39,18 +39,21 @@ module.exports.routes = {
   'PUT /api/login/web': 'UserController.webLogIn',
   'PUT /api/login/backend': 'UserController.backendLogIn',
 
+  'GET /api/user/client': 'UserController.getClient',
+  'GET /api/user/worker': 'UserController.getWorker',
+  'GET /api/user/admin': 'UserController.getAdmin',
+  'GET /api/user/client/:id': 'UserController.getWorker',
+  'GET /api/user/worker/:id': 'UserController.getWorker',
+  'GET /api/user/admin/:id': 'UserController.getWorker',
+
   'POST /api/user': 'UserController.register',
   'POST /api/user/client': 'UserController.createClient',
   'POST /api/user/worker': 'UserController.createWorker',
   'POST /api/user/admin': 'UserController.createAdmin',
+  'POST /api/fileupload': 'UserController.fileUpload',
 
-  'GET /api/user/client': 'UserController.getClient',
-  'GET /api/user/worker': 'UserController.getWorker',
-  'GET /api/user/admin': 'UserController.getAdmin',
-
-  'GET /api/user/worker/:id': 'UserController.getWorker',
-
-  'POST /api/fileupload': 'UserController.fileUpload'
+  'POST /api/laundary/order': 'LaundryOrderController.createOrder',
+  'PUT /api/laundary/order/:orderId': 'LaundryOrderController.updateOrder',
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *

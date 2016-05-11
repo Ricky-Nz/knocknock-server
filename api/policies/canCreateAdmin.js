@@ -1,15 +1,7 @@
 module.exports = function(req, res, next) {
-	if (!req.userId) {
-		return ResponseService.permissionDenied(next);
+	if (!req.user || !req.user.createAdmin) {
+		return res.forbidden('CREATE ADMIN PERMISSION DENIED');
+	} else {
+		next();
 	}
-
-	Permission.findOne({ownerId: req.userId}, function (err, permission) {
-		if (err) return next(err);
-
-		if (permission.createAdmin) {
-			next();
-		} else {
-			ResponseService.permissionDenied(next);
-		}
-	})
 }

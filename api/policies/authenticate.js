@@ -6,8 +6,9 @@ module.exports = function(req, res, next) {
 		email: req.param('username')
 	}, function (err, user) {
 		if (err) return next(err);
+
 		if (!user || !bcrypt.compareSync(req.param('password'), user.password)) {
-			return next('username or password not correct');
+			return res.badRequest('username or password not correct');
 		}
 
 	  jwt.sign({id: user.uid}, 'knocknockserver-secret-token', {
@@ -15,7 +16,7 @@ module.exports = function(req, res, next) {
 	  }, function (err, token) {
 	  	if (err) return next(err);
 
-	  	req.userId = user.uid;
+	  	req.user = user;
 			req.jwtToken = token;
 			next();
 	  });

@@ -12,15 +12,17 @@ module.exports = function(req, res, next) {
 	// check header or url parameters or post parameters for token
   var token = req.headers['x-access-token'];
   if (!token) {
-  	return ResponseService.permissionDenied(next);
+  	return res.forbidden('token not found');
   }
 
   jwt.verify(token, 'knocknockserver-secret-token', function(err, payload) {
-    if (err || !payload || !payload.id) {
-      ResponseService.permissionDenied(next);
-    } else {
-    	req.userId = payload.id;
+    if (err||!payload) return res.forbidden('invalid token');
+
+    User.findOne({uid: payload.id}, function (err, user) {
+      if (err||!user) return res.forbidden('token user not found');
+
+      req.user = user;
       next();
-    }
+    });
   });
 };

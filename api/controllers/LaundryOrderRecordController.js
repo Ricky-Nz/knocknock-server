@@ -1,7 +1,7 @@
 /**
- * UserRecordController
+ * LaundryOrderRecordController
  *
- * @description :: Server-side logic for managing Userrecords
+ * @description :: Server-side logic for managing Laundryorderrecords
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
 

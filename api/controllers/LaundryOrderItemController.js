@@ -1,7 +1,7 @@
 /**
- * PermissionController
+ * LaundryOrderItemController
  *
- * @description :: Server-side logic for managing Permissions
+ * @description :: Server-side logic for managing Laundryorderitems
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
 
