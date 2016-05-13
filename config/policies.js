@@ -44,7 +44,10 @@ module.exports.policies = {
   },
 
   LaundryOrderController: {
-    createOrder: ['authorize', 'canCreateOrder'],
-    updateOrder: ['authorize', 'canCreateOrder']
+    create: ['authorize', 'ensureUid', 'canCreateOrder'],
+    update: ['authorize', 'canCreateOrder'],
+    find: ['authorize'],
+    findOne: ['authorize'],
+    destroy: ['authorize']
   }
 };

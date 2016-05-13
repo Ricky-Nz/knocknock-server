@@ -50,10 +50,7 @@ module.exports.routes = {
   'POST /api/user/client': 'UserController.createClient',
   'POST /api/user/worker': 'UserController.createWorker',
   'POST /api/user/admin': 'UserController.createAdmin',
-  'POST /api/fileupload': 'UserController.fileUpload',
-
-  'POST /api/laundary/order': 'LaundryOrderController.createOrder',
-  'PUT /api/laundary/order/:orderId': 'LaundryOrderController.updateOrder',
+  'POST /api/fileupload': 'UserController.fileUpload'
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *

@@ -13,14 +13,13 @@ module.exports = {
 			});
 		});
 	},
-	createRecord: function (operator, title, order) {
-		var json = order.toJSON();
-		for (var key in json) {
+	createRecord: function (operator, title, updateValues) {
+		for (var key in updateValues) {
 			LaundryOrderRecord.create({
-				orderId: json.id,
+				orderId: updateValues.id,
 				operatorId: operator,
 				title: title,
-				after: json[key],
+				after: updateValues[key],
 				description: key
 			}, function () {});
 		}

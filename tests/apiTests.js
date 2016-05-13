@@ -73,7 +73,7 @@ describe('Admin API Test', function() {
 
 	it('create order', function (done) {
 		request
-			.post(SERVER_ROOT+'/api/laundary/order')
+			.post(SERVER_ROOT+'/api/laundryorder')
 			.set({
 				'x-access-token': token
 			})
@@ -90,7 +90,7 @@ describe('Admin API Test', function() {
 
 	it('update order', function (done) {
 		request
-			.put(SERVER_ROOT+'/api/laundary/order/'+createdOrder.id)
+			.put(SERVER_ROOT+'/api/laundryorder/'+createdOrder.id)
 			.set({
 				'x-access-token': token
 			})
