@@ -1,0 +1,114 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+input CreateLaundryClothInput {
+  nameEn: String!
+  nameCn: String!
+  washPrice: Float!
+  dryCleanPrice: Float!
+  ironPrice: Float!
+  washPriceDiscount: Float
+  dryCleanPriceDiscount: Float
+  ironPriceDiscount: Float
+  special: Boolean
+  imageUrl: String!
+  clientMutationId: String!
+}
+
+type CreateLaundryClothPayload {
+  laundryClothEdge: LaundryClothEdge
+  clientMutationId: String!
+}
+
+input CreateUserInput {
+  role: String!
+  email: String!
+  password: String!
+  clientMutationId: String!
+}
+
+type CreateUserPayload {
+  userEdge: UserEdge
+  clientMutationId: String!
+}
+
+type LaundryCloth implements Node {
+  id: ID!
+  nameEn: String!
+  nameCn: String!
+  washPrice: Float!
+  dryCleanPrice: Float!
+  ironPrice: Float!
+  washPriceDiscount: Float
+  dryCleanPriceDiscount: Float
+  ironPriceDiscount: Float
+  special: Boolean
+  imageUrl: String!
+}
+
+type LaundryClothConnection {
+  pageInfo: PageInfo!
+  edges: [LaundryClothEdge]
+}
+
+type LaundryClothEdge {
+  node: LaundryCloth
+  cursor: String!
+}
+
+type Mutation {
+  createUser(input: CreateUserInput!): CreateUserPayload
+  createLaundryCloth(input: CreateLaundryClothInput!): CreateLaundryClothPayload
+}
+
+interface Node {
+  id: ID!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+type Query {
+  node(id: ID!): Node
+  viewer: Viewer
+}
+
+enum Role {
+  Client
+  Worker
+  Admin
+}
+
+type User implements Node {
+  id: ID!
+  role: Role!
+  email: String!
+  name: String
+  contact: String
+  avatarUrl: String
+  emailVerified: Boolean
+  contactVerified: Boolean
+}
+
+type UserConnection {
+  pageInfo: PageInfo!
+  edges: [UserEdge]
+}
+
+type UserEdge {
+  node: User
+  cursor: String!
+}
+
+type Viewer {
+  user(token: String!): User
+  users(role: String!, search: String, after: String, first: Int, before: String, last: Int): UserConnection
+  laundryCloth(id: String!): LaundryCloth
+  laundryClothes(search: String, after: String, first: Int, before: String, last: Int): LaundryClothConnection
+}
