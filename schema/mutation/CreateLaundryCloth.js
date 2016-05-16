@@ -53,7 +53,7 @@ export default mutationWithClientMutationId({
 		laundryClothEdge: {
 			type: GraphQLLaundryClothEdge,
 			resolve: (newCloth) => ({
-				cursor: offsetToCursor(0),
+				cursor: null,
 				node: newCloth
 			})
 		},

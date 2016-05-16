@@ -13,12 +13,13 @@ input CreateLaundryClothInput {
   dryCleanPriceDiscount: Float
   ironPriceDiscount: Float
   special: Boolean
-  imageUrl: String!
+  imageUrl: String
   clientMutationId: String!
 }
 
 type CreateLaundryClothPayload {
   laundryClothEdge: LaundryClothEdge
+  viewer: Viewer
   clientMutationId: String!
 }
 

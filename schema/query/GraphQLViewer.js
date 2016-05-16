@@ -1,5 +1,5 @@
 import { GraphQLObjectType, GraphQLString, GraphQLNonNull } from 'graphql';
-import { connectionArgs, connectionFromPromisedArray } from 'graphql-relay';
+import { connectionArgs, connectionFromPromisedArraySlice, cursorToOffset } from 'graphql-relay';
 import { GraphQLUser, GraphQLUserConnection } from './GraphQLUser';
 import { GraphQLLaundryCloth, GraphQLLaundryClothConnection } from './GraphQLLaundryCloth';
 import { DBUser, DBLaundryCloth } from '../../database';
@@ -17,7 +17,33 @@ function verifyToken (token) {
   });
 }
 
-const GraphQLViewer = new GraphQLObjectType({
+function modelConnection(dbClass, query, args) {
+  return dbClass.count(query)
+    .then((count) => {
+      query.skip = 0;
+
+      if (args.first) {
+        query.limit = args.first;
+      } else if (args.last) {
+        query.limit = args.last;
+        query.skip = Math.max(0, count - args.last);
+      } 
+
+      if (args.after) {
+        query.skip = cursorToOffset(args.after) + 1;
+      } else if (args.before) {
+        const offset = cursorToOffset(args.before);
+        query.skip = Math.max(0, offset - args.last);
+      }
+
+      return connectionFromPromisedArraySlice(dbClass.findAll(query), args, {
+        sliceStart: query.skip,
+        arrayLength: count
+      });
+    });
+}
+
+export default new GraphQLObjectType({
   name: 'Viewer',
   fields: {
     user: {
@@ -47,9 +73,18 @@ const GraphQLViewer = new GraphQLObjectType({
         },
         ...connectionArgs
       },
-      resolve: (obj, {role, search, ...args}) =>
-        connectionFromPromisedArray(DBUser.findAll(
-          {where: search? {$or: [{name: {$like: `%${search}%`}}, {email: {$like: `%${search}%`}}, {contact: {$like: `%${search}%`}}]} : {role}}), args)
+      resolve: (obj, {role, search, ...args}) => {
+        let query = {
+          where: search?
+            {$or: [
+              {name: {$like: `%${search}%`}},
+              {email: {$like: `%${search}%`}},
+              {contact: {$like: `%${search}%`}}
+            ]} : {role}
+        };
+
+        return modelConnection(DBUser, query, args);
+      }
     },
     laundryCloth: {
       type: GraphQLLaundryCloth,
@@ -71,9 +106,16 @@ const GraphQLViewer = new GraphQLObjectType({
         },
         ...connectionArgs
       },
-      resolve: (obj, {search, ...args}) =>
-        connectionFromPromisedArray(DBLaundryCloth.findAll(
-          {where: search? {$or: [{nameEn: {$like: `%${search}%`}}, {nameCn: {$like: `%${search}%`}}]} : {}}), args)
+      resolve: (obj, {search, ...args}) => {
+        let query = search? {
+          where: {$or: [
+            {nameCn: {$like: `%${search}%`}},
+            {nameEn: {$like: `%${search}%`}}
+          ]}
+        } : {};
+
+        return modelConnection(DBLaundryCloth, query, args);
+      }
     }
   }
 });
