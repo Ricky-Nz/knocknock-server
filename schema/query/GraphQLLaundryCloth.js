@@ -45,7 +45,7 @@ export const GraphQLLaundryCloth = new GraphQLObjectType({
 			description: 'special item'
 		},
 		imageUrl: {
-			type: new GraphQLNonNull(GraphQLString),
+			type: GraphQLString,
 			description: 'cloth image url'
 		}
 	},

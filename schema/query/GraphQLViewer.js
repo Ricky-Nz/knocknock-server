@@ -46,6 +46,10 @@ function modelConnection(dbClass, query, args) {
 export default new GraphQLObjectType({
   name: 'Viewer',
   fields: {
+    id: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: () => 'VIEWER'
+    },
     user: {
       type: GraphQLUser,
       description: 'login user info',

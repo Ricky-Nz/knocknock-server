@@ -46,7 +46,7 @@ type LaundryCloth implements Node {
   dryCleanPriceDiscount: Float
   ironPriceDiscount: Float
   special: Boolean
-  imageUrl: String!
+  imageUrl: String
 }
 
 type LaundryClothConnection {
@@ -108,6 +108,7 @@ type UserEdge {
 }
 
 type Viewer {
+  id: String!
   user(token: String!): User
   users(role: String!, search: String, after: String, first: Int, before: String, last: Int): UserConnection
   laundryCloth(id: String!): LaundryCloth
