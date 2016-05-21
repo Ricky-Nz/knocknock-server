@@ -28,6 +28,7 @@ import {
 } from '../../database';
 
 import jwt from 'jsonwebtoken';
+import GraphQLClothFields from './GraphQLClothFields';
 
 function verifyToken (token) {
   return new Promise((resolve, reject) => {
@@ -94,47 +95,7 @@ export const GraphQLCloth = new GraphQLObjectType({
 	name: 'Cloth',
 	description: 'launtry cloth',
 	fields: {
-		id: globalIdField('Cloth'),
-		nameEn: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'english name'
-		},
-		nameCn: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'chinese name'
-		},
-		washPrice: {
-			type: new GraphQLNonNull(GraphQLFloat),
-			description: 'normal wash price'
-		},
-		dryCleanPrice: {
-			type: new GraphQLNonNull(GraphQLFloat),
-			description: 'dry clean price'
-		},
-		ironPrice: {
-			type: new GraphQLNonNull(GraphQLFloat),
-			description: 'iron clean price'
-		},
-		washPriceDiscount: {
-			type: GraphQLFloat,
-			description: 'normal wash price discount'
-		},
-		dryCleanPriceDiscount: {
-			type: GraphQLFloat,
-			description: 'dry clean price discount'
-		},
-		ironPriceDiscount: {
-			type: GraphQLFloat,
-			description: 'iron clean price discount'
-		},
-		special: {
-			type: GraphQLBoolean,
-			description: 'special item'
-		},
-		imageUrl: {
-			type: GraphQLString,
-			description: 'cloth image url'
-		}
+		...GraphQLClothFields
 	},
 	interfaces: [nodeInterface]
 });
@@ -272,26 +233,25 @@ export function modelConnection (dbClass, query, args) {
 
 export function resolvePagination (dbClass, selection, page, limit) {
 	let query = {
-		order: 'updatedAt DESC'
+		order: 'updatedAt DESC',
+		offset: (page - 1) * limit,
+		limit
 	};
 
 	if (selection) query.where = selection;
 
-	let totalPage;
-	return dbClass
-		.count(query)
-		.then(count => {
-			totalPage = Math.ceil(count / limit);
-			return dbClass.findAll({...query, offset: (page - 1) * limit, limit})
-		})
-		.then(datas => ({
-			pagination: {
-				totalPage,
-				page,
-				limit
-			},
-			datas
-		}));
+	return dbClass.findAndCountAll(query)
+		.then(({count, rows}) => {
+			const totalPage = Math.ceil(count / limit);
+			return {
+				pagination: {
+					totalPage,
+					page,
+					limit
+				},
+				datas: rows
+			};
+		});
 }
 
 export const GraphQLViewer =  new GraphQLObjectType({
@@ -359,14 +319,17 @@ export const GraphQLViewer =  new GraphQLObjectType({
     },
     cloth: {
       type: GraphQLCloth,
+      description: 'cloth pagination',
       args: {
         id: {
           type: new GraphQLNonNull(GraphQLString),
           description: 'laundry cloth id'
         }
       },
-      reslove: (obj, {id}) =>
-        DBLaundryCloth.findById(id)
+      resolve: (obj, {id}) => {
+      	const {type, id: localId} = fromGlobalId(id);
+      	return DBLaundryCloth.findById(localId);
+      }
     },
     clothPage: {
     	type: GraphQLClothPagination,

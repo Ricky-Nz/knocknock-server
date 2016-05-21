@@ -33,22 +33,21 @@ type ClothPagination {
   datas: [Cloth]
 }
 
-input CreateLaundryClothInput {
+input CreateClothInput {
   limit: Int!
   nameEn: String!
   nameCn: String!
   washPrice: Float!
   dryCleanPrice: Float!
   ironPrice: Float!
-  washPriceDiscount: Float
-  dryCleanPriceDiscount: Float
-  ironPriceDiscount: Float
+  washPriceDiscount: Float!
+  dryCleanPriceDiscount: Float!
+  ironPriceDiscount: Float!
   special: Boolean
-  imageUrl: String
   clientMutationId: String!
 }
 
-type CreateLaundryClothPayload {
+type CreateClothPayload {
   clothPage: ClothPagination
   clientMutationId: String!
 }
@@ -65,9 +64,21 @@ type CreateUserPayload {
   clientMutationId: String!
 }
 
+input DeleteClothInput {
+  id: String!
+  clientMutationId: String!
+}
+
+type DeleteClothPayload {
+  deletedId: String!
+  clientMutationId: String!
+}
+
 type Mutation {
   createUser(input: CreateUserInput!): CreateUserPayload
-  createLaundryCloth(input: CreateLaundryClothInput!): CreateLaundryClothPayload
+  createCloth(input: CreateClothInput!): CreateClothPayload
+  updateCloth(input: UpdateClothInput!): UpdateClothPayload
+  deleteCloth(input: DeleteClothInput!): DeleteClothPayload
 }
 
 interface Node {
@@ -97,6 +108,25 @@ enum Role {
   Client
   Worker
   Admin
+}
+
+input UpdateClothInput {
+  id: String!
+  nameEn: String
+  nameCn: String
+  washPrice: Float
+  dryCleanPrice: Float
+  ironPrice: Float
+  washPriceDiscount: Float
+  dryCleanPriceDiscount: Float
+  ironPriceDiscount: Float
+  special: Boolean
+  clientMutationId: String!
+}
+
+type UpdateClothPayload {
+  cloth: Cloth
+  clientMutationId: String!
 }
 
 type User implements Node {

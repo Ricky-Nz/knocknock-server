@@ -1,11 +1,13 @@
 import { GraphQLObjectType } from 'graphql';
+import { CreateCloth, UpdateCloth, DeleteCloth } from './ClothMutation';
 import CreateUser from './CreateUser';
-import CreateLaundryCloth from './CreateLaundryCloth';
 
 export default new GraphQLObjectType({
   name: 'Mutation',
   fields: {
   	createUser: CreateUser,
-  	createLaundryCloth: CreateLaundryCloth
+  	createCloth: CreateCloth,
+  	updateCloth: UpdateCloth,
+  	deleteCloth: DeleteCloth
   }
 });

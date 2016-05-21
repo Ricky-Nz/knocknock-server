@@ -6,11 +6,9 @@ const gcs = gcloud.storage({
 	keyFilename: path.join(__dirname, '..', 'gcloud-cert.json')
 });
 
-const colthBucket = gcs.bucket('knocknock-laundry');
-
-export function uploadFile (filePath) {
+export function uploadFile (bucket, filePath) {
 	return new Promise((resolve, reject) => {
-		colthBucket.upload(filePath, function (err, file, apiResponse) {
+		gcs.bucket(bucket).upload(filePath, function (err, file, apiResponse) {
 			if (err) {
 				reject(err);
 			} else {
@@ -18,4 +16,19 @@ export function uploadFile (filePath) {
 			}
 		});
 	})
+}
+
+export function deleteFile (bucket, fileId) {
+	return new Promise((resolve, reject) => {
+		const file = gcs.bucket(bucket).file(fileId);
+		if (!file) return resolve();
+
+		file.delete((err) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve();
+			}
+		});
+	});
 }
