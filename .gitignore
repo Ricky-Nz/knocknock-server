@@ -40,6 +40,8 @@
 ################################################
 
 config/local.js
+gcloud-cert.json
+uploads/
 
 
 

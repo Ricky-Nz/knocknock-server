@@ -3,7 +3,38 @@ schema {
   mutation: Mutation
 }
 
+type Cloth implements Node {
+  id: ID!
+  nameEn: String!
+  nameCn: String!
+  washPrice: Float!
+  dryCleanPrice: Float!
+  ironPrice: Float!
+  washPriceDiscount: Float
+  dryCleanPriceDiscount: Float
+  ironPriceDiscount: Float
+  special: Boolean
+  imageUrl: String
+}
+
+type ClothConnection {
+  pageInfo: PageInfo!
+  edges: [ClothEdge]
+}
+
+type ClothEdge {
+  node: Cloth
+  cursor: String!
+}
+
+type ClothPagination {
+  id: ID!
+  pagination: Pagination!
+  datas: [Cloth]
+}
+
 input CreateLaundryClothInput {
+  limit: Int!
   nameEn: String!
   nameCn: String!
   washPrice: Float!
@@ -18,8 +49,7 @@ input CreateLaundryClothInput {
 }
 
 type CreateLaundryClothPayload {
-  laundryClothEdge: LaundryClothEdge
-  viewer: Viewer
+  clothPage: ClothPagination
   clientMutationId: String!
 }
 
@@ -33,30 +63,6 @@ input CreateUserInput {
 type CreateUserPayload {
   userEdge: UserEdge
   clientMutationId: String!
-}
-
-type LaundryCloth implements Node {
-  id: ID!
-  nameEn: String!
-  nameCn: String!
-  washPrice: Float!
-  dryCleanPrice: Float!
-  ironPrice: Float!
-  washPriceDiscount: Float
-  dryCleanPriceDiscount: Float
-  ironPriceDiscount: Float
-  special: Boolean
-  imageUrl: String
-}
-
-type LaundryClothConnection {
-  pageInfo: PageInfo!
-  edges: [LaundryClothEdge]
-}
-
-type LaundryClothEdge {
-  node: LaundryCloth
-  cursor: String!
 }
 
 type Mutation {
@@ -75,9 +81,16 @@ type PageInfo {
   endCursor: String
 }
 
+type Pagination {
+  search: String
+  totalPage: Int!
+  page: Int!
+  limit: Int!
+}
+
 type Query {
-  node(id: ID!): Node
   viewer: Viewer
+  node(id: ID!): Node
 }
 
 enum Role {
@@ -107,10 +120,17 @@ type UserEdge {
   cursor: String!
 }
 
-type Viewer {
-  id: String!
+type UserPagination {
+  pagination: Pagination!
+  datas: [User]
+}
+
+type Viewer implements Node {
+  id: ID!
   user(token: String!): User
-  users(role: String!, search: String, after: String, first: Int, before: String, last: Int): UserConnection
-  laundryCloth(id: String!): LaundryCloth
-  laundryClothes(search: String, after: String, first: Int, before: String, last: Int): LaundryClothConnection
+  userPage(role: String!, search: String, page: Int!, limit: Int!): UserPagination
+  userScroll(role: String!, search: String, after: String, first: Int, before: String, last: Int): UserConnection
+  cloth(id: String!): Cloth
+  clothPage(search: String, page: Int!, limit: Int!): ClothPagination
+  clothScroll(search: String, after: String, first: Int, before: String, last: Int): ClothConnection
 }

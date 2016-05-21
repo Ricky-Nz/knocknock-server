@@ -1,13 +1,20 @@
 import { GraphQLNonNull, GraphQLString, GraphQLFloat,
-	GraphQLBoolean } from 'graphql';
+	GraphQLBoolean, GraphQLInt } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor } from 'graphql-relay';
 import { DBLaundryCloth } from '../../database';
-import { GraphQLLaundryClothEdge } from '../query/GraphQLLaundryCloth';
-import GraphQLViewer from '../query/GraphQLViewer';
+import { GraphQLViewer, GraphQLClothEdge, GraphQLClothPagination,
+	resolvePagination } from '../query';
+import { uploadFile } from '../../datastorage';
+import path from 'path';
+import fs from 'fs';
 
 export default mutationWithClientMutationId({
 	name: 'CreateLaundryCloth',
 	inputFields: {
+		limit: {
+			type: new GraphQLNonNull(GraphQLInt),
+			description: 'refeach limit'
+		},
 		nameEn: {
 			type: new GraphQLNonNull(GraphQLString),
 			description: 'english name'
@@ -50,18 +57,26 @@ export default mutationWithClientMutationId({
 		}
 	},
 	outputFields: {
-		laundryClothEdge: {
-			type: GraphQLLaundryClothEdge,
-			resolve: (newCloth) => ({
-				cursor: offsetToCursor(0),
-				node: newCloth
-			})
-		},
-		viewer: {
-			type: GraphQLViewer,
-			resolve: () => ({})
+		clothPage: {
+			type: GraphQLClothPagination,
+			resolve: ({newCloth, limit}) => {
+				return resolvePagination(DBLaundryCloth, null, 1, limit);
+			}
 		}
 	},
-	mutateAndGetPayload: (args) => DBLaundryCloth.create(args)
+	mutateAndGetPayload: ({limit, ...args}, context, {rootValue}) => {
+		const localFilePath = path.join(__dirname, '..', '..', rootValue.request.file.path);
+
+		return uploadFile(localFilePath)
+			.then(file => {
+				fs.unlink(localFilePath);
+				
+				const imageBucket = file.metadata.bucket;
+				const imageId = file.id;
+				const imageUrl = `https://storage.googleapis.com/${imageBucket}/${imageId}`
+				return DBLaundryCloth.create({...args, imageUrl, imageBucket, imageId})
+					.then(newCloth => ({newCloth, limit}));
+			});
+	}
 });
 

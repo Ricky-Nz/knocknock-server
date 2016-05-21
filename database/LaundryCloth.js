@@ -39,7 +39,16 @@ const LaundryCloth = sequelize.define('laundrycloth', {
 		defaultValue: false
 	},
 	imageUrl: {
-		type: STRING
+		type: STRING,
+		allowNull: false
+	},
+	imageBucket: {
+		type: STRING,
+		allowNull: false
+	},
+	imageId: {
+		type: STRING,
+		allowNull: false
 	}
 });
 

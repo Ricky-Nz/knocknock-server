@@ -1,3 +1,4 @@
+import viewer from './Viewer';
 import permission from './Permission';
 import user from './User';
 import laundrycloth from './LaundryCloth';
@@ -19,3 +20,4 @@ export const DBPermission = permission;
 export const DBLaundryCloth = laundrycloth;
 export const DBLaundryOrder = laundryorder;
 export const DBRecord = record;
+export const DBViewer = viewer;

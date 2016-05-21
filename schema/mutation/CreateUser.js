@@ -1,7 +1,7 @@
 import { GraphQLNonNull, GraphQLString } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor } from 'graphql-relay';
 import { DBUser } from '../../database';
-import { GraphQLUserEdge } from '../query/GraphQLUser';
+import { GraphQLUserEdge } from '../query';
 
 export default mutationWithClientMutationId({
 	name: 'CreateUser',
