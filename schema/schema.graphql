@@ -5,26 +5,24 @@ schema {
 
 type Cloth implements Node {
   id: ID!
+  categoryId: String!
   nameEn: String!
   nameCn: String!
   washPrice: Float!
   dryCleanPrice: Float!
   ironPrice: Float!
-  washPriceDiscount: Float
-  dryCleanPriceDiscount: Float
-  ironPriceDiscount: Float
+  washPriceDiscount: Float!
+  dryCleanPriceDiscount: Float!
+  ironPriceDiscount: Float!
   special: Boolean
   imageUrl: String
 }
 
-type ClothConnection {
-  pageInfo: PageInfo!
-  edges: [ClothEdge]
-}
-
-type ClothEdge {
-  node: Cloth
-  cursor: String!
+type ClothCategory implements Node {
+  id: ID!
+  nameCn: String!
+  nameEn: String!
+  count: Int!
 }
 
 type ClothPagination {
@@ -33,8 +31,20 @@ type ClothPagination {
   datas: [Cloth]
 }
 
+input CreateCategoryInput {
+  nameCn: String!
+  nameEn: String!
+  clientMutationId: String!
+}
+
+type CreateCategoryPayload {
+  clothCategories: [ClothCategory]
+  clientMutationId: String!
+}
+
 input CreateClothInput {
   limit: Int!
+  categoryId: String!
   nameEn: String!
   nameCn: String!
   washPrice: Float!
@@ -52,51 +62,44 @@ type CreateClothPayload {
   clientMutationId: String!
 }
 
-input CreateUserInput {
-  role: String!
-  email: String!
-  password: String!
-  clientMutationId: String!
-}
-
-type CreateUserPayload {
-  userEdge: UserEdge
-  clientMutationId: String!
-}
-
 input DeleteClothInput {
   id: String!
   clientMutationId: String!
 }
 
 type DeleteClothPayload {
-  deletedId: String!
+  clothPage: ClothPagination
+  clientMutationId: String!
+}
+
+input DleteCategoryInput {
+  id: String!
+  clientMutationId: String!
+}
+
+type DleteCategoryPayload {
+  clothCategories: [ClothCategory]
   clientMutationId: String!
 }
 
 type Mutation {
-  createUser(input: CreateUserInput!): CreateUserPayload
   createCloth(input: CreateClothInput!): CreateClothPayload
   updateCloth(input: UpdateClothInput!): UpdateClothPayload
   deleteCloth(input: DeleteClothInput!): DeleteClothPayload
+  createCategory(input: CreateCategoryInput!): CreateCategoryPayload
+  updateCategory(input: UpdateCategoryInput!): UpdateCategoryPayload
+  deleteCategory(input: DleteCategoryInput!): DleteCategoryPayload
 }
 
 interface Node {
   id: ID!
 }
 
-type PageInfo {
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-  startCursor: String
-  endCursor: String
-}
-
 type Pagination {
   search: String
-  totalPage: Int!
   page: Int!
   limit: Int!
+  totalPage: Int!
 }
 
 type Query {
@@ -110,8 +113,21 @@ enum Role {
   Admin
 }
 
+input UpdateCategoryInput {
+  id: String!
+  nameCn: String
+  nameEn: String
+  clientMutationId: String!
+}
+
+type UpdateCategoryPayload {
+  clothCategory: ClothCategory
+  clientMutationId: String!
+}
+
 input UpdateClothInput {
   id: String!
+  categoryId: String
   nameEn: String
   nameCn: String
   washPrice: Float
@@ -140,27 +156,17 @@ type User implements Node {
   contactVerified: Boolean
 }
 
-type UserConnection {
-  pageInfo: PageInfo!
-  edges: [UserEdge]
-}
-
-type UserEdge {
-  node: User
-  cursor: String!
-}
-
 type UserPagination {
+  id: ID!
   pagination: Pagination!
   datas: [User]
 }
 
 type Viewer implements Node {
   id: ID!
-  user(token: String!): User
+  user(id: String): User
   userPage(role: String!, search: String, page: Int!, limit: Int!): UserPagination
-  userScroll(role: String!, search: String, after: String, first: Int, before: String, last: Int): UserConnection
   cloth(id: String!): Cloth
-  clothPage(search: String, page: Int!, limit: Int!): ClothPagination
-  clothScroll(search: String, after: String, first: Int, before: String, last: Int): ClothConnection
+  clothPage(categoryId: String, search: String, page: Int!, limit: Int!): ClothPagination
+  clothCategories: [ClothCategory]
 }

@@ -1,7 +1,19 @@
 import sequelize from './connection';
 import { STRING, FLOAT, BOOLEAN, INTEGER } from 'sequelize';
+import ClothCategory from './clothCategory';
 
-const LaundryCloth = sequelize.define('laundrycloth', {
+function updateCategoryCount(instance, fn) {
+	LaundryCloth.count()
+		.then(count => ClothCategory.update({count}, {where: {id: instance.categoryId}}))
+		.then(() => fn())
+		.catch(() => fn());
+}
+
+const LaundryCloth = sequelize.define('cloth', {
+	categoryId: {
+		type: STRING,
+		allowNull: false
+	},
 	nameEn: {
 		type: STRING,
 		allowNull: false
@@ -49,6 +61,15 @@ const LaundryCloth = sequelize.define('laundrycloth', {
 	imageId: {
 		type: STRING,
 		allowNull: false
+	}
+}, {
+	hooks: {
+		afterCreate: (instance, options, fn) => {
+			updateCategoryCount(instance, fn);
+		},
+		afterDestroy: (instance, options, fn) => {
+			updateCategoryCount(instance, fn);
+		}
 	}
 });
 

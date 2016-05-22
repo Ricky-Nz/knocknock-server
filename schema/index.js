@@ -1,5 +1,5 @@
 import { GraphQLSchema } from 'graphql';
-import { query } from './query';
+import query from './query';
 import mutation from './mutation';
 
 // Define the schema with one top-level field, `user`, that
