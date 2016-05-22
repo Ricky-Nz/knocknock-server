@@ -1,6 +1,7 @@
 import {
 	GraphQLNonNull,
-	GraphQLString
+	GraphQLString,
+	GraphQLList
 } from 'graphql';
 
 import {
@@ -10,11 +11,10 @@ import {
 
 import {
 	findCLothById,
-	searchPaginationArgs,
-	resolveClothPagination
+	findClothes
 } from '../models';
 
-import { GraphQLClothPagination } from '../query';
+import { GraphQLCloth } from '../query';
 import { deleteFile } from '../../datastorage';
 
 export default mutationWithClientMutationId({
@@ -23,16 +23,15 @@ export default mutationWithClientMutationId({
 		id: {
 			type: new GraphQLNonNull(GraphQLString),
 			description: 'cloth id'
-		},
-		...searchPaginationArgs
-	},
-	outputFields: {
-		clothPage: {
-			type: GraphQLClothPagination,
-    	resolve: resolveClothPagination
 		}
 	},
-	mutateAndGetPayload: ({id, ...fetchArgs}) => {
+	outputFields: {
+		clothes: {
+			type: new GraphQLList(GraphQLCloth),
+    	resolve: () => findClothes()
+		}
+	},
+	mutateAndGetPayload: ({id}) => {
 		const {id: localId} = fromGlobalId(id);
 
 		return findCLothById(localId)
@@ -45,8 +44,7 @@ export default mutationWithClientMutationId({
 					return cloth;
 				}
 			})
-			.then(cloth => cloth.destroy())
-			.then(() => fetchArgs);
+			.then(cloth => cloth.destroy());
 	}
 });
 

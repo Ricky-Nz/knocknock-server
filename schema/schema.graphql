@@ -25,12 +25,6 @@ type ClothCategory implements Node {
   count: Int!
 }
 
-type ClothPagination {
-  id: ID!
-  pagination: Pagination!
-  datas: [Cloth]
-}
-
 input CreateCategoryInput {
   nameCn: String!
   nameEn: String!
@@ -43,7 +37,6 @@ type CreateCategoryPayload {
 }
 
 input CreateClothInput {
-  limit: Int!
   categoryId: String!
   nameEn: String!
   nameCn: String!
@@ -58,7 +51,7 @@ input CreateClothInput {
 }
 
 type CreateClothPayload {
-  clothPage: ClothPagination
+  clothes: [Cloth]
   clientMutationId: String!
 }
 
@@ -68,7 +61,7 @@ input DeleteClothInput {
 }
 
 type DeleteClothPayload {
-  clothPage: ClothPagination
+  clothes: [Cloth]
   clientMutationId: String!
 }
 
@@ -167,6 +160,6 @@ type Viewer implements Node {
   user(id: String): User
   userPage(role: String!, search: String, page: Int!, limit: Int!): UserPagination
   cloth(id: String!): Cloth
-  clothPage(categoryId: String, search: String, page: Int!, limit: Int!): ClothPagination
+  clothes: [Cloth]
   clothCategories: [ClothCategory]
 }

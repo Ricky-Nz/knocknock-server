@@ -1,6 +1,7 @@
 import {
 	GraphQLNonNull,
-	GraphQLInt
+	GraphQLInt,
+	GraphQLList
 } from 'graphql';
 
 import {
@@ -10,34 +11,28 @@ import {
 
 import {
 	getClothInputFields,
-	resolveClothPagination,
-	createCloth
+	createCloth,
+	findClothes
 } from '../models';
 
 import { processFileUpload } from '../service';
-import { GraphQLClothPagination } from '../query';
+import { GraphQLCloth } from '../query';
 
 export default mutationWithClientMutationId({
 	name: 'CreateCloth',
 	inputFields: {
-		limit: {
-			type: new GraphQLNonNull(GraphQLInt),
-			description: 'refeach limit'
-		},
 		...getClothInputFields()
 	},
 	outputFields: {
-		clothPage: {
-			type: GraphQLClothPagination,
-			resolve: ({limit}) =>
-				resolveClothPagination(null, {page: 1, limit})
+		clothes: {
+			type: new GraphQLList(GraphQLCloth),
+			resolve: () => findClothes()
 		}
 	},
-	mutateAndGetPayload: ({limit, ...args}, context, {rootValue}) => {
+	mutateAndGetPayload: (args, context, {rootValue}) => {
 		const {id: localId} = fromGlobalId(args.categoryId);
 		
 		return processFileUpload(args, rootValue.request.file)
-			.then(args => createCloth({...args, categoryId: localId}))
-			.then(newCloth => ({limit}))
+			.then(args => createCloth({...args, categoryId: localId}));
 	}
 });

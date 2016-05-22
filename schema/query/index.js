@@ -26,8 +26,7 @@ import {
 	resolveUser,
 	userPaginationInputs,
 	resolveUserPagination,
-  clothPaginationInputs,
-	resolveClothPagination
+  clothPaginationInputs
 } from '../models';
 
 import {
@@ -94,21 +93,6 @@ export const {
 	nodeType: GraphQLCloth
 });
 
-export const GraphQLClothPagination = new GraphQLObjectType({
-	name: 'ClothPagination',
-	fields: {
-		id: globalIdField('ClothPagination', () => 'rootclothpagination'),
-		pagination: {
-			type: new GraphQLNonNull(GraphQLPagination),
-			description: 'pagination info'
-		},
-		datas: {
-			type: new GraphQLList(GraphQLCloth),
-			description: 'page datas'
-		}
-	}
-});
-
 export const GraphQLUser = new GraphQLObjectType({
 	name: 'User',
 	description: 'Knocknock User',
@@ -167,10 +151,9 @@ export const GraphQLViewer =  new GraphQLObjectType({
         return DBCloth.findById(localId);
       }
     },
-    clothPage: {
-    	type: GraphQLClothPagination,
-    	args: clothPaginationInputs,
-    	resolve: resolveClothPagination
+    clothes: {
+    	type: new GraphQLList(GraphQLCloth),
+    	resolve: () => DBCloth.findAll()
     },
     clothCategories: {
       type: new GraphQLList(GraphQLClothCategory),

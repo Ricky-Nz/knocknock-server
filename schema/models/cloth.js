@@ -66,27 +66,8 @@ export const clothFields = {
 	}
 }
 
-export const clothPaginationInputs = {
-	categoryId: {
-		type: GraphQLString,
-		description: 'filter by category ID'
-	},
-	...searchPaginationInput
-};
-
-export function resolveClothPagination(obj, {categoryId, search, page, limit}) {
-	let selection = {};
-	if (categoryId) {
-		selection.categoryId = categoryId;
-	}
-	if (search) {
-		selection['$or'] = [
-	    {nameCn: {$like: `%${search}%`}},
-	    {nameEn: {$like: `%${search}%`}}
-	  ];
-	}
-
-	return resolvePagination(DBCloth, selection, page, limit)
+export function findClothes() {
+	return DBCloth.findAll();
 }
 
 export function createCloth(args) {
