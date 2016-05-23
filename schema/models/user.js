@@ -13,58 +13,54 @@ import {
 import { DBUser } from '../../database';
 import { searchPaginationInput, resolvePagination } from './pagination';
 
-export const GraphQLUserRole = new GraphQLEnumType({
-	name: 'Role',
-	description: 'User role',
-	values: {
-		Client: { value: 'client' },
-		Worker: { value: 'worker' },
-		Admin: { value: 'admin' }
-	}
-});
-
-export const userFileds = {
-	id: globalIdField('User'),
-	role: {
-		type: new GraphQLNonNull(GraphQLUserRole),
-		description: 'user role'
-	},
-	email: {
-		type: new GraphQLNonNull(GraphQLString),
-		description: 'user login email'
-	},
-	name: {
-		type: GraphQLString,
-		description: 'user name'
-	},
-	contact: {
-		type: GraphQLString,
-		description: 'contact phone number'
-	},
-	avatarUrl: {
-		type: GraphQLString,
-		description: 'avatar image url'
-	},
-	emailVerified: {
-		type: GraphQLBoolean,
-		description: 'login email verified'
-	},
-	contactVerified: {
-		type: GraphQLBoolean,
-		description: 'contact phoen verified'
-	}
+export function getUserInputs(update) {
+	return {
+		...!update&&{
+			role: {
+				type: new GraphQLNonNull(GraphQLString),
+				description: 'user role'
+			}
+		},
+		email: {
+			type: update ? GraphQLString : new GraphQLNonNull(GraphQLString),
+			description: 'user login email'
+		},
+		name: {
+			type: GraphQLString,
+			description: 'user name'
+		},
+		contact: {
+			type: GraphQLString,
+			description: 'contact phone number'
+		},
+		password: {
+			type: update ? GraphQLString : new GraphQLNonNull(GraphQLString),
+			description: 'login password'
+		}
+	};	
 }
 
-export const userInputs = {
-	id: {
-	  type: GraphQLString,
-	  description: 'user id'
+export function getUserFields() {
+	let fields = {
+		id: globalIdField('User'),
+		...getUserInputs(),
+		avatarUrl: {
+			type: GraphQLString,
+			description: 'avatar image url'
+		},
+		emailVerified: {
+			type: GraphQLBoolean,
+			description: 'login email verified'
+		},
+		contactVerified: {
+			type: GraphQLBoolean,
+			description: 'contact phoen verified'
+		}
 	}
-};
 
-export function resolveUser(obj, {id}) {
-	const {id: localId} = fromGlobalId(id);
-	return DBUser.findById(localId);
+	delete fields.password;
+
+	return fields;
 }
 
 export const userPaginationInputs = {
@@ -75,7 +71,7 @@ export const userPaginationInputs = {
 	...searchPaginationInput
 };
 
-export function resloveUserPagination(obj, {role, search, page, limit}) {
+export function resolveUserPagination(obj, {role, search, page, limit}) {
 	return resolvePagination(DBUser, search?{
 			$or: [
 			  {name: {$like: `%${search}%`}},

@@ -26,6 +26,12 @@ const User = sequelize.define('user', {
 	avatarUrl: {
 		type: STRING
 	},
+	avatarId: {
+		type: STRING
+	},
+	avatarBucket: {
+		type: STRING
+	},
 	password: {
 		type: STRING,
 		allowNull: false

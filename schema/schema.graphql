@@ -77,6 +77,21 @@ type CreateClothPayload {
   clientMutationId: String!
 }
 
+input CreateUserInput {
+  role: String!
+  email: String!
+  name: String
+  contact: String
+  password: String!
+  clientMutationId: String!
+}
+
+type CreateUserPayload {
+  userEdge: UserEdge
+  viewer: Viewer
+  clientMutationId: String!
+}
+
 input DeleteCategoryInput {
   id: String!
   clientMutationId: String!
@@ -106,6 +121,7 @@ type Mutation {
   createCategory(input: CreateCategoryInput!): CreateCategoryPayload
   updateCategory(input: UpdateCategoryInput!): UpdateCategoryPayload
   deleteCategory(input: DeleteCategoryInput!): DeleteCategoryPayload
+  createUser(input: CreateUserInput!): CreateUserPayload
 }
 
 interface Node {
@@ -129,12 +145,6 @@ type Pagination {
 type Query {
   viewer: Viewer
   node(id: ID!): Node
-}
-
-enum Role {
-  Client
-  Worker
-  Admin
 }
 
 input UpdateCategoryInput {
@@ -171,13 +181,23 @@ type UpdateClothPayload {
 
 type User implements Node {
   id: ID!
-  role: Role!
+  role: String!
   email: String!
   name: String
   contact: String
   avatarUrl: String
   emailVerified: Boolean
   contactVerified: Boolean
+}
+
+type UserConnection {
+  pageInfo: PageInfo!
+  edges: [UserEdge]
+}
+
+type UserEdge {
+  node: User
+  cursor: String!
 }
 
 type UserPagination {
@@ -188,7 +208,8 @@ type UserPagination {
 
 type Viewer implements Node {
   id: ID!
-  user(id: String): User
+  user(id: String!): User
+  users(role: String!, after: String, first: Int, before: String, last: Int): UserConnection
   userPage(role: String!, search: String, page: Int, limit: Int): UserPagination
   cloth(id: String!): Cloth
   clothes(after: String, first: Int, before: String, last: Int): ClothConnection

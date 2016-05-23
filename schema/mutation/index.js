@@ -5,15 +5,17 @@ import deleteCloth from './ClothDelete';
 import createCategory from './CategoryCreate';
 import updateCategory from './CategoryUpdate';
 import deleteCategory from './CategoryDelete';
+import createUser from './UserCreate';
 
 export default new GraphQLObjectType({
   name: 'Mutation',
   fields: {
-  	createCloth: createCloth,
-  	updateCloth: updateCloth,
-  	deleteCloth: deleteCloth,
-  	createCategory: createCategory,
-  	updateCategory: updateCategory,
-  	deleteCategory: deleteCategory
+  	createCloth,
+  	updateCloth,
+  	deleteCloth,
+  	createCategory,
+  	updateCategory,
+  	deleteCategory,
+  	createUser
   }
 });

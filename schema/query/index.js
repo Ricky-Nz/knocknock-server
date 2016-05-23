@@ -21,13 +21,12 @@ import {
 	searchPaginationInput,
 	GraphQLPagination,
 	clothFields,
-	userFileds,
+	getUserFields,
   clothCategoryFields,
-	userInputs,
-	resolveUser,
 	userPaginationInputs,
 	resolveUserPagination,
-  clothPaginationInputs
+  clothPaginationInputs,
+  modelConnection
 } from '../models';
 
 import {
@@ -105,7 +104,7 @@ export const GraphQLUser = new GraphQLObjectType({
 	name: 'User',
 	description: 'Knocknock User',
 	fields: {
-		...userFileds
+		...getUserFields()
 	},
 	interfaces: [nodeInterface]
 });
@@ -138,8 +137,28 @@ export const GraphQLViewer =  new GraphQLObjectType({
     id: globalIdField('Viewer', () => 'VIEWER'),
     user: {
       type: GraphQLUser,
-      args: userInputs,
-      resolve: resolveUser
+      args: {
+        id: {
+          type: new GraphQLNonNull(GraphQLString),
+          description: 'user id'
+        }
+      },
+      resolve: (obj, {id}) => {
+        const {id: localId} = fromGlobalId(id);
+        return DBUser.findById(localId);
+      }
+    },
+    users: {
+      type: GraphQLUserConnection,
+      args: {
+        role: {
+          type: new GraphQLNonNull(GraphQLString),
+          description: 'user role'
+        },
+        ...connectionArgs
+      },
+      resolve: (obj, {role, ...args}) =>
+        modelConnection(DBUser, {where:{role}}, args)
     },
     userPage: {
     	type: GraphQLUserPagination,

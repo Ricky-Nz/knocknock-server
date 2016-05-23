@@ -4,7 +4,7 @@ import cloth from './Cloth';
 import clothCategory from './ClothCategory';
 
 export function connect () {
-	const options = { force: true };
+	const options = { force: false };
 	return user.sync(options)
 		.then(() => permission.sync(options))
 		.then(() => cloth.sync(options))
