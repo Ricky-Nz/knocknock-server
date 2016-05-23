@@ -29,16 +29,11 @@ export default mutationWithClientMutationId({
 	outputFields: {
 		cloth: {
 			type: GraphQLCloth,
-			resolve: (result) => result
+			resolve: ({localId}) => findCLothById(localId)
 		}
 	},
 	mutateAndGetPayload: ({id, ...args}, context, {rootValue}) => {
 		const {id: localId} = fromGlobalId(id);
-		if (args.categoryId) {
-			const {id: categoryId} = fromGlobalId(args.categoryId);
-
-			args = {...args, categoryId};
-		}
 
 		return processFileUpload(args, rootValue.request.file)
 			.then(args =>
@@ -54,7 +49,8 @@ export default mutationWithClientMutationId({
 				} else {
 					return cloth.update(args); 
 				}
-			});
+			})
+			.then(() => ({localId}));
 	}
 });
 

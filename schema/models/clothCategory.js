@@ -24,7 +24,7 @@ export function getClothCategoryInpts(update) {
 }
 
 export const clothCategoryFields = {
-	id: globalIdField('Cloth'),
+	id: globalIdField('ClothCategory'),
 	...getClothCategoryInpts(),
 	count: {
 		type: new GraphQLNonNull(GraphQLInt),
@@ -32,12 +32,16 @@ export const clothCategoryFields = {
 	}
 };
 
+export function findCategoryById(id) {
+	return DBClothCategory.findById(id);
+}
+
 export function createCategory(args) {
 	return DBClothCategory.create(args);
 }
 
 export function updateCategory(id, args) {
-	return DBClothCategory.update({id}, args);
+	return DBClothCategory.update(args, {where: {id}});
 }
 
 export function getCategories() {

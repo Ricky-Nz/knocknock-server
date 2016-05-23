@@ -25,6 +25,26 @@ type ClothCategory implements Node {
   count: Int!
 }
 
+type ClothCategoryConnection {
+  pageInfo: PageInfo!
+  edges: [ClothCategoryEdge]
+}
+
+type ClothCategoryEdge {
+  node: ClothCategory
+  cursor: String!
+}
+
+type ClothConnection {
+  pageInfo: PageInfo!
+  edges: [ClothEdge]
+}
+
+type ClothEdge {
+  node: Cloth
+  cursor: String!
+}
+
 input CreateCategoryInput {
   nameCn: String!
   nameEn: String!
@@ -32,7 +52,8 @@ input CreateCategoryInput {
 }
 
 type CreateCategoryPayload {
-  clothCategories: [ClothCategory]
+  categoryEdge: ClothCategoryEdge
+  viewer: Viewer
   clientMutationId: String!
 }
 
@@ -51,7 +72,19 @@ input CreateClothInput {
 }
 
 type CreateClothPayload {
-  clothes: [Cloth]
+  clothEdge: ClothEdge
+  viewer: Viewer
+  clientMutationId: String!
+}
+
+input DeleteCategoryInput {
+  id: String!
+  clientMutationId: String!
+}
+
+type DeleteCategoryPayload {
+  deletedId: String!
+  viewer: Viewer
   clientMutationId: String!
 }
 
@@ -61,17 +94,8 @@ input DeleteClothInput {
 }
 
 type DeleteClothPayload {
-  clothes: [Cloth]
-  clientMutationId: String!
-}
-
-input DleteCategoryInput {
-  id: String!
-  clientMutationId: String!
-}
-
-type DleteCategoryPayload {
-  clothCategories: [ClothCategory]
+  deletedId: String!
+  viewer: Viewer
   clientMutationId: String!
 }
 
@@ -81,17 +105,24 @@ type Mutation {
   deleteCloth(input: DeleteClothInput!): DeleteClothPayload
   createCategory(input: CreateCategoryInput!): CreateCategoryPayload
   updateCategory(input: UpdateCategoryInput!): UpdateCategoryPayload
-  deleteCategory(input: DleteCategoryInput!): DleteCategoryPayload
+  deleteCategory(input: DeleteCategoryInput!): DeleteCategoryPayload
 }
 
 interface Node {
   id: ID!
 }
 
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
 type Pagination {
   search: String
-  page: Int!
-  limit: Int!
+  page: Int
+  limit: Int
   totalPage: Int!
 }
 
@@ -114,7 +145,7 @@ input UpdateCategoryInput {
 }
 
 type UpdateCategoryPayload {
-  clothCategory: ClothCategory
+  category: ClothCategory
   clientMutationId: String!
 }
 
@@ -158,8 +189,8 @@ type UserPagination {
 type Viewer implements Node {
   id: ID!
   user(id: String): User
-  userPage(role: String!, search: String, page: Int!, limit: Int!): UserPagination
+  userPage(role: String!, search: String, page: Int, limit: Int): UserPagination
   cloth(id: String!): Cloth
-  clothes: [Cloth]
-  clothCategories: [ClothCategory]
+  clothes(after: String, first: Int, before: String, last: Int): ClothConnection
+  categories(after: String, first: Int, before: String, last: Int): ClothCategoryConnection
 }

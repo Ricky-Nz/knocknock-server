@@ -9,6 +9,7 @@ import {
 import {
 	connectionArgs,
 	connectionFromPromisedArraySlice,
+  connectionFromPromisedArray,
   cursorToOffset,
   globalIdField,
   fromGlobalId,
@@ -75,6 +76,13 @@ export const GraphQLClothCategory = new GraphQLObjectType({
     ...clothCategoryFields
   },
   interfaces: [nodeInterface]
+});
+
+export const {
+  connectionType: GraphQLClothCategoryConnection,
+  edgeType: GraphQLClothCategoryEdge
+} = connectionDefinitions({
+  nodeType: GraphQLClothCategory
 });
 
 export const GraphQLCloth = new GraphQLObjectType({
@@ -152,12 +160,20 @@ export const GraphQLViewer =  new GraphQLObjectType({
       }
     },
     clothes: {
-    	type: new GraphQLList(GraphQLCloth),
-    	resolve: () => DBCloth.findAll()
+    	type: GraphQLClothConnection,
+      args: {
+        ...connectionArgs
+      },
+    	resolve: (obj, args) =>
+        connectionFromPromisedArray(DBCloth.findAll(), args)
     },
-    clothCategories: {
-      type: new GraphQLList(GraphQLClothCategory),
-      resolve: () => DBClothCategory.findAll() 
+    categories: {
+      type: GraphQLClothCategoryConnection,
+      args: {
+        ...connectionArgs
+      },
+      resolve: (obj, args) =>
+        connectionFromPromisedArray(DBClothCategory.findAll(), args)
     }
   },
   interfaces: [nodeInterface]

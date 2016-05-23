@@ -12,11 +12,11 @@ export const searchPaginationInput = {
 		description: 'search'
 	},
 	page: {
-		type: new GraphQLNonNull(GraphQLInt),
+		type: GraphQLInt,
 		description: 'page index'
 	},
 	limit: {
-		type: new GraphQLNonNull(GraphQLInt),
+		type: GraphQLInt,
 		description: 'each page size'
 	}
 };

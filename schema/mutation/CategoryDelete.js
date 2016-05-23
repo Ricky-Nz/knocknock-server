@@ -15,11 +15,12 @@ import {
 } from '../models';
 
 import {
-	GraphQLClothCategory
+	GraphQLClothCategory,
+	GraphQLViewer
 } from '../query';
 
 export default mutationWithClientMutationId({
-	name: 'DleteCategory',
+	name: 'DeleteCategory',
 	inputFields: {
 		id: {
 			type: new GraphQLNonNull(GraphQLString),
@@ -27,14 +28,18 @@ export default mutationWithClientMutationId({
 		}
 	},
 	outputFields: {
-		clothCategories: {
-			type: new GraphQLList(GraphQLClothCategory),
-			resolve: () => getCategories()
+		deletedId: {
+			type: new GraphQLNonNull(GraphQLString),
+			resolve: ({id}) => id
+		},
+		viewer: {
+			type: GraphQLViewer,
+			resolve: () => ({})
 		}
 	},
 	mutateAndGetPayload: ({id}) => {
 		const {id: localId} = fromGlobalId(id);
 		return deleteCategory(localId)
-			.then(() => ({}));
+			.then(() => ({id}));
 	}
 });

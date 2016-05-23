@@ -6,7 +6,8 @@ import {
 
 import {
 	mutationWithClientMutationId,
-	fromGlobalId
+	fromGlobalId,
+	offsetToCursor
 } from 'graphql-relay';
 
 import {
@@ -15,8 +16,13 @@ import {
 	findClothes
 } from '../models';
 
+import {
+	GraphQLCloth,
+	GraphQLClothEdge,
+	GraphQLViewer
+} from '../query';
+
 import { processFileUpload } from '../service';
-import { GraphQLCloth } from '../query';
 
 export default mutationWithClientMutationId({
 	name: 'CreateCloth',
@@ -24,15 +30,24 @@ export default mutationWithClientMutationId({
 		...getClothInputFields()
 	},
 	outputFields: {
-		clothes: {
-			type: new GraphQLList(GraphQLCloth),
-			resolve: () => findClothes()
+		clothEdge: {
+			type: GraphQLClothEdge,
+			resolve: (newCloth) =>
+				findClothes()
+					.then(clothes => {
+						const index = clothes.findIndex(item => item.id === newCloth.id);
+						return {
+							cursor: offsetToCursor(index),
+							node: newCloth
+						};
+					})
+		},
+		viewer: {
+			type: GraphQLViewer,
+			resolve: () => ({})
 		}
 	},
-	mutateAndGetPayload: (args, context, {rootValue}) => {
-		const {id: localId} = fromGlobalId(args.categoryId);
-		
-		return processFileUpload(args, rootValue.request.file)
-			.then(args => createCloth({...args, categoryId: localId}));
-	}
+	mutateAndGetPayload: (args, context, {rootValue}) =>
+		processFileUpload(args, rootValue.request.file)
+			.then(args => createCloth(args))
 });

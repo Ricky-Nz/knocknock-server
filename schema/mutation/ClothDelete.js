@@ -14,7 +14,10 @@ import {
 	findClothes
 } from '../models';
 
-import { GraphQLCloth } from '../query';
+import {
+	GraphQLViewer
+} from '../query';
+
 import { deleteFile } from '../../datastorage';
 
 export default mutationWithClientMutationId({
@@ -26,9 +29,13 @@ export default mutationWithClientMutationId({
 		}
 	},
 	outputFields: {
-		clothes: {
-			type: new GraphQLList(GraphQLCloth),
-    	resolve: () => findClothes()
+		deletedId: {
+			type: new GraphQLNonNull(GraphQLString),
+			resolve: ({id}) => id
+		},
+		viewer: {
+			type: GraphQLViewer,
+			resolve: () => ({})
 		}
 	},
 	mutateAndGetPayload: ({id}) => {
@@ -44,7 +51,8 @@ export default mutationWithClientMutationId({
 					return cloth;
 				}
 			})
-			.then(cloth => cloth.destroy());
+			.then(cloth => cloth.destroy())
+			.then(() => ({id}));
 	}
 });
 

@@ -4,6 +4,7 @@ import {
 
 import {
 	mutationWithClientMutationId,
+	offsetToCursor
 } from 'graphql-relay';
 
 import {
@@ -13,7 +14,9 @@ import {
 } from '../models';
 
 import {
-	GraphQLClothCategory
+	GraphQLClothCategory,
+	GraphQLClothCategoryEdge,
+	GraphQLViewer
 } from '../query';
 
 export default mutationWithClientMutationId({
@@ -22,9 +25,21 @@ export default mutationWithClientMutationId({
 		...getClothCategoryInpts()
 	},
 	outputFields: {
-		clothCategories: {
-			type: new GraphQLList(GraphQLClothCategory),
-			resolve: () => getCategories()
+		categoryEdge: {
+			type: GraphQLClothCategoryEdge,
+			resolve: (newCategory) =>
+				getCategories()
+					.then(categories => {
+						const index = categories.findIndex(item => item.id === newCategory.id);
+						return {
+							cursor: offsetToCursor(index),
+							node: newCategory
+						};
+					})
+		},
+		viewer: {
+			type: GraphQLViewer,
+			resolve: () => ({})
 		}
 	},
 	mutateAndGetPayload: (args) => createCategory(args)

@@ -10,7 +10,8 @@ import {
 
 import {
 	getClothCategoryInpts,
-	updateCategory
+	updateCategory,
+	findCategoryById
 } from '../models';
 
 import {
@@ -27,13 +28,14 @@ export default mutationWithClientMutationId({
 		...getClothCategoryInpts(true)
 	},
 	outputFields: {
-		clothCategory: {
+		category: {
 			type: GraphQLClothCategory,
-			resolve: (result) => result
+			resolve: ({localId}) => findCategoryById(localId)
 		}
 	},
 	mutateAndGetPayload: ({id, ...args}) => {
 		const {id: localId} = fromGlobalId(id);
-		return updateCategory(localId, args);
+		return updateCategory(localId, args)
+			.then(() => ({localId}));
 	}
 });
