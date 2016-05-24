@@ -33,8 +33,8 @@ export default mutationWithClientMutationId({
 			type: GraphQLAddressEdge,
 			resolve: (address) =>
 				DBAddress.findAll()
-					.then(address => {
-						const index = address.findIndex(item => item.id === address.id);
+					.then(addresses => {
+						const index = addresses.findIndex(item => item.id === address.id);
 						return {
 							cursor: offsetToCursor(index),
 							node: address
