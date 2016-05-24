@@ -3,6 +3,24 @@ schema {
   mutation: Mutation
 }
 
+type Address implements Node {
+  id: ID!
+  userId: String!
+  postalCode: String!
+  address: String!
+  contact: String!
+}
+
+type AddressConnection {
+  pageInfo: PageInfo!
+  edges: [AddressEdge]
+}
+
+type AddressEdge {
+  node: Address
+  cursor: String!
+}
+
 type Cloth implements Node {
   id: ID!
   categoryId: String!
@@ -43,6 +61,20 @@ type ClothConnection {
 type ClothEdge {
   node: Cloth
   cursor: String!
+}
+
+input CreateAddressInput {
+  userId: String!
+  postalCode: String!
+  address: String!
+  contact: String!
+  clientMutationId: String!
+}
+
+type CreateAddressPayload {
+  addressEdge: AddressEdge
+  user: User
+  clientMutationId: String!
 }
 
 input CreateCategoryInput {
@@ -92,6 +124,17 @@ type CreateUserPayload {
   clientMutationId: String!
 }
 
+input DeleteAddressInput {
+  id: String!
+  clientMutationId: String!
+}
+
+type DeleteAddressPayload {
+  deletedId: String!
+  viewer: User
+  clientMutationId: String!
+}
+
 input DeleteCategoryInput {
   id: String!
   clientMutationId: String!
@@ -122,6 +165,10 @@ type Mutation {
   updateCategory(input: UpdateCategoryInput!): UpdateCategoryPayload
   deleteCategory(input: DeleteCategoryInput!): DeleteCategoryPayload
   createUser(input: CreateUserInput!): CreateUserPayload
+  updateUser(input: UpdateUserInput!): UpdateUserPayload
+  createAddress(input: CreateAddressInput!): CreateAddressPayload
+  updateAddress(input: UpdateAddressInput!): UpdateAddressPayload
+  deleteAddress(input: DeleteAddressInput!): DeleteAddressPayload
 }
 
 interface Node {
@@ -145,6 +192,19 @@ type Pagination {
 type Query {
   viewer: Viewer
   node(id: ID!): Node
+}
+
+input UpdateAddressInput {
+  id: String!
+  postalCode: String
+  address: String
+  contact: String
+  clientMutationId: String!
+}
+
+type UpdateAddressPayload {
+  address: Address
+  clientMutationId: String!
 }
 
 input UpdateCategoryInput {
@@ -179,6 +239,19 @@ type UpdateClothPayload {
   clientMutationId: String!
 }
 
+input UpdateUserInput {
+  id: String!
+  name: String
+  contact: String
+  password: String
+  clientMutationId: String!
+}
+
+type UpdateUserPayload {
+  user: User
+  clientMutationId: String!
+}
+
 type User implements Node {
   id: ID!
   role: String!
@@ -188,6 +261,7 @@ type User implements Node {
   avatarUrl: String
   emailVerified: Boolean
   contactVerified: Boolean
+  addresses(after: String, first: Int, before: String, last: Int): AddressConnection
 }
 
 type UserConnection {
@@ -209,7 +283,7 @@ type UserPagination {
 type Viewer implements Node {
   id: ID!
   user(id: String!): User
-  users(role: String!, after: String, first: Int, before: String, last: Int): UserConnection
+  users(role: String!, search: String, after: String, first: Int, before: String, last: Int): UserConnection
   userPage(role: String!, search: String, page: Int, limit: Int): UserPagination
   cloth(id: String!): Cloth
   clothes(after: String, first: Int, before: String, last: Int): ClothConnection

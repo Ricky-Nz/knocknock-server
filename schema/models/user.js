@@ -6,12 +6,34 @@ import {
 } from 'graphql';
 
 import {
-	globalIdField,
 	fromGlobalId
 } from 'graphql-relay';
 
 import { DBUser } from '../../database';
 import { searchPaginationInput, resolvePagination } from './pagination';
+
+export function getAddressInputs(update) {
+	return {
+		...!update&&{
+			userId: {
+				type: new GraphQLNonNull(GraphQLString),
+				description: 'user id'
+			}
+		},
+		postalCode: {
+			type: update ? GraphQLString : new GraphQLNonNull(GraphQLString),
+			description: 'address postal code'
+		},
+		address: {
+			type: update ? GraphQLString : new GraphQLNonNull(GraphQLString),
+			description: 'address detail'
+		},
+		contact: {
+			type: update ? GraphQLString : new GraphQLNonNull(GraphQLString),
+			description: 'contact phone number'
+		},
+	};
+}
 
 export function getUserInputs(update) {
 	return {
@@ -21,9 +43,11 @@ export function getUserInputs(update) {
 				description: 'user role'
 			}
 		},
-		email: {
-			type: update ? GraphQLString : new GraphQLNonNull(GraphQLString),
-			description: 'user login email'
+		...!update&&{
+			email: {
+				type: update ? GraphQLString : new GraphQLNonNull(GraphQLString),
+				description: 'user login email'
+			}
 		},
 		name: {
 			type: GraphQLString,
@@ -42,7 +66,6 @@ export function getUserInputs(update) {
 
 export function getUserFields() {
 	let fields = {
-		id: globalIdField('User'),
 		...getUserInputs(),
 		avatarUrl: {
 			type: GraphQLString,

@@ -12,6 +12,7 @@ import {
   connectionFromPromisedArray,
   cursorToOffset,
   globalIdField,
+  toGlobalId,
   fromGlobalId,
   nodeDefinitions,
   connectionDefinitions
@@ -26,11 +27,13 @@ import {
 	userPaginationInputs,
 	resolveUserPagination,
   clothPaginationInputs,
-  modelConnection
+  modelConnection,
+  getAddressInputs
 } from '../models';
 
 import {
   DBUser,
+  DBAddress,
   DBCloth,
   DBClothCategory
 } from '../../database';
@@ -43,6 +46,8 @@ const { nodeInterface, nodeField } = nodeDefinitions(
 
     if (type === 'User') {
       return DBUser.findById(id);
+    } else if (type === 'Address') {
+      return DBAddress.findById(id);
     } else if (type === 'Cloth') {
       return DBCloth.findById(id);
     } else if (type === 'Viewer') {
@@ -58,7 +63,9 @@ const { nodeInterface, nodeField } = nodeDefinitions(
     	return GraphQLViewer;
     } else if (obj instanceof DBUser) {
   		return GraphQLUser;
-  	} else if (obj instanceof DBCloth) {
+  	} else if (obj instanceof DBAddress) {
+      return GraphQLAddress;
+    } else if (obj instanceof DBCloth) {
       return GraphQLCloth;
     } else if (obj instanceof DBClothCategory) {
       return GraphQLClothCategory;
@@ -100,11 +107,37 @@ export const {
 	nodeType: GraphQLCloth
 });
 
+export const GraphQLAddress = new GraphQLObjectType({
+  name: 'Address',
+  description: 'user address',
+  fields: {
+    id: globalIdField('Address'),
+    ...getAddressInputs()
+  },
+  interfaces: [nodeInterface]
+});
+
+export const {
+  connectionType: GraphQLAddressConnection,
+  edgeType: GraphQLAddressEdge
+} = connectionDefinitions({
+  nodeType: GraphQLAddress
+});
+
 export const GraphQLUser = new GraphQLObjectType({
 	name: 'User',
 	description: 'Knocknock User',
 	fields: {
-		...getUserFields()
+    id: globalIdField('User'),
+		...getUserFields(),
+    addresses: {
+      type: GraphQLAddressConnection,
+      args: {
+        ...connectionArgs
+      },
+      resolve: (obj, args) =>
+        modelConnection(DBAddress, {where:{userId: toGlobalId('User', obj.id)}}, args)
+    }
 	},
 	interfaces: [nodeInterface]
 });
@@ -155,10 +188,19 @@ export const GraphQLViewer =  new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLString),
           description: 'user role'
         },
+        search: {
+          type: GraphQLString,
+          description: 'search user'
+        },
         ...connectionArgs
       },
-      resolve: (obj, {role, ...args}) =>
-        modelConnection(DBUser, {where:{role}}, args)
+      resolve: (obj, {role, search, ...args}) =>
+        modelConnection(DBUser, search?{where:{role, $or:[
+            {id: {$like: `%${search}%`}},
+            {name: {$like: `%${search}%`}},
+            {email: {$like: `%${search}%`}},
+            {contact: {$like: `%${search}%`}}
+          ]}}:{where:{role}}, args)
     },
     userPage: {
     	type: GraphQLUserPagination,
