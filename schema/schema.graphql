@@ -109,6 +109,32 @@ type CreateClothPayload {
   clientMutationId: String!
 }
 
+input CreateOrderInput {
+  userId: String!
+  express: Boolean
+  note: String
+  status: String
+  clientMutationId: String!
+}
+
+type CreateOrderPayload {
+  orderEdge: OrderEdge
+  user: User
+  clientMutationId: String!
+}
+
+input CreateTimeSlotInput {
+  start: String!
+  end: String!
+  clientMutationId: String!
+}
+
+type CreateTimeSlotPayload {
+  timeSlots: [TimeSlot]
+  viewer: Viewer
+  clientMutationId: String!
+}
+
 input CreateUserInput {
   role: String!
   email: String!
@@ -121,6 +147,20 @@ input CreateUserInput {
 type CreateUserPayload {
   userEdge: UserEdge
   viewer: Viewer
+  clientMutationId: String!
+}
+
+input CreateVoucherInput {
+  userId: String!
+  title: String!
+  value: Float!
+  expireOn: String!
+  clientMutationId: String!
+}
+
+type CreateVoucherPayload {
+  voucherEdge: VoucherEdge
+  user: User
   clientMutationId: String!
 }
 
@@ -157,6 +197,17 @@ type DeleteClothPayload {
   clientMutationId: String!
 }
 
+input DeleteTimeSlotInput {
+  id: String!
+  clientMutationId: String!
+}
+
+type DeleteTimeSlotPayload {
+  timeSlots: [TimeSlot]
+  viewer: Viewer
+  clientMutationId: String!
+}
+
 type Mutation {
   createCloth(input: CreateClothInput!): CreateClothPayload
   updateCloth(input: UpdateClothInput!): UpdateClothPayload
@@ -169,10 +220,37 @@ type Mutation {
   createAddress(input: CreateAddressInput!): CreateAddressPayload
   updateAddress(input: UpdateAddressInput!): UpdateAddressPayload
   deleteAddress(input: DeleteAddressInput!): DeleteAddressPayload
+  createVoucher(input: CreateVoucherInput!): CreateVoucherPayload
+  createOrder(input: CreateOrderInput!): CreateOrderPayload
+  updateOrder(input: UpdateOrderInput!): UpdateOrderPayload
+  createTimeSlot(input: CreateTimeSlotInput!): CreateTimeSlotPayload
+  updateTimeSlot(input: UpdateTimeSlotInput!): UpdateTimeSlotPayload
+  deleteTimeSlot(input: DeleteTimeSlotInput!): DeleteTimeSlotPayload
 }
 
 interface Node {
   id: ID!
+}
+
+type Order implements Node {
+  id: ID!
+  userId: String!
+  express: Boolean
+  note: String
+  status: String
+  totalPrice: Float
+  pickupDate: String
+  pickupAddress: String
+}
+
+type OrderConnection {
+  pageInfo: PageInfo!
+  edges: [OrderEdge]
+}
+
+type OrderEdge {
+  node: Order
+  cursor: String!
 }
 
 type PageInfo {
@@ -182,16 +260,34 @@ type PageInfo {
   endCursor: String
 }
 
-type Pagination {
-  search: String
-  page: Int
-  limit: Int
-  totalPage: Int!
-}
-
 type Query {
   viewer: Viewer
   node(id: ID!): Node
+}
+
+type TimeSlot implements Node {
+  id: ID!
+  start: String!
+  end: String!
+}
+
+type Transaction implements Node {
+  id: ID!
+  userId: String!
+  value: String!
+  type: String!
+  orderId: String
+  description: String
+}
+
+type TransactionConnection {
+  pageInfo: PageInfo!
+  edges: [TransactionEdge]
+}
+
+type TransactionEdge {
+  node: Transaction
+  cursor: String!
 }
 
 input UpdateAddressInput {
@@ -239,6 +335,28 @@ type UpdateClothPayload {
   clientMutationId: String!
 }
 
+input UpdateOrderInput {
+  id: String!
+  clientMutationId: String!
+}
+
+type UpdateOrderPayload {
+  order: Order
+  clientMutationId: String!
+}
+
+input UpdateTimeSlotInput {
+  id: String!
+  start: String!
+  end: String!
+  clientMutationId: String!
+}
+
+type UpdateTimeSlotPayload {
+  timeSlot: TimeSlot
+  clientMutationId: String!
+}
+
 input UpdateUserInput {
   id: String!
   name: String
@@ -262,6 +380,10 @@ type User implements Node {
   emailVerified: Boolean
   contactVerified: Boolean
   addresses(after: String, first: Int, before: String, last: Int): AddressConnection
+  vouchers(all: Boolean, after: String, first: Int, before: String, last: Int): VoucherConnection
+  order(id: String!): Order
+  orders(search: String, after: String, first: Int, before: String, last: Int): OrderConnection
+  transactions(after: String, first: Int, before: String, last: Int): TransactionConnection
 }
 
 type UserConnection {
@@ -274,18 +396,34 @@ type UserEdge {
   cursor: String!
 }
 
-type UserPagination {
-  id: ID!
-  pagination: Pagination!
-  datas: [User]
-}
-
 type Viewer implements Node {
   id: ID!
   user(id: String!): User
   users(role: String!, search: String, after: String, first: Int, before: String, last: Int): UserConnection
-  userPage(role: String!, search: String, page: Int, limit: Int): UserPagination
+  orders(userId: String, search: String, after: String, first: Int, before: String, last: Int): OrderConnection
   cloth(id: String!): Cloth
   clothes(after: String, first: Int, before: String, last: Int): ClothConnection
   categories(after: String, first: Int, before: String, last: Int): ClothCategoryConnection
+  pickupSlots: [TimeSlot]
+}
+
+type Voucher implements Node {
+  id: ID!
+  userId: String!
+  title: String!
+  value: Float!
+  expireOn: String!
+  used: Boolean!
+  usedOn: String
+  usedOrderId: String
+}
+
+type VoucherConnection {
+  pageInfo: PageInfo!
+  edges: [VoucherEdge]
+}
+
+type VoucherEdge {
+  node: Voucher
+  cursor: String!
 }

@@ -2,15 +2,51 @@ import {
 	GraphQLNonNull,
 	GraphQLString,
 	GraphQLBoolean,
-	GraphQLEnumType
+	GraphQLEnumType,
+	GraphQLFloat
 } from 'graphql';
-
-import {
-	fromGlobalId
-} from 'graphql-relay';
 
 import { DBUser } from '../../database';
 import { searchPaginationInput, resolvePagination } from './pagination';
+
+export function getVoucherInputs() {
+	return {
+		userId: {
+			type: new GraphQLNonNull(GraphQLString),
+			description: 'user id'
+		},
+		title: {
+			type: new GraphQLNonNull(GraphQLString),
+			description: 'voucher title'
+		},
+		value: {
+			type: new GraphQLNonNull(GraphQLFloat),
+			description: 'voucher value'
+		},
+		expireOn: {
+			type: new GraphQLNonNull(GraphQLString),
+			description: 'voucher expire on'
+		}
+	};
+}
+
+export function getVoucherFields() {
+	return {
+		...getVoucherInputs(),
+		used: {
+			type: new GraphQLNonNull(GraphQLBoolean),
+			description: 'voucher used'
+		},
+		usedOn: {
+			type: GraphQLString,
+			description: 'voucher used date'
+		},
+		usedOrderId: {
+			type: GraphQLString,
+			description: 'voucher used on order id'
+		}
+	};
+}
 
 export function getAddressInputs(update) {
 	return {

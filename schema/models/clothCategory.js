@@ -4,10 +4,6 @@ import {
   GraphQLInt
 } from 'graphql';
 
-import {
-	globalIdField
-} from 'graphql-relay';
-
 import { DBClothCategory } from '../../database';
 
 export function getClothCategoryInpts(update) {
@@ -24,7 +20,6 @@ export function getClothCategoryInpts(update) {
 }
 
 export const clothCategoryFields = {
-	id: globalIdField('ClothCategory'),
 	...getClothCategoryInpts(),
 	count: {
 		type: new GraphQLNonNull(GraphQLInt),

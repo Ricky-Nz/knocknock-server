@@ -3,7 +3,8 @@ import {
   GraphQLString,
   GraphQLNonNull,
   GraphQLObjectType,
-  GraphQLSchema
+  GraphQLSchema,
+  GraphQLBoolean
 } from 'graphql';
 
 import {
@@ -28,14 +29,22 @@ import {
 	resolveUserPagination,
   clothPaginationInputs,
   modelConnection,
-  getAddressInputs
+  getAddressInputs,
+  getVoucherFields,
+  getOrderFields,
+  transactionFields,
+  timeSlotFields
 } from '../models';
 
 import {
   DBUser,
   DBAddress,
   DBCloth,
-  DBClothCategory
+  DBClothCategory,
+  DBVoucher,
+  DBOrder,
+  DBTransaction,
+  DBTimeSlot
 } from '../../database';
 
 class FeakViewerClass {}
@@ -54,6 +63,14 @@ const { nodeInterface, nodeField } = nodeDefinitions(
       return new FeakViewerClass();
     } else if (type === 'ClothCategory') {
       return DBClothCategory.findById(id);
+    } else if (type === 'Voucher') {
+      return DBVoucher.findById(id);
+    } else if (type === 'Order') {
+      return DBOrder.findById(id);
+    } else if (type === 'Transaction') {
+      return DBTransaction.findById(id);
+    } else if (type === 'TimeSlot') {
+      return DBTimeSlot.findById(id);
     } else {
       return null;
     }
@@ -69,16 +86,52 @@ const { nodeInterface, nodeField } = nodeDefinitions(
       return GraphQLCloth;
     } else if (obj instanceof DBClothCategory) {
       return GraphQLClothCategory;
+    } else if (obj instanceof DBVoucher) {
+      return GraphQLVoucher;
+    } else if (obj instanceof DBOrder) {
+      return GraphQLOrder;
+    } else if (obj instanceof DBTransaction) {
+      return GraphQLTransaction;
+    } else if (obj instanceof DBTimeSlot) {
+      return GraphQLTimeSlot;
     } else {
   		return null;
   	}
   }
 );
 
+export const GraphQLTimeSlot = new GraphQLObjectType({
+  name: 'TimeSlot',
+  description: 'time slots',
+  fields: {
+    id: globalIdField('TimeSlot'),
+    ...timeSlotFields
+  },
+  interfaces: [nodeInterface]
+});
+
+export const GraphQLTransaction = new GraphQLObjectType({
+  name: 'Transaction',
+  description: 'transaction record',
+  fields: {
+    id: globalIdField('Transaction'),
+    ...transactionFields
+  },
+  interfaces: [nodeInterface]
+});
+
+export const {
+  connectionType: GraphQLTransactionConnection,
+  edgeType: GraphQLTransactionEdge
+} = connectionDefinitions({
+  nodeType: GraphQLTransaction
+});
+
 export const GraphQLClothCategory = new GraphQLObjectType({
   name: 'ClothCategory',
   description: 'cloth category',
   fields: {
+    id: globalIdField('ClothCategory'),
     ...clothCategoryFields
   },
   interfaces: [nodeInterface]
@@ -105,6 +158,38 @@ export const {
 	edgeType: GraphQLClothEdge
 } = connectionDefinitions({
 	nodeType: GraphQLCloth
+});
+
+export const GraphQLVoucher = new GraphQLObjectType({
+  name: 'Voucher',
+  fields: {
+    id: globalIdField('Voucher'),
+    ...getVoucherFields(),
+  },
+  interfaces: [nodeInterface]
+});
+
+export const {
+  connectionType: GraphQLVoucherConnection,
+  edgeType: GraphQLVoucherEdge
+} = connectionDefinitions({
+  nodeType: GraphQLVoucher
+});
+
+export const GraphQLOrder = new GraphQLObjectType({
+  name: 'Order',
+  fields: {
+    id: globalIdField('Order'),
+    ...getOrderFields()
+  },
+  interfaces: [nodeInterface]
+});
+
+export const {
+  connectionType: GraphQLOrderConnection,
+  edgeType: GraphQLOrderEdge
+} = connectionDefinitions({
+  nodeType: GraphQLOrder
 });
 
 export const GraphQLAddress = new GraphQLObjectType({
@@ -135,8 +220,58 @@ export const GraphQLUser = new GraphQLObjectType({
       args: {
         ...connectionArgs
       },
-      resolve: (obj, args) =>
-        modelConnection(DBAddress, {where:{userId: toGlobalId('User', obj.id)}}, args)
+      resolve: (user, args) =>
+        modelConnection(DBAddress, {where:{userId: toGlobalId('User', user.id)}}, args)
+    },
+    vouchers: {
+      type: GraphQLVoucherConnection,
+      args: {
+        all: {
+          type: GraphQLBoolean,
+          description: 'show all voucher include used voucher'
+        },
+        ...connectionArgs
+      },
+      resolve: (user, {all, ...args}) => {
+        const userId = toGlobalId('User', user.id);
+        return modelConnection(DBVoucher, {where: all?{userId}:{userId, used: false}}, args);
+      }
+    },
+    order: {
+      type: GraphQLOrder,
+      args: {
+        id: {
+          type: new GraphQLNonNull(GraphQLString),
+          description: 'order id'
+        }
+      },
+      resolve: (obj, {id}) => DBOrder.findById(id)
+    },
+    orders: {
+      type: GraphQLOrderConnection,
+      args: {
+        search: {
+          type: GraphQLString,
+          description: 'search order by order id'
+        },
+        ...connectionArgs
+      },
+      resolve: (user, {search, ...args}) => {
+        const userId = toGlobalId('User', user.id);
+        return modelConnection(DBOrder, {where: search?{userId, $or: [
+            {id: {$like: `%${search}%`}}
+          ]}:{userId}}, args);
+      }
+    },
+    transactions: {
+      type: GraphQLTransactionConnection,
+      args: {
+        ...connectionArgs
+      },
+      resolve: (user, args) => {
+        const userId = toGlobalId('User', user.id);
+        return modelConnection(DBTransaction, {where: {userId}}, args);
+      }
     }
 	},
 	interfaces: [nodeInterface]
@@ -202,10 +337,30 @@ export const GraphQLViewer =  new GraphQLObjectType({
             {contact: {$like: `%${search}%`}}
           ]}}:{where:{role}}, args)
     },
-    userPage: {
-    	type: GraphQLUserPagination,
-    	args: userPaginationInputs,
-    	resolve: resolveUserPagination
+    orders: {
+      type: GraphQLOrderConnection,
+      args: {
+        userId: {
+          type: GraphQLString,
+          description: 'user id'
+        },
+        search: {
+          type: GraphQLString,
+          description: 'search by order id'
+        },
+        ...connectionArgs
+      },
+      resolve: (obj, {userId, search, ...args}) => {
+        let query = {where:{}};
+        if (userId) {
+          query.where.userId = userId;
+        }
+        if (search) {
+          query.where.id = {$like: `%${search}%`}
+        }
+
+        return modelConnection(DBOrder, query, args);
+      }
     },
     cloth: {
       type: GraphQLCloth,
@@ -235,6 +390,11 @@ export const GraphQLViewer =  new GraphQLObjectType({
       },
       resolve: (obj, args) =>
         connectionFromPromisedArray(DBClothCategory.findAll(), args)
+    },
+    pickupSlots: {
+      type: new GraphQLList(GraphQLTimeSlot),
+      description: 'pickup time slots',
+      resolve: (obj) => DBTimeSlot.findAll({order: 'start DESC'})
     }
   },
   interfaces: [nodeInterface]

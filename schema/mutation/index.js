@@ -10,6 +10,12 @@ import updateUser from './UserUpdate';
 import createAddress from './AddressCreate';
 import updateAddress from './AddressUpdate';
 import deleteAddress from './AddressDelete';
+import createVoucher from './VoucherCreate';
+import createOrder from './OrderCreate';
+import updateOrder from './OrderUpdate';
+import createTimeSlot from './TimeSlotCreate';
+import updateTimeSlot from './TimeSlotUpdate';
+import deleteTimeSlot from './TimeSlotDelete';
 
 export default new GraphQLObjectType({
   name: 'Mutation',
@@ -24,6 +30,12 @@ export default new GraphQLObjectType({
     updateUser,
     createAddress,
     updateAddress,
-    deleteAddress
+    deleteAddress,
+    createVoucher,
+    createOrder,
+    updateOrder,
+    createTimeSlot,
+    updateTimeSlot,
+    deleteTimeSlot
   }
 });

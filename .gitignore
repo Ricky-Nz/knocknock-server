@@ -42,7 +42,8 @@
 config/local.js
 gcloud-cert.json
 uploads/
-
+schema/schema.graphql
+schema/schema.json
 
 
 
