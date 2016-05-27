@@ -1,13 +1,17 @@
 import sequelize from './connection';
-import { STRING, DATE, BOOLEAN, INTEGER } from 'sequelize';
+import { STRING, BOOLEAN } from 'sequelize';
 
 export default sequelize.define('timeslot', {
 	start: {
-		type: DATE,
+		type: STRING,
 		allowNull: false
 	},
 	end: {
-		type: DATE,
+		type: STRING,
 		allowNull: false
+	},
+	enabled: {
+		type: BOOLEAN,
+		defaultValue: false
 	}
 });

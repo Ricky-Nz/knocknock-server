@@ -126,6 +126,7 @@ type CreateOrderPayload {
 input CreateTimeSlotInput {
   start: String!
   end: String!
+  enabled: Boolean!
   clientMutationId: String!
 }
 
@@ -171,7 +172,7 @@ input DeleteAddressInput {
 
 type DeleteAddressPayload {
   deletedId: String!
-  viewer: User
+  user: User
   clientMutationId: String!
 }
 
@@ -269,6 +270,7 @@ type TimeSlot implements Node {
   id: ID!
   start: String!
   end: String!
+  enabled: Boolean!
 }
 
 type Transaction implements Node {
@@ -349,6 +351,7 @@ input UpdateTimeSlotInput {
   id: String!
   start: String!
   end: String!
+  enabled: Boolean!
   clientMutationId: String!
 }
 

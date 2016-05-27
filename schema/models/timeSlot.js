@@ -13,5 +13,9 @@ export const timeSlotFields = {
 	end: {
 		type: new GraphQLNonNull(GraphQLString),
 		description: 'end time'
+	},
+	enabled: {
+		type: new GraphQLNonNull(GraphQLBoolean),
+		description: 'enabled'
 	}
 };
