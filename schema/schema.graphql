@@ -21,6 +21,23 @@ type AddressEdge {
   cursor: String!
 }
 
+type Admin implements Node {
+  id: ID!
+  email: String!
+  name: String!
+  contact: String
+}
+
+type AdminConnection {
+  pageInfo: PageInfo!
+  edges: [AdminEdge]
+}
+
+type AdminEdge {
+  node: Admin
+  cursor: String!
+}
+
 type Cloth implements Node {
   id: ID!
   categoryId: String!
@@ -33,14 +50,14 @@ type Cloth implements Node {
   dryCleanPriceDiscount: Float!
   ironPriceDiscount: Float!
   special: Boolean
-  imageUrl: String
+  imageUrl: String!
 }
 
 type ClothCategory implements Node {
   id: ID!
   nameCn: String!
   nameEn: String!
-  count: Int!
+  count: Int
 }
 
 type ClothCategoryConnection {
@@ -77,6 +94,20 @@ type CreateAddressPayload {
   clientMutationId: String!
 }
 
+input CreateAdminInput {
+  email: String!
+  password: String!
+  name: String!
+  contact: String
+  clientMutationId: String!
+}
+
+type CreateAdminPayload {
+  adminEdge: AdminEdge
+  viewer: Viewer
+  clientMutationId: String!
+}
+
 input CreateCategoryInput {
   nameCn: String!
   nameEn: String!
@@ -109,6 +140,21 @@ type CreateClothPayload {
   clientMutationId: String!
 }
 
+input CreateFactoryInput {
+  name: String!
+  address: String!
+  postalCode: String!
+  contact: String!
+  contactName: String!
+  clientMutationId: String!
+}
+
+type CreateFactoryPayload {
+  factoryEdge: FactoryEdge
+  viewer: Viewer
+  clientMutationId: String!
+}
+
 input CreateOrderInput {
   userId: String!
   express: Boolean
@@ -124,24 +170,23 @@ type CreateOrderPayload {
 }
 
 input CreateTimeSlotInput {
-  start: String!
-  end: String!
+  start: Int!
+  end: Int!
   enabled: Boolean!
   clientMutationId: String!
 }
 
 type CreateTimeSlotPayload {
-  timeSlots: [TimeSlot]
+  timeSlotEdge: TimeSlotEdge
   viewer: Viewer
   clientMutationId: String!
 }
 
 input CreateUserInput {
-  role: String!
   email: String!
+  password: String!
   name: String
   contact: String
-  password: String!
   clientMutationId: String!
 }
 
@@ -162,6 +207,20 @@ input CreateVoucherInput {
 type CreateVoucherPayload {
   voucherEdge: VoucherEdge
   user: User
+  clientMutationId: String!
+}
+
+input CreateWorkerInput {
+  email: String!
+  password: String!
+  name: String!
+  contact: String!
+  clientMutationId: String!
+}
+
+type CreateWorkerPayload {
+  workerEdge: WorkerEdge
+  viewer: Viewer
   clientMutationId: String!
 }
 
@@ -198,15 +257,45 @@ type DeleteClothPayload {
   clientMutationId: String!
 }
 
+input DeleteFactoryInput {
+  id: String!
+  clientMutationId: String!
+}
+
+type DeleteFactoryPayload {
+  deletedId: String!
+  viewer: Viewer
+  clientMutationId: String!
+}
+
 input DeleteTimeSlotInput {
   id: String!
   clientMutationId: String!
 }
 
 type DeleteTimeSlotPayload {
-  timeSlots: [TimeSlot]
+  deletedId: String!
   viewer: Viewer
   clientMutationId: String!
+}
+
+type Factory implements Node {
+  id: ID!
+  name: String!
+  address: String!
+  postalCode: String!
+  contact: String!
+  contactName: String!
+}
+
+type FactoryConnection {
+  pageInfo: PageInfo!
+  edges: [FactoryEdge]
+}
+
+type FactoryEdge {
+  node: Factory
+  cursor: String!
 }
 
 type Mutation {
@@ -218,6 +307,10 @@ type Mutation {
   deleteCategory(input: DeleteCategoryInput!): DeleteCategoryPayload
   createUser(input: CreateUserInput!): CreateUserPayload
   updateUser(input: UpdateUserInput!): UpdateUserPayload
+  createWorker(input: CreateWorkerInput!): CreateWorkerPayload
+  updateWorker(input: UpdateWorkerInput!): UpdateWorkerPayload
+  createAdmin(input: CreateAdminInput!): CreateAdminPayload
+  updateAdmin(input: UpdateAdminInput!): UpdateAdminPayload
   createAddress(input: CreateAddressInput!): CreateAddressPayload
   updateAddress(input: UpdateAddressInput!): UpdateAddressPayload
   deleteAddress(input: DeleteAddressInput!): DeleteAddressPayload
@@ -227,6 +320,9 @@ type Mutation {
   createTimeSlot(input: CreateTimeSlotInput!): CreateTimeSlotPayload
   updateTimeSlot(input: UpdateTimeSlotInput!): UpdateTimeSlotPayload
   deleteTimeSlot(input: DeleteTimeSlotInput!): DeleteTimeSlotPayload
+  createFactory(input: CreateFactoryInput!): CreateFactoryPayload
+  updateFactory(input: UpdateFactoryInput!): UpdateFactoryPayload
+  deleteFactory(input: DeleteFactoryInput!): DeleteFactoryPayload
 }
 
 interface Node {
@@ -268,9 +364,19 @@ type Query {
 
 type TimeSlot implements Node {
   id: ID!
-  start: String!
-  end: String!
+  start: Int!
+  end: Int!
   enabled: Boolean!
+}
+
+type TimeSlotConnection {
+  pageInfo: PageInfo!
+  edges: [TimeSlotEdge]
+}
+
+type TimeSlotEdge {
+  node: TimeSlot
+  cursor: String!
 }
 
 type Transaction implements Node {
@@ -302,6 +408,19 @@ input UpdateAddressInput {
 
 type UpdateAddressPayload {
   address: Address
+  clientMutationId: String!
+}
+
+input UpdateAdminInput {
+  id: String!
+  password: String
+  name: String
+  contact: String
+  clientMutationId: String!
+}
+
+type UpdateAdminPayload {
+  admin: Admin
   clientMutationId: String!
 }
 
@@ -337,6 +456,21 @@ type UpdateClothPayload {
   clientMutationId: String!
 }
 
+input UpdateFactoryInput {
+  id: String!
+  name: String
+  address: String
+  postalCode: String
+  contact: String
+  contactName: String
+  clientMutationId: String!
+}
+
+type UpdateFactoryPayload {
+  factory: Factory
+  clientMutationId: String!
+}
+
 input UpdateOrderInput {
   id: String!
   clientMutationId: String!
@@ -349,9 +483,9 @@ type UpdateOrderPayload {
 
 input UpdateTimeSlotInput {
   id: String!
-  start: String!
-  end: String!
-  enabled: Boolean!
+  start: Int
+  end: Int
+  enabled: Boolean
   clientMutationId: String!
 }
 
@@ -362,9 +496,9 @@ type UpdateTimeSlotPayload {
 
 input UpdateUserInput {
   id: String!
+  password: String
   name: String
   contact: String
-  password: String
   clientMutationId: String!
 }
 
@@ -373,9 +507,21 @@ type UpdateUserPayload {
   clientMutationId: String!
 }
 
+input UpdateWorkerInput {
+  id: String!
+  password: String
+  name: String
+  contact: String
+  clientMutationId: String!
+}
+
+type UpdateWorkerPayload {
+  worker: Worker
+  clientMutationId: String!
+}
+
 type User implements Node {
   id: ID!
-  role: String!
   email: String!
   name: String
   contact: String
@@ -387,6 +533,7 @@ type User implements Node {
   order(id: String!): Order
   orders(search: String, after: String, first: Int, before: String, last: Int): OrderConnection
   transactions(after: String, first: Int, before: String, last: Int): TransactionConnection
+  wallet: Wallet
 }
 
 type UserConnection {
@@ -402,12 +549,18 @@ type UserEdge {
 type Viewer implements Node {
   id: ID!
   user(id: String!): User
-  users(role: String!, search: String, after: String, first: Int, before: String, last: Int): UserConnection
+  worker(id: String!): Worker
+  admin(id: String!): Admin
+  users(search: String, after: String, first: Int, before: String, last: Int): UserConnection
+  workers(search: String, after: String, first: Int, before: String, last: Int): WorkerConnection
+  admins(search: String, after: String, first: Int, before: String, last: Int): AdminConnection
   orders(userId: String, search: String, after: String, first: Int, before: String, last: Int): OrderConnection
   cloth(id: String!): Cloth
   clothes(after: String, first: Int, before: String, last: Int): ClothConnection
   categories(after: String, first: Int, before: String, last: Int): ClothCategoryConnection
-  pickupSlots: [TimeSlot]
+  timeSlots(after: String, first: Int, before: String, last: Int): TimeSlotConnection
+  factories(after: String, first: Int, before: String, last: Int): FactoryConnection
+  orderStatus: [String]
 }
 
 type Voucher implements Node {
@@ -428,5 +581,29 @@ type VoucherConnection {
 
 type VoucherEdge {
   node: Voucher
+  cursor: String!
+}
+
+type Wallet implements Node {
+  id: ID!
+  credit: Int!
+  freeze: Boolean!
+}
+
+type Worker implements Node {
+  id: ID!
+  email: String!
+  name: String!
+  contact: String!
+  avatarUrl: String
+}
+
+type WorkerConnection {
+  pageInfo: PageInfo!
+  edges: [WorkerEdge]
+}
+
+type WorkerEdge {
+  node: Worker
   cursor: String!
 }

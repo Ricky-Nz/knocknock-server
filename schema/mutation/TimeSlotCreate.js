@@ -1,33 +1,41 @@
 import {
-	GraphQLList
-} from 'graphql';
-
-import {
 	mutationWithClientMutationId,
+	offsetToCursor,
+	fromGlobalId,
 } from 'graphql-relay';
 
 import {
-	timeSlotFields
+	getTimeSlotInputs
 } from '../models';
 
 import {
+	DBViewer,
 	DBTimeSlot
 } from '../../database';
 
 import {
 	GraphQLViewer,
+	GraphQLTimeSlotEdge,
 	GraphQLTimeSlot
 } from '../query';
 
 export default mutationWithClientMutationId({
 	name: 'CreateTimeSlot',
 	inputFields: {
-		...timeSlotFields
+		...getTimeSlotInputs()
 	},
 	outputFields: {
-		timeSlots: {
-			type: new GraphQLList(GraphQLTimeSlot),
-			resolve: () => DBTimeSlot.findAll()
+		timeSlotEdge: {
+			type: GraphQLTimeSlotEdge,
+			resolve: (slot) =>
+				DBTimeSlot.findAll()
+					.then(slots => {
+						const index = slots.findIndex(item => item.id === slot.id);
+						return {
+							cursor: offsetToCursor(index),
+							node: slot
+						};
+					})
 		},
 		viewer: {
 			type: GraphQLViewer,

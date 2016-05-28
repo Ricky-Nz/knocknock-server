@@ -11,7 +11,7 @@ import {
 } from 'graphql-relay';
 
 import {
-	getClothInputFields,
+	getClothInputs,
 	createCloth,
 	findClothes
 } from '../models';
@@ -27,7 +27,7 @@ import { processFileUpload } from '../service';
 export default mutationWithClientMutationId({
 	name: 'CreateCloth',
 	inputFields: {
-		...getClothInputFields()
+		...getClothInputs()
 	},
 	outputFields: {
 		clothEdge: {
@@ -48,6 +48,6 @@ export default mutationWithClientMutationId({
 		}
 	},
 	mutateAndGetPayload: (args, context, {rootValue}) =>
-		processFileUpload(args, rootValue.request.file)
+		processFileUpload('knocknock-laundry', args, rootValue.request.file)
 			.then(args => createCloth(args))
 });

@@ -1,39 +1,35 @@
 import { GraphQLNonNull, GraphQLString } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'graphql-relay';
-import { DBUser } from '../../database';
-import { GraphQLUser } from '../query';
-import { getUserInputs } from '../models';
+import { DBWorker } from '../../database';
+import { GraphQLWorker } from '../query';
+import { getWorkerInputs } from '../models';
 import { processFileUpload } from '../service';
 
 export default mutationWithClientMutationId({
-	name: 'UpdateUser',
+	name: 'UpdateWorker',
 	inputFields: {
 		id: {
 			type: new GraphQLNonNull(GraphQLString),
-			description: 'user id'
+			description: 'worker id'
 		},
-		...getUserInputs(true)
+		...getWorkerInputs(true)
 	},
 	outputFields: {
-		user: {
-			type: GraphQLUser,
-			resolve: ({localId}) => DBUser.findById(localId)
+		worker: {
+			type: GraphQLWorker,
+			resolve: ({localId}) => DBWorker.findById(localId)
 		}
 	},
 	mutateAndGetPayload: ({id, ...args}, context, {rootValue}) =>
 		processFileUpload('knocknock-avatar', args, rootValue.request.file)
-			.then(args => {
-				if (args.imageId && args.imageBucket && args.imageUrl) {
-					args.avatarUrl = args.imageUrl;
-					args.avatarId = args.imageId;
-					args.avatarBucket = args.imageBucket;
-					delete args.imageUrl;
-					delete args.imageId;
-					delete args.imageBucket;
+			.then(upload => {
+				if (upload) {
+					args.avatarUrl = upload.imageUrl;
+					args.avatarId = upload.imageId;
+					args.avatarBucket = upload.imageBucket;
 				}
 
 				const {id: localId} = fromGlobalId(id);
-
 				return DBUser.update(args, {where:{id: localId}})
 					.then(() => ({localId}));
 			})

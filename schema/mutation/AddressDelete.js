@@ -40,7 +40,6 @@ export default mutationWithClientMutationId({
 		}
 	},
 	mutateAndGetPayload: ({id}) => {
-		console.log(1111111);
 		const {id: localId} = fromGlobalId(id);
 		return DBAddress.findById(localId)
 			.then((address) => address.destroy().then(() => ({userId: address.userId, id})));

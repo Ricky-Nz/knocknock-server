@@ -5,14 +5,7 @@ import {
   GraphQLFloat
 } from 'graphql';
 
-import {
-  globalIdField
-} from 'graphql-relay';
-
-import { DBCloth } from '../../database';
-import { searchPaginationInput, resolvePagination } from './pagination';
-
-export function getClothInputFields(update) {
+export function getClothInputs(update) {
 	return {
 		categoryId: {
 			type: update ? GraphQLString : new GraphQLNonNull(GraphQLString),
@@ -58,24 +51,10 @@ export function getClothInputFields(update) {
 }
 
 export const clothFields = {
-	id: globalIdField('Cloth'),
-	...getClothInputFields(),
+	...getClothInputs(),
 	imageUrl: {
-		type: GraphQLString,
+		type: new GraphQLNonNull(GraphQLString),
 		description: 'cloth image url'
 	}
-}
-
-export function findClothes() {
-	return DBCloth.findAll();
-}
-
-export function createCloth(args) {
-	return DBCloth.create(args);
-}
-
-export function findCLothById(id) {
-	return DBCloth.findById(id);
-}
-
+};
 

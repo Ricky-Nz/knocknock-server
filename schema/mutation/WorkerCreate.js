@@ -1,20 +1,20 @@
 import { mutationWithClientMutationId, offsetToCursor } from 'graphql-relay';
-import { DBUser } from '../../database';
-import { GraphQLUserEdge, GraphQLViewer } from '../query';
-import { getUserInputs } from '../models';
+import { DBWorker } from '../../database';
+import { GraphQLWorkerEdge, GraphQLViewer } from '../query';
+import { getWorkerInputs } from '../models';
 import { processFileUpload } from '../service';
 
 export default mutationWithClientMutationId({
-	name: 'CreateUser',
+	name: 'CreateWorker',
 	inputFields: {
-		...getUserInputs()
+		...getWorkerInputs()
 	},
 	outputFields: {
-		userEdge: {
-			type: GraphQLUserEdge,
-			resolve: (newUser) => ({
+		workerEdge: {
+			type: GraphQLWorkerEdge,
+			resolve: (worker) => ({
 				cursor: offsetToCursor(0),
-				node: newUser
+				node: worker
 			})
 		},
 		viewer: {
@@ -31,6 +31,6 @@ export default mutationWithClientMutationId({
 					args.avatarBucket = args.imageBucket;
 				}
 
-				return DBUser.create(args);
+				return DBWorker.create(args);
 			})
 });

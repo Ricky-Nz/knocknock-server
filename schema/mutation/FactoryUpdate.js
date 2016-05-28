@@ -9,35 +9,35 @@ import {
 } from 'graphql-relay';
 
 import {
-	getTimeSlotInputs
+	getFactoryInputs
 } from '../models';
 
 import {
-	GraphQLTimeSlot
+	GraphQLFactory
 } from '../query';
 
 import {
-	DBTimeSlot
+	DBFactory
 } from '../../database';
 
 export default mutationWithClientMutationId({
-	name: 'UpdateTimeSlot',
+	name: 'UpdateFactory',
 	inputFields: {
 		id: {
 			type: new GraphQLNonNull(GraphQLString),
 			description: 'update item id'
 		},
-		...getTimeSlotInputs(true)
+		...getFactoryInputs(true)
 	},
 	outputFields: {
-		timeSlot: {
-			type: GraphQLTimeSlot,
-			resolve: ({localId}) => DBTimeSlot.findById(localId)
+		factory: {
+			type: GraphQLFactory,
+			resolve: ({localId}) => DBFactory.findById(localId)
 		}
 	},
 	mutateAndGetPayload: ({id, ...args}) => {
 		const {id: localId} = fromGlobalId(id);
-		return DBTimeSlot.update(args, {where: {id: localId}})
+		return DBFactory.update(args, {where: {id: localId}})
 			.then(() => ({localId}));
 	}
 });

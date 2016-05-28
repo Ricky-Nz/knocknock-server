@@ -7,6 +7,10 @@ import updateCategory from './CategoryUpdate';
 import deleteCategory from './CategoryDelete';
 import createUser from './UserCreate';
 import updateUser from './UserUpdate';
+import createWorker from './WorkerCreate';
+import updateWorker from './WorkerUpdate';
+import createAdmin from './AdminCreate';
+import updateAdmin from './AdminUpdate';
 import createAddress from './AddressCreate';
 import updateAddress from './AddressUpdate';
 import deleteAddress from './AddressDelete';
@@ -16,6 +20,9 @@ import updateOrder from './OrderUpdate';
 import createTimeSlot from './TimeSlotCreate';
 import updateTimeSlot from './TimeSlotUpdate';
 import deleteTimeSlot from './TimeSlotDelete';
+import createFactory from './FactoryCreate';
+import updateFactory from './FactoryUpdate';
+import deleteFactory from './FactoryDelete';
 
 export default new GraphQLObjectType({
   name: 'Mutation',
@@ -28,6 +35,10 @@ export default new GraphQLObjectType({
   	deleteCategory,
   	createUser,
     updateUser,
+    createWorker,
+    updateWorker,
+    createAdmin,
+    updateAdmin,
     createAddress,
     updateAddress,
     deleteAddress,
@@ -36,6 +47,9 @@ export default new GraphQLObjectType({
     updateOrder,
     createTimeSlot,
     updateTimeSlot,
-    deleteTimeSlot
+    deleteTimeSlot,
+    createFactory,
+    updateFactory,
+    deleteFactory
   }
 });

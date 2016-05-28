@@ -4,8 +4,6 @@ import {
   GraphQLInt
 } from 'graphql';
 
-import { DBClothCategory } from '../../database';
-
 export function getClothCategoryInpts(update) {
 	return {
 		nameCn: {
@@ -22,27 +20,7 @@ export function getClothCategoryInpts(update) {
 export const clothCategoryFields = {
 	...getClothCategoryInpts(),
 	count: {
-		type: new GraphQLNonNull(GraphQLInt),
+		type: GraphQLInt,
 		description: 'items count belong to this category'
 	}
 };
-
-export function findCategoryById(id) {
-	return DBClothCategory.findById(id);
-}
-
-export function createCategory(args) {
-	return DBClothCategory.create(args);
-}
-
-export function updateCategory(id, args) {
-	return DBClothCategory.update(args, {where: {id}});
-}
-
-export function getCategories() {
-	return DBClothCategory.findAll();
-}
-
-export function deleteCategory(id) {
-	return DBClothCategory.destroy({where: {id}});
-}

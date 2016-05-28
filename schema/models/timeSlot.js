@@ -1,21 +1,26 @@
 import {
   GraphQLBoolean,
   GraphQLNonNull,
-  GraphQLString,
-  GraphQLFloat
+  GraphQLInt
 } from 'graphql';
 
+export function getTimeSlotInputs(update) {
+	return {
+		start: {
+			type: update ? GraphQLInt : new GraphQLNonNull(GraphQLInt),
+			description: 'start time'
+		},
+		end: {
+			type: update ? GraphQLInt : new GraphQLNonNull(GraphQLInt),
+			description: 'end time'
+		},
+		enabled: {
+			type: update ? GraphQLBoolean : new GraphQLNonNull(GraphQLBoolean),
+			description: 'enabled'
+		}
+	};
+}
+
 export const timeSlotFields = {
-	start: {
-		type: new GraphQLNonNull(GraphQLString),
-		description: 'start time'
-	},
-	end: {
-		type: new GraphQLNonNull(GraphQLString),
-		description: 'end time'
-	},
-	enabled: {
-		type: new GraphQLNonNull(GraphQLBoolean),
-		description: 'enabled'
-	}
+	...getTimeSlotInputs()
 };

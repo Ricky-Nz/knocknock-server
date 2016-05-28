@@ -10,7 +10,7 @@ import {
 
 import {
 	findCLothById,
-	getClothInputFields
+	getClothInputs
 } from '../models';
 
 import { GraphQLCloth } from '../query';
@@ -24,7 +24,7 @@ export default mutationWithClientMutationId({
 			type: new GraphQLNonNull(GraphQLString),
 			description: 'cloth id'
 		},
-		...getClothInputFields(true)
+		...getClothInputs(true)
 	},
 	outputFields: {
 		cloth: {
@@ -35,7 +35,7 @@ export default mutationWithClientMutationId({
 	mutateAndGetPayload: ({id, ...args}, context, {rootValue}) => {
 		const {id: localId} = fromGlobalId(id);
 
-		return processFileUpload(args, rootValue.request.file)
+		return processFileUpload('knocknock-laundry', args, rootValue.request.file)
 			.then(args =>
 					findCLothById(localId)
 						.then(cloth => ({cloth, args}))

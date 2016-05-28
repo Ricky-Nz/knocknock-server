@@ -11,21 +11,19 @@ import {
 
 import {
 	DBViewer,
-	DBTimeSlot
+	DBFactory
 } from '../../database';
 
 import {
-	GraphQLViewer,
-	GraphQLTimeSlotEdge,
-	GraphQLTimeSlot
+	GraphQLViewer
 } from '../query';
 
 export default mutationWithClientMutationId({
-	name: 'DeleteTimeSlot',
+	name: 'DeleteFactory',
 	inputFields: {
 		id: {
 			type: new GraphQLNonNull(GraphQLString),
-			description: 'time slot id'
+			description: 'factory id'
 		}
 	},
 	outputFields: {
@@ -40,7 +38,7 @@ export default mutationWithClientMutationId({
 	},
 	mutateAndGetPayload: ({id, ...args}) => {
 		const {id: localId} = fromGlobalId(id);
-		return DBTimeSlot.destroy({where:{id:localId}})
+		return DBFactory.destroy({where:{id:localId}})
 			.then(() => ({id}));
 	}
 });

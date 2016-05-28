@@ -2,7 +2,6 @@ import {
 	GraphQLNonNull,
 	GraphQLString,
 	GraphQLBoolean,
-	GraphQLEnumType,
 	GraphQLFloat
 } from 'graphql';
 
@@ -29,20 +28,19 @@ export function getOrderInputs(update) {
 	}
 }
 
-export function getOrderFields() {
-	return {
-		...getOrderInputs(),
-		totalPrice: {
-			type: GraphQLFloat,
-			description: 'order total price'
-		},
-		pickupDate: {
-			type: GraphQLString,
-			description: 'pickup date'
-		},
-		pickupAddress: {
-			type: GraphQLString,
-			description: 'pickup address'
-		}
+export const orderFields = {
+	...getOrderInputs(),
+	totalPrice: {
+		type: GraphQLFloat,
+		description: 'order total price'
+	},
+	pickupDate: {
+		type: GraphQLString,
+		description: 'pickup date'
+	},
+	pickupAddress: {
+		type: GraphQLString,
+		description: 'pickup address'
 	}
-}
+};
+
