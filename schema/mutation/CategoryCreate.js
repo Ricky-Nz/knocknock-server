@@ -8,9 +8,7 @@ import {
 } from 'graphql-relay';
 
 import {
-	getClothCategoryInpts,
-	createCategory,
-	getCategories
+	getClothCategoryInpts
 } from '../models';
 
 import {
@@ -18,6 +16,10 @@ import {
 	GraphQLClothCategoryEdge,
 	GraphQLViewer
 } from '../query';
+
+import {
+	DBClothCategory
+} from '../../database';
 
 export default mutationWithClientMutationId({
 	name: 'CreateCategory',
@@ -27,20 +29,15 @@ export default mutationWithClientMutationId({
 	outputFields: {
 		categoryEdge: {
 			type: GraphQLClothCategoryEdge,
-			resolve: (newCategory) =>
-				getCategories()
-					.then(categories => {
-						const index = categories.findIndex(item => item.id === newCategory.id);
-						return {
-							cursor: offsetToCursor(index),
-							node: newCategory
-						};
-					})
+			resolve: (newCategory) => ({
+				cursor: offsetToCursor(0),
+				node: newCategory
+			})
 		},
 		viewer: {
 			type: GraphQLViewer,
 			resolve: () => ({})
 		}
 	},
-	mutateAndGetPayload: (args) => createCategory(args)
+	mutateAndGetPayload: (args) => DBClothCategory.create(args)
 });

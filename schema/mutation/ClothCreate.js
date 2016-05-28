@@ -1,19 +1,10 @@
 import {
-	GraphQLNonNull,
-	GraphQLInt,
-	GraphQLList
-} from 'graphql';
-
-import {
 	mutationWithClientMutationId,
-	fromGlobalId,
 	offsetToCursor
 } from 'graphql-relay';
 
 import {
-	getClothInputs,
-	createCloth,
-	findClothes
+	getClothInputs
 } from '../models';
 
 import {
@@ -21,6 +12,10 @@ import {
 	GraphQLClothEdge,
 	GraphQLViewer
 } from '../query';
+
+import {
+	DBCloth
+} from '../../database';
 
 import { processFileUpload } from '../service';
 
@@ -32,15 +27,10 @@ export default mutationWithClientMutationId({
 	outputFields: {
 		clothEdge: {
 			type: GraphQLClothEdge,
-			resolve: (newCloth) =>
-				findClothes()
-					.then(clothes => {
-						const index = clothes.findIndex(item => item.id === newCloth.id);
-						return {
-							cursor: offsetToCursor(index),
-							node: newCloth
-						};
-					})
+			resolve: (newCloth) => ({
+				cursor: offsetToCursor(0),
+				node: newCloth
+			})
 		},
 		viewer: {
 			type: GraphQLViewer,
@@ -48,6 +38,14 @@ export default mutationWithClientMutationId({
 		}
 	},
 	mutateAndGetPayload: (args, context, {rootValue}) =>
-		processFileUpload('knocknock-laundry', args, rootValue.request.file)
-			.then(args => createCloth(args))
+		processFileUpload('knocknock-laundry', rootValue.request.file)
+			.then(upload => {
+				if (upload) {
+					args.imageUrl = upload.imageUrl;
+					args.imageId = upload.imageId;
+					args.imageBucket = upload.imageBucket;
+				}
+
+				return DBCloth.create(args);
+			})
 });

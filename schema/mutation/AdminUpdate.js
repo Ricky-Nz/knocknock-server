@@ -21,7 +21,7 @@ export default mutationWithClientMutationId({
 		}
 	},
 	mutateAndGetPayload: ({id, ...args}, context, {rootValue}) =>
-		processFileUpload('knocknock-avatar', args, rootValue.request.file)
+		processFileUpload('knocknock-avatar', rootValue.request.file)
 			.then(upload => {
 				if (upload) {
 					args.avatarUrl = upload.imageUrl;

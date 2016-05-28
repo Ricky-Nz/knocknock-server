@@ -160,6 +160,11 @@ input CreateOrderInput {
   express: Boolean
   note: String
   status: String
+  pickupDate: String!
+  pickupTime: String!
+  pickupAddress: String!
+  pickupWorkerId: String
+  orderItems: [OrderItemInput]
   clientMutationId: String!
 }
 
@@ -335,9 +340,12 @@ type Order implements Node {
   express: Boolean
   note: String
   status: String
-  totalPrice: Float
-  pickupDate: String
-  pickupAddress: String
+  pickupDate: String!
+  pickupTime: String!
+  pickupAddress: String!
+  pickupWorkerId: String
+  totalPrice: Int
+  orderItems(after: String, first: Int, before: String, last: Int): OrderItemConnection
 }
 
 type OrderConnection {
@@ -348,6 +356,39 @@ type OrderConnection {
 type OrderEdge {
   node: Order
   cursor: String!
+}
+
+type OrderItem implements Node {
+  id: ID!
+  orderId: String!
+  productId: String!
+  washType: String
+  itemPrice: Int!
+  itemNameCn: String!
+  itemNameEn: String!
+  itemImageUrl: String!
+  quantity: String!
+}
+
+type OrderItemConnection {
+  pageInfo: PageInfo!
+  edges: [OrderItemEdge]
+}
+
+type OrderItemEdge {
+  node: OrderItem
+  cursor: String!
+}
+
+input OrderItemInput {
+  userId: String!
+  express: Boolean
+  note: String
+  status: String
+  pickupDate: String!
+  pickupTime: String!
+  pickupAddress: String!
+  pickupWorkerId: String
 }
 
 type PageInfo {
@@ -473,6 +514,13 @@ type UpdateFactoryPayload {
 
 input UpdateOrderInput {
   id: String!
+  express: Boolean
+  note: String
+  status: String
+  pickupDate: String
+  pickupTime: String
+  pickupAddress: String
+  pickupWorkerId: String
   clientMutationId: String!
 }
 

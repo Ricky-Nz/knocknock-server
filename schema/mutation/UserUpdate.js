@@ -21,19 +21,15 @@ export default mutationWithClientMutationId({
 		}
 	},
 	mutateAndGetPayload: ({id, ...args}, context, {rootValue}) =>
-		processFileUpload('knocknock-avatar', args, rootValue.request.file)
-			.then(args => {
-				if (args.imageId && args.imageBucket && args.imageUrl) {
-					args.avatarUrl = args.imageUrl;
-					args.avatarId = args.imageId;
-					args.avatarBucket = args.imageBucket;
-					delete args.imageUrl;
-					delete args.imageId;
-					delete args.imageBucket;
+		processFileUpload('knocknock-avatar', rootValue.request.file)
+			.then(upload => {
+				if (upload) {
+					args.avatarUrl = upload.imageUrl;
+					args.avatarId = upload.imageId;
+					args.avatarBucket = upload.imageBucket;
 				}
 
 				const {id: localId} = fromGlobalId(id);
-
 				return DBUser.update(args, {where:{id: localId}})
 					.then(() => ({localId}));
 			})

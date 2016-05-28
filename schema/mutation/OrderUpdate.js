@@ -1,6 +1,7 @@
 import {
 	GraphQLString,
-	GraphQLNonNull
+	GraphQLNonNull,
+	GraphQLList
 } from 'graphql';
 
 import {
@@ -13,7 +14,8 @@ import {
 } from '../models';
 
 import {
-	GraphQLOrder
+	GraphQLOrder,
+	GraphQLOrderItem
 } from '../query';
 
 import {

@@ -10,14 +10,13 @@ import {
 } from 'graphql-relay';
 
 import {
-	deleteCategory,
-	getCategories
-} from '../models';
-
-import {
 	GraphQLClothCategory,
 	GraphQLViewer
 } from '../query';
+
+import {
+	DBClothCategory
+} from '../../database';
 
 export default mutationWithClientMutationId({
 	name: 'DeleteCategory',
@@ -39,7 +38,7 @@ export default mutationWithClientMutationId({
 	},
 	mutateAndGetPayload: ({id}) => {
 		const {id: localId} = fromGlobalId(id);
-		return deleteCategory(localId)
+		return DBClothCategory.destroy({where:{id:localId}})
 			.then(() => ({id}));
 	}
 });

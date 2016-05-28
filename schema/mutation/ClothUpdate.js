@@ -9,12 +9,12 @@ import {
 } from 'graphql-relay';
 
 import {
-	findCLothById,
 	getClothInputs
 } from '../models';
 
 import { GraphQLCloth } from '../query';
 import { processFileUpload } from '../service';
+import { DBCloth } from '../../database';
 import { deleteFile } from '../../datastorage';
 
 export default mutationWithClientMutationId({
@@ -35,11 +35,17 @@ export default mutationWithClientMutationId({
 	mutateAndGetPayload: ({id, ...args}, context, {rootValue}) => {
 		const {id: localId} = fromGlobalId(id);
 
-		return processFileUpload('knocknock-laundry', args, rootValue.request.file)
-			.then(args =>
-					findCLothById(localId)
+		return processFileUpload('knocknock-laundry', rootValue.request.file)
+			.then(upload => {
+				if (upload) {
+					args.imageUrl = upload.imageUrl;
+					args.imageId = upload.imageId;
+					args.imageBucket = upload.imageBucket;
+				}
+
+				return DBCloth.findById(localId)
 						.then(cloth => ({cloth, args}))
-			)
+			})
 			.then(({cloth, args}) => {
 				if (cloth.imageId && cloth.imageBucket
 					&& args.imageId && args.imageId !== cloth.imageId) {

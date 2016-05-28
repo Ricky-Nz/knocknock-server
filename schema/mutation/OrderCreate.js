@@ -1,11 +1,13 @@
 import {
 	GraphQLNonNull,
-	GraphQLInt
+	GraphQLInt,
+	GraphQLList
 } from 'graphql';
 
 import {
 	mutationWithClientMutationId,
 	fromGlobalId,
+	toGlobalId,
 	offsetToCursor
 } from 'graphql-relay';
 
@@ -15,16 +17,21 @@ import {
 
 import {
 	GraphQLOrder,
+	GraphQLOrderItemInput,
 	GraphQLOrderEdge,
 	GraphQLUser
 } from '../query';
 
-import { DBOrder, DBUser } from '../../database';
+import { DBOrder, DBUser, DBOrderItem } from '../../database';
 
 export default mutationWithClientMutationId({
 	name: 'CreateOrder',
 	inputFields: {
-		...getOrderInputs()
+		...getOrderInputs(),
+		orderItems: {
+			type: new GraphQLList(GraphQLOrderItemInput),
+			description: 'order items'
+		}
 	},
 	outputFields: {
 		orderEdge: {
@@ -42,5 +49,17 @@ export default mutationWithClientMutationId({
 			}
 		}
 	},
-	mutateAndGetPayload: (args) => DBOrder.create(args)
+	mutateAndGetPayload: ({orderItems, ...args}) =>
+		DBOrder.create(args)
+			.then(order => {
+				if (orderItems&&orderItems.length > 0) {
+					const orderId = toGlobalId('Order', order.id);
+					const bulkItems = orderItems.map(item =>
+						({...item, orderId}));
+					return DBOrderItem.bulkCreate(bulkItems)
+						.then(() => order)
+				} else {
+					return order;
+				}
+			})
 });

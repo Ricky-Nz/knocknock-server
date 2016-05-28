@@ -10,13 +10,12 @@ import {
 } from 'graphql-relay';
 
 import {
-	findCLothById,
-	findClothes
-} from '../models';
-
-import {
 	GraphQLViewer
 } from '../query';
+
+import {
+	DBCloth
+} from '../../database';
 
 import { deleteFile } from '../../datastorage';
 
@@ -41,7 +40,7 @@ export default mutationWithClientMutationId({
 	mutateAndGetPayload: ({id}) => {
 		const {id: localId} = fromGlobalId(id);
 
-		return findCLothById(localId)
+		return DBCloth.findById(localId)
 			.then(cloth => {
 				if (cloth.imageId && cloth.imageBucket) {
 					return deleteFile(cloth.imageBucket, cloth.imageId)

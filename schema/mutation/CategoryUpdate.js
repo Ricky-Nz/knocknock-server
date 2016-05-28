@@ -9,14 +9,16 @@ import {
 } from 'graphql-relay';
 
 import {
-	getClothCategoryInpts,
-	updateCategory,
-	findCategoryById
+	getClothCategoryInpts
 } from '../models';
 
 import {
 	GraphQLClothCategory
 } from '../query';
+
+import {
+	DBClothCategory
+} from '../../database';
 
 export default mutationWithClientMutationId({
 	name: 'UpdateCategory',
@@ -30,12 +32,12 @@ export default mutationWithClientMutationId({
 	outputFields: {
 		category: {
 			type: GraphQLClothCategory,
-			resolve: ({localId}) => findCategoryById(localId)
+			resolve: ({localId}) => DBClothCategory.findById(localId)
 		}
 	},
 	mutateAndGetPayload: ({id, ...args}) => {
 		const {id: localId} = fromGlobalId(id);
-		return updateCategory(localId, args)
+		return DBClothCategory.update(args, {where:{id:localId}})
 			.then(() => ({localId}));
 	}
 });

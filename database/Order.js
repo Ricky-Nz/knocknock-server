@@ -27,6 +27,9 @@ export default sequelize.define('order', {
 	pickupDate: {
 		type: DATE
 	},
+	pickupTime: {
+		type: STRING
+	},
 	pickupAddress: {
 		type: STRING
 	},

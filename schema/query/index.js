@@ -3,6 +3,7 @@ import {
   GraphQLString,
   GraphQLNonNull,
   GraphQLObjectType,
+  GraphQLInputObjectType,
   GraphQLSchema,
   GraphQLBoolean
 } from 'graphql';
@@ -26,10 +27,12 @@ import {
   addressFields,
   voucherFields,
   orderFields,
+  orderItemFields,
   transactionFields,
   timeSlotFields,
   factoryFields,
-  walletFields
+  walletFields,
+  getOrderInputs
 } from '../models';
 
 import {
@@ -41,6 +44,7 @@ import {
   DBClothCategory,
   DBVoucher,
   DBOrder,
+  DBOrderItem,
   DBTransaction,
   DBTimeSlot,
   DBFactory,
@@ -73,6 +77,8 @@ const { nodeInterface, nodeField } = nodeDefinitions(
       return DBVoucher.findById(id);
     } else if (type === 'Order') {
       return DBOrder.findById(id);
+    } else if (type === 'OrderItem') {
+      return DBOrderItem.findById(id);
     } else if (type === 'Transaction') {
       return DBTransaction.findById(id);
     } else if (type === 'TimeSlot') {
@@ -104,6 +110,8 @@ const { nodeInterface, nodeField } = nodeDefinitions(
       return GraphQLVoucher;
     } else if (obj instanceof DBOrder) {
       return GraphQLOrder;
+    } else if (obj instanceof DBOrderItem) {
+      return GraphQLOrderItem;
     } else if (obj instanceof DBTransaction) {
       return GraphQLTransaction;
     } else if (obj instanceof DBTimeSlot) {
@@ -214,11 +222,42 @@ export const {
   nodeType: GraphQLVoucher
 });
 
+export const GraphQLOrderItemInput = new GraphQLInputObjectType({
+  name: 'OrderItemInput',
+  fields: {
+    ...getOrderInputs()
+  }
+});
+
+export const GraphQLOrderItem = new GraphQLObjectType({
+  name: 'OrderItem',
+  fields: {
+    id: globalIdField('OrderItem'),
+    ...orderItemFields
+  },
+  interfaces: [nodeInterface]
+});
+
+export const {
+  connectionType: GraphQLOrderItemConnection,
+  edgeType: GraphQLOrderItemEdge
+} = connectionDefinitions({
+  nodeType: GraphQLOrderItem
+});
+
 export const GraphQLOrder = new GraphQLObjectType({
   name: 'Order',
   fields: {
     id: globalIdField('Order'),
-    ...orderFields
+    ...orderFields,
+    orderItems: {
+      type: GraphQLOrderItemConnection,
+      args: {
+        ...connectionArgs
+      },
+      resolve: (order, args) =>
+        modelConnection(DBOrderItem, {where:{orderId: toGlobalId('Order', order.id)}}, args)
+    }
   },
   interfaces: [nodeInterface]
 });

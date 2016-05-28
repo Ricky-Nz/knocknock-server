@@ -7,6 +7,7 @@ import clothCategory from './ClothCategory';
 import address from './Address';
 import voucher from './Voucher';
 import order from './Order';
+import orderItem from './OrderItem';
 import transaction from './Transaction';
 import timeslot from './TimeSlot';
 import factory from './Factory';
@@ -23,6 +24,7 @@ export function connect () {
 		.then(() => clothCategory.sync(options))
 		.then(() => voucher.sync(options))
 		.then(() => order.sync(options))
+		.then(() => orderItem.sync(options))
 		.then(() => transaction.sync(options))
 		.then(() => timeslot.sync(options))
 		.then(() => factory.sync(options))
@@ -38,6 +40,7 @@ export const DBCloth = cloth;
 export const DBClothCategory = clothCategory;
 export const DBVoucher = voucher;
 export const DBOrder = order;
+export const DBOrderItem = orderItem;
 export const DBTransaction = transaction;
 export const DBTimeSlot = timeslot;
 export const DBFactory = factory;
