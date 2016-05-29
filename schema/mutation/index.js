@@ -17,6 +17,7 @@ import deleteAddress from './AddressDelete';
 import createVoucher from './VoucherCreate';
 import createOrder from './OrderCreate';
 import updateOrder from './OrderUpdate';
+import bulkUpdateOrder from './OrderBulkUpdate';
 import createTimeSlot from './TimeSlotCreate';
 import updateTimeSlot from './TimeSlotUpdate';
 import deleteTimeSlot from './TimeSlotDelete';
@@ -50,6 +51,7 @@ export default new GraphQLObjectType({
     deleteTimeSlot,
     createFactory,
     updateFactory,
-    deleteFactory
+    deleteFactory,
+    bulkUpdateOrder
   }
 });

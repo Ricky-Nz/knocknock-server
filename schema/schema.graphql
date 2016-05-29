@@ -38,6 +38,18 @@ type AdminEdge {
   cursor: String!
 }
 
+input BluckUpdateOrderInput {
+  ids: [String]
+  status: String
+  pickupWorkerId: String
+  clientMutationId: String!
+}
+
+type BluckUpdateOrderPayload {
+  result: Boolean
+  clientMutationId: String!
+}
+
 type Cloth implements Node {
   id: ID!
   categoryId: String!
@@ -328,6 +340,7 @@ type Mutation {
   createFactory(input: CreateFactoryInput!): CreateFactoryPayload
   updateFactory(input: UpdateFactoryInput!): UpdateFactoryPayload
   deleteFactory(input: DeleteFactoryInput!): DeleteFactoryPayload
+  bulkUpdateOrder(input: BluckUpdateOrderInput!): BluckUpdateOrderPayload
 }
 
 interface Node {
