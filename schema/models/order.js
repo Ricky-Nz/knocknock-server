@@ -4,13 +4,10 @@ import {
 	GraphQLBoolean,
 	GraphQLInt
 } from 'graphql';
+import moment from 'moment';
 
 export function getOrderItemInputs() {
 	return {
-		orderId: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'order id'
-		},
 		productId: {
 			type: new GraphQLNonNull(GraphQLString),
 			description: 'product id'
@@ -18,22 +15,6 @@ export function getOrderItemInputs() {
 		washType: {
 			type: GraphQLString,
 			description: 'wash type'
-		},
-		itemPrice: {
-			type: new GraphQLNonNull(GraphQLInt),
-			description: 'item price'
-		},
-		itemNameCn: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'item chinese name'
-		},
-		itemNameEn: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'item english name'
-		},
-		itemImageUrl: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'item imageurl'
 		},
 		quantity: {
 			type: new GraphQLNonNull(GraphQLString),
@@ -43,10 +24,30 @@ export function getOrderItemInputs() {
 }
 
 export const orderItemFields = {
-	...getOrderItemInputs()
+	...getOrderItemInputs(),
+	serialNumber: {
+		type: new GraphQLNonNull(GraphQLString),
+		description: 'order readable serial number'
+	},
+	itemPrice: {
+		type: new GraphQLNonNull(GraphQLInt),
+		description: 'item price'
+	},
+	itemNameCn: {
+		type: new GraphQLNonNull(GraphQLString),
+		description: 'item chinese name'
+	},
+	itemNameEn: {
+		type: new GraphQLNonNull(GraphQLString),
+		description: 'item english name'
+	},
+	itemImageUrl: {
+		type: new GraphQLNonNull(GraphQLString),
+		description: 'item imageurl'
+	}
 };
 
-export function getOrderInputs(update) {
+export function getOrderInputs(update, resolve) {
 	return {
 		...!update&&{
 			userId: {
@@ -67,10 +68,19 @@ export function getOrderInputs(update) {
 			description: 'order status'
 		},
 		pickupDate: {
-			type: update ? GraphQLString : new GraphQLNonNull(GraphQLString)
+			type: update ? GraphQLString : new GraphQLNonNull(GraphQLString),
+			...resolve&&{
+				resolve: (order) => moment(order.pickupDate).format('MMM Do YYYY')
+			}
 		},
 		pickupTime: {
-			type: update ? GraphQLString : new GraphQLNonNull(GraphQLString)
+			type: update ? GraphQLString : new GraphQLNonNull(GraphQLString),
+			...resolve&&{
+				resolve: (order) => {
+					const slot = order.pickupTime.split('~');
+					return `${slot[0]}:00 ~ ${slot[1]}:00`;
+				}
+			}
 		},
 		pickupAddress: {
 			type: update ? GraphQLString : new GraphQLNonNull(GraphQLString)
@@ -82,7 +92,11 @@ export function getOrderInputs(update) {
 }
 
 export const orderFields = {
-	...getOrderInputs(),
+	...getOrderInputs(false, true),
+	serialNumber: {
+		type: GraphQLString,
+		description: 'order readable serial number'
+	},
 	totalPrice: {
 		type: GraphQLInt,
 		description: 'total price'

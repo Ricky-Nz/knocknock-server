@@ -22,7 +22,9 @@ import {
 	GraphQLUser
 } from '../query';
 
-import { DBOrder, DBUser, DBOrderItem } from '../../database';
+import { DBOrder, DBUser, DBOrderItem, DBCloth } from '../../database';
+
+import { calculateOrderId, formatDate } from '../service';
 
 export default mutationWithClientMutationId({
 	name: 'CreateOrder',
@@ -50,16 +52,51 @@ export default mutationWithClientMutationId({
 		}
 	},
 	mutateAndGetPayload: ({orderItems, ...args}) =>
-		DBOrder.create(args)
+		calculateOrderId(args.userId)
+			.then(serialNumber => {
+				return DBOrder.create({...args, pickupDate: formatDate(args.pickupDate), serialNumber});
+			})
 			.then(order => {
-				if (orderItems&&orderItems.length > 0) {
-					const orderId = toGlobalId('Order', order.id);
-					const bulkItems = orderItems.map(item =>
-						({...item, orderId}));
-					return DBOrderItem.bulkCreate(bulkItems)
-						.then(() => order)
-				} else {
+				if (!orderItems || orderItems.length === 0) {
 					return order;
+				} else {
+					const clothIds = orderItems.map(item => {
+						const {id} = fromGlobalId(item.productId);
+						return id;
+					});
+
+					return DBCloth.findAll({where:{id:{$in:clothIds}}})
+						.then(clothes => {
+							const bulkItems = orderItems.map(item => {
+								const {id: localClothId} = fromGlobalId(item.productId);
+								const cloth = clothes.find(cloth => cloth.id == localClothId);
+								
+								let itemPrice;
+								switch(item.washType) {
+									case 'Wash&Iron':
+										itemPrice = cloth.washPrice;
+										break;
+									case 'Dry Clean':
+										itemPrice = cloth.dryCleanPrice;
+										break;
+									case 'Iron':
+										itemPrice = cloth.ironPrice;
+										break;
+								}
+
+								return {
+									...item,
+									serialNumber: order.serialNumber,
+									itemPrice,
+									itemNameCn: cloth.nameCn,
+									itemNameEn: cloth.nameEn,
+									itemImageUrl: cloth.imageUrl
+								};
+							});
+
+							return DBOrderItem.bulkCreate(bulkItems);
+						})
+						.then(() => order);
 				}
 			})
 });

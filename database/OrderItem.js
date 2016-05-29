@@ -2,7 +2,7 @@ import sequelize from './connection';
 import { STRING, DATE, ENUM, FLOAT, BOOLEAN, INTEGER } from 'sequelize';
 
 export default sequelize.define('orderitem', {
-	orderId: {
+	serialNumber: {
 		type: STRING,
 		allowNull: false
 	},

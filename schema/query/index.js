@@ -32,7 +32,7 @@ import {
   timeSlotFields,
   factoryFields,
   walletFields,
-  getOrderInputs
+  getOrderItemInputs
 } from '../models';
 
 import {
@@ -51,7 +51,7 @@ import {
   DBWallet
 } from '../../database';
 
-import { modelConnection } from '../service';
+import { modelConnection, calculateTimeRnage } from '../service';
 
 class FeakViewerClass {}
 
@@ -225,7 +225,7 @@ export const {
 export const GraphQLOrderItemInput = new GraphQLInputObjectType({
   name: 'OrderItemInput',
   fields: {
-    ...getOrderInputs()
+    ...getOrderItemInputs()
   }
 });
 
@@ -250,6 +250,13 @@ export const GraphQLOrder = new GraphQLObjectType({
   fields: {
     id: globalIdField('Order'),
     ...orderFields,
+    userAvatar: {
+      type: GraphQLString,
+      resolve: (order) => {
+        const {id} = fromGlobalId(order.userId);
+        return DBUser.findById(id).then(user => user.avatarUrl);
+      }
+    },
     orderItems: {
       type: GraphQLOrderItemConnection,
       args: {
@@ -506,16 +513,26 @@ export const GraphQLViewer =  new GraphQLObjectType({
           type: GraphQLString,
           description: 'search by order id'
         },
+        status: {
+          type: new GraphQLList(GraphQLString),
+          description: 'order status'
+        },
+        afterDate: {
+          type: GraphQLString,
+          description: 'start date'
+        },
+        beforeDate: {
+          type: GraphQLString,
+          description: 'end date'
+        },
         ...connectionArgs
       },
-      resolve: (obj, {userId, search, ...args}) => {
+      resolve: (obj, {userId, search, status, afterDate, beforeDate, ...args}) => {
         let query = {where:{}};
-        if (userId) {
-          query.where.userId = userId;
-        }
-        if (search) {
-          query.where.id = {$like: `%${search}%`}
-        }
+        if (userId) query.where.userId = userId;
+        if (search) query.where.id = {$like: `%${search}%`};
+        if (status && status.length > 0) query.where.status = {$in: status};
+        if (afterDate||beforeDate) query.where.pickupDate = calculateTimeRnage(afterDate, beforeDate);
 
         return modelConnection(DBOrder, query, args);
       }
