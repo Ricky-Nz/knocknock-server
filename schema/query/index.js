@@ -29,10 +29,14 @@ import {
   orderFields,
   orderItemFields,
   transactionFields,
+  timeSlotTemplateFields,
   timeSlotFields,
   factoryFields,
   walletFields,
-  getOrderItemInputs
+  getOrderItemInputs,
+  promoCodeFields,
+  bannerFields,
+  feedbackFields
 } from '../models';
 
 import {
@@ -46,12 +50,16 @@ import {
   DBOrder,
   DBOrderItem,
   DBTransaction,
+  DBTimeSlotTemplate,
   DBTimeSlot,
   DBFactory,
-  DBWallet
+  DBWallet,
+  DBPromoCode,
+  DBBanner,
+  DBFeedback
 } from '../../database';
 
-import { modelConnection, calculateTimeRnage } from '../service';
+import { modelConnection, formatToDay, calculateTimeRnage } from '../service';
 
 class FeakViewerClass {}
 
@@ -81,12 +89,20 @@ const { nodeInterface, nodeField } = nodeDefinitions(
       return DBOrderItem.findById(id);
     } else if (type === 'Transaction') {
       return DBTransaction.findById(id);
+    } else if (type === 'TimeSlotTemplate') {
+      return DBTimeSlotTemplate.findById(id);
     } else if (type === 'TimeSlot') {
       return DBTimeSlot.findById(id);
     } else if (type === 'Factory') {
       return DBFactory.findById(id);
     } else if (type === 'Wallet') {
       return DBWallet.findById(id);
+    } else if (type === 'PromoCode') {
+      return DBPromoCode.findById(id);
+    } else if (type === 'Banner') {
+      return DBBanner.findById(id);
+    } else if (type === 'Feedback') {
+      return DBFeedback.findById(id);
     } else {
       return null;
     }
@@ -114,17 +130,73 @@ const { nodeInterface, nodeField } = nodeDefinitions(
       return GraphQLOrderItem;
     } else if (obj instanceof DBTransaction) {
       return GraphQLTransaction;
+    } else if (obj instanceof DBTimeSlotTemplate) {
+      return GraphQLTimeSlotTemplate;
     } else if (obj instanceof DBTimeSlot) {
       return GraphQLTimeSlot;
     } else if (obj instanceof DBFactory) {
       return GraphQLFactory;
     } else if (obj instanceof DBWallet) {
       return GraphQLWallet;
+    } else if (obj instanceof DBPromoCode) {
+      return GraphQLPromoCode;
+    } else if (obj instanceof DBBanner) {
+      return GraphQLBanner;
+    } else if (obj instanceof DBFeedback) {
+      return GraphQLFeedback;
     } else {
   		return null;
   	}
   }
 );
+
+export const GraphQLFeedback = new GraphQLObjectType({
+  name: 'Feedback',
+  fields: {
+    id: globalIdField('Feedback'),
+    ...feedbackFields
+  },
+  interfaces: [nodeInterface]
+})
+
+export const {
+  connectionType: GraphQLFeedbackConnection,
+  edgeType: GraphQLFeedbackEdge
+} = connectionDefinitions({
+  nodeType: GraphQLFeedback
+});
+
+export const GraphQLBanner = new GraphQLObjectType({
+  name: 'Banner',
+  fields: {
+    id: globalIdField('Banner'),
+    ...bannerFields
+  },
+  interfaces: [nodeInterface]
+})
+
+export const {
+  connectionType: GraphQLBannerConnection,
+  edgeType: GraphQLBannerEdge
+} = connectionDefinitions({
+  nodeType: GraphQLBanner
+});
+
+export const GraphQLPromoCode = new GraphQLObjectType({
+  name: 'PromoCode',
+  fields: {
+    id: globalIdField('PromoCode'),
+    ...promoCodeFields
+  },
+  interfaces: [nodeInterface]
+})
+
+export const {
+  connectionType: GraphQLPromoCodeConnection,
+  edgeType: GraphQLPromoCodeEdge
+} = connectionDefinitions({
+  nodeType: GraphQLPromoCode
+});
 
 export const GraphQLFactory = new GraphQLObjectType({
   name: 'Factory',
@@ -140,6 +212,22 @@ export const {
   edgeType: GraphQLFactoryEdge
 } = connectionDefinitions({
   nodeType: GraphQLFactory
+});
+
+export const GraphQLTimeSlotTemplate = new GraphQLObjectType({
+  name: 'TimeSlotTemplate',
+  fields: {
+    id: globalIdField('TimeSlotTemplate'),
+    ...timeSlotTemplateFields
+  },
+  interfaces: [nodeInterface]
+});
+
+export const {
+  connectionType: GraphQLTimeSlotTemplateConnection,
+  edgeType: GraphQLTimeSlotTemplateEdge
+} = connectionDefinitions({
+  nodeType: GraphQLTimeSlotTemplate
 });
 
 export const GraphQLTimeSlot = new GraphQLObjectType({
@@ -331,12 +419,12 @@ export const GraphQLUser = new GraphQLObjectType({
     order: {
       type: GraphQLOrder,
       args: {
-        id: {
+        serialNumber: {
           type: new GraphQLNonNull(GraphQLString),
           description: 'order id'
         }
       },
-      resolve: (obj, {id}) => DBOrder.findById(id)
+      resolve: (obj, {serialNumber}) => DBOrder.findOne({where:{serialNumber}})
     },
     orders: {
       type: GraphQLOrderConnection,
@@ -566,13 +654,34 @@ export const GraphQLViewer =  new GraphQLObjectType({
       resolve: (obj, args) =>
         modelConnection(DBClothCategory, {}, args)
     },
-    timeSlots: {
-      type: GraphQLTimeSlotConnection,
+    timeSlotTempaltes: {
+      type: GraphQLTimeSlotTemplateConnection,
       args: {
         ...connectionArgs
       },
       resolve: (obj, args) =>
-        modelConnection(DBTimeSlot, {}, args)
+        modelConnection(DBTimeSlotTemplate, {}, args)
+    },
+    timeSlots: {
+      type: GraphQLTimeSlot,
+      args: {
+        date: {
+          type: new GraphQLNonNull(GraphQLString),
+          description: 'date'
+        }
+      },
+      resolve: (obj, {date}) =>
+        DBTimeSlot.findAll({where:{date: formatToDay(date)}})
+          .then(timeSlots => {
+            if (timeSlots && timeSlots.length > 0) {
+              return timeSlots;
+            } else {
+              return DBTimeSlotTemplate.findAll()
+                .then(templates => {
+
+                });
+            }
+          })
     },
     factories: {
       type: GraphQLFactoryConnection,
@@ -581,6 +690,48 @@ export const GraphQLViewer =  new GraphQLObjectType({
       },
       resolve: (obj, args) =>
         modelConnection(DBFactory, {}, args)
+    },
+    promoCodes: {
+      type: GraphQLPromoCodeConnection,
+      args: {
+        search: {
+          type: GraphQLString,
+          description: 'search code'
+        },
+        ...connectionArgs
+      },
+      resolve: (obj, {search, ...args}) =>
+        modelConnection(DBPromoCode, search?{where:{
+          code: {$like: `%${search}%`}
+        }}:{}, args)
+    },
+    banners: {
+      type: GraphQLBannerConnection,
+      args: {
+        search: {
+          type: GraphQLString,
+          description: 'search banner'
+        },
+        ...connectionArgs
+      },
+      resolve: (obj, {search, ...args}) =>
+        modelConnection(DBBanner, search?{where:{
+          title: {$like: `%${search}%`}
+        }, order: 'position'}:{order: 'position'}, args)
+    },
+    feedbacks: {
+      type: GraphQLFeedbackConnection,
+      args: {
+        search: {
+          type: GraphQLString,
+          description: 'search feedback'
+        },
+        ...connectionArgs
+      },
+      resolve: (obj, {search, ...args}) =>
+        modelConnection(DBFeedback, search?{where:{
+          comment: {$like: `%${search}%`}
+        }}:{}, args)
     },
     orderStatus: {
       type: new GraphQLList(GraphQLString),

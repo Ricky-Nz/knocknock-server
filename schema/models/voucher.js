@@ -32,11 +32,11 @@ export const voucherFields = {
 		type: new GraphQLNonNull(GraphQLBoolean),
 		description: 'voucher used'
 	},
-	usedOn: {
+	usedAt: {
 		type: GraphQLString,
 		description: 'voucher used date'
 	},
-	usedOrderId: {
+	usedOnOrderId: {
 		type: GraphQLString,
 		description: 'voucher used on order id'
 	}

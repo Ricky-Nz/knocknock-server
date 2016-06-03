@@ -10,6 +10,15 @@ export function formatDate(date) {
   return moment(new Date(date)).format();
 }
 
+export function formatToDay(date) {
+  const moment = moment(new Date(date));
+  moment.millisecond(0);
+  moment.second(0);
+  moment.minute(0);
+  moment.hour(0);
+  return moment.format();
+}
+
 export function calculateOrderId(userId) {
   return DBOrder.findOne({where:{userId}, order: 'serialNumber DESC'})
     .then(order => {

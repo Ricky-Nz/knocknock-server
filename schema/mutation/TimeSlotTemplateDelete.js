@@ -5,27 +5,23 @@ import {
 
 import {
 	mutationWithClientMutationId,
-	offsetToCursor,
 	fromGlobalId,
 } from 'graphql-relay';
 
 import {
-	DBViewer,
-	DBTimeSlot
+	DBTimeSlotTemplate
 } from '../../database';
 
 import {
-	GraphQLViewer,
-	GraphQLTimeSlotEdge,
-	GraphQLTimeSlot
+	GraphQLViewer
 } from '../query';
 
 export default mutationWithClientMutationId({
-	name: 'DeleteTimeSlot',
+	name: 'DeleteTimeSlotTemplate',
 	inputFields: {
 		id: {
 			type: new GraphQLNonNull(GraphQLString),
-			description: 'time slot id'
+			description: 'time slot tempalte id'
 		}
 	},
 	outputFields: {
@@ -40,7 +36,7 @@ export default mutationWithClientMutationId({
 	},
 	mutateAndGetPayload: ({id, ...args}) => {
 		const {id: localId} = fromGlobalId(id);
-		return DBTimeSlot.destroy({where:{id:localId}})
+		return DBTimeSlotTemplate.destroy({where:{id:localId}})
 			.then(() => ({id}));
 	}
 });

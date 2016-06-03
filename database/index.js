@@ -9,9 +9,13 @@ import voucher from './Voucher';
 import order from './Order';
 import orderItem from './OrderItem';
 import transaction from './Transaction';
-import timeslot from './TimeSlot';
+import timeslottemplate from './TimeSlotTemplate';
+import timeslot from './timeslot';
 import factory from './Factory';
 import wallet from './Wallet';
+import promoCode from './PromoCode';
+import banner from './Banner';
+import feedback from './Feedback';
 
 export function connect () {
 	const options = { force: false };
@@ -26,9 +30,13 @@ export function connect () {
 		.then(() => order.sync(options))
 		.then(() => orderItem.sync(options))
 		.then(() => transaction.sync(options))
+		.then(() => timeslottemplate.sync(options))
 		.then(() => timeslot.sync(options))
 		.then(() => factory.sync(options))
-		.then(() => wallet.sync(options));
+		.then(() => wallet.sync(options))
+		.then(() => promoCode.sync(options))
+		.then(() => banner.sync(options))
+		.then(() => feedback.sync(options));
 }
 
 export const DBUser = user;
@@ -42,8 +50,12 @@ export const DBVoucher = voucher;
 export const DBOrder = order;
 export const DBOrderItem = orderItem;
 export const DBTransaction = transaction;
+export const DBTimeSlotTemplate = timeslottemplate;
 export const DBTimeSlot = timeslot;
 export const DBFactory = factory;
 export const DBWallet = wallet;
+export const DBPromoCode = promoCode;
+export const DBBanner = banner;
+export const DBFeedback = feedback;
 
 

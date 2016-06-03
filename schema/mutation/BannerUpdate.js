@@ -9,33 +9,33 @@ import {
 } from 'graphql-relay';
 
 import {
-	getClothInputs
+	getBannerInputs
 } from '../models';
 
-import { GraphQLCloth } from '../query';
+import { GraphQLBanner } from '../query';
 import { processFileUpload } from '../service';
-import { DBCloth } from '../../database';
+import { DBBanner } from '../../database';
 import { deleteFile } from '../../datastorage';
 
 export default mutationWithClientMutationId({
-	name: 'UpdateCloth',
+	name: 'UpdateBanner',
 	inputFields: {
 		id: {
 			type: new GraphQLNonNull(GraphQLString),
-			description: 'cloth id'
+			description: 'banner id'
 		},
-		...getClothInputs(true)
+		...getBannerInputs(true)
 	},
 	outputFields: {
-		cloth: {
-			type: GraphQLCloth,
-			resolve: ({localId}) => DBCloth.findById(localId)
+		banner: {
+			type: GraphQLBanner,
+			resolve: ({localId}) => DBBanner.findById(localId)
 		}
 	},
 	mutateAndGetPayload: ({id, ...args}, context, {rootValue}) => {
 		const {id: localId} = fromGlobalId(id);
 
-		return processFileUpload('knocknock-laundry', rootValue.request.file)
+		return processFileUpload('knocknock-banner', rootValue.request.file)
 			.then(upload => {
 				if (upload) {
 					args.imageUrl = upload.imageUrl;
@@ -43,17 +43,17 @@ export default mutationWithClientMutationId({
 					args.imageBucket = upload.imageBucket;
 				}
 
-				return DBCloth.findById(localId)
-						.then(cloth => ({cloth, args}))
+				return DBBanner.findById(localId)
+						.then(banner => ({banner, args}))
 			})
-			.then(({cloth, args}) => {
-				if (cloth.imageId && cloth.imageBucket
-					&& args.imageId && args.imageId !== cloth.imageId) {
-					return deleteFile(cloth.imageBucket, cloth.imageId)
-						.then(() => cloth.update(args))
-						.catch(() => cloth.update(args));
+			.then(({banner, args}) => {
+				if (banner.imageId && banner.imageBucket
+					&& banner.imageId && banner.imageId !== banner.imageId) {
+					return deleteFile(banner.imageBucket, banner.imageId)
+						.then(() => banner.update(args))
+						.catch(() => banner.update(args));
 				} else {
-					return cloth.update(args); 
+					return banner.update(args); 
 				}
 			})
 			.then(() => ({localId}));

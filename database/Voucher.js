@@ -22,10 +22,10 @@ export default sequelize.define('voucher', {
 		type: BOOLEAN,
 		defaultValue: false
 	},
-	usedOn: {
+	usedAt: {
 		type: DATE
 	},
-	usedOrderId: {
+	usedOnOrderId: {
 		type: STRING
 	}
 });

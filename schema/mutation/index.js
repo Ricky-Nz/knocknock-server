@@ -18,12 +18,20 @@ import createVoucher from './VoucherCreate';
 import createOrder from './OrderCreate';
 import updateOrder from './OrderUpdate';
 import bulkUpdateOrder from './OrderBulkUpdate';
-import createTimeSlot from './TimeSlotCreate';
+import createTimeSlotTemplate from './TimeSlotTemplateCreate';
+import updateTimeSlotTemplate from './TimeSlotTemplateUpdate';
+import deleteTimeSlotTemplate from './TimeSlotTemplateDelete';
 import updateTimeSlot from './TimeSlotUpdate';
-import deleteTimeSlot from './TimeSlotDelete';
 import createFactory from './FactoryCreate';
 import updateFactory from './FactoryUpdate';
 import deleteFactory from './FactoryDelete';
+import createPromoCode from './PromoCodeCreate';
+import updatePromoCode from './PromoCodeUpdate';
+import deletePromoCode from './PromoCodeDelete';
+import createFeedback from './FeedbackCreate';
+import createBanner from './BannerCreate';
+import updateBanner from './BannerUpdate';
+import deleteBanner from './BannerDelete';
 
 export default new GraphQLObjectType({
   name: 'Mutation',
@@ -46,12 +54,19 @@ export default new GraphQLObjectType({
     createVoucher,
     createOrder,
     updateOrder,
-    createTimeSlot,
+    createTimeSlotTemplate,
+    updateTimeSlotTemplate,
+    deleteTimeSlotTemplate,
     updateTimeSlot,
-    deleteTimeSlot,
     createFactory,
     updateFactory,
     deleteFactory,
-    bulkUpdateOrder
+    createPromoCode,
+    updatePromoCode,
+    deletePromoCode,
+    createFeedback,
+    createBanner,
+    updateBanner,
+    deleteBanner
   }
 });

@@ -38,16 +38,23 @@ type AdminEdge {
   cursor: String!
 }
 
-input BluckUpdateOrderInput {
-  ids: [String]
-  status: String
-  pickupWorkerId: String
-  clientMutationId: String!
+type Banner implements Node {
+  id: ID!
+  enabled: Boolean
+  title: String!
+  link: String
+  position: Int
+  imageUrl: String!
 }
 
-type BluckUpdateOrderPayload {
-  result: Boolean
-  clientMutationId: String!
+type BannerConnection {
+  pageInfo: PageInfo!
+  edges: [BannerEdge]
+}
+
+type BannerEdge {
+  node: Banner
+  cursor: String!
 }
 
 type Cloth implements Node {
@@ -120,6 +127,20 @@ type CreateAdminPayload {
   clientMutationId: String!
 }
 
+input CreateBannerInput {
+  enabled: Boolean
+  title: String!
+  link: String
+  position: Int
+  clientMutationId: String!
+}
+
+type CreateBannerPayload {
+  bannerEdge: BannerEdge
+  viewer: Viewer
+  clientMutationId: String!
+}
+
 input CreateCategoryInput {
   nameCn: String!
   nameEn: String!
@@ -167,6 +188,20 @@ type CreateFactoryPayload {
   clientMutationId: String!
 }
 
+input CreateFeedbackInput {
+  userId: String!
+  rating: Float!
+  comment: String
+  source: String!
+  clientMutationId: String!
+}
+
+type CreateFeedbackPayload {
+  feedbackEdge: FeedbackEdge
+  viewer: Viewer
+  clientMutationId: String!
+}
+
 input CreateOrderInput {
   userId: String!
   express: Boolean
@@ -186,15 +221,39 @@ type CreateOrderPayload {
   clientMutationId: String!
 }
 
-input CreateTimeSlotInput {
-  start: Int!
-  end: Int!
+input CreatePromoCodeInput {
   enabled: Boolean!
+  code: String!
+  name: String!
+  description: String
+  start: String!
+  end: String!
+  perUserLimit: Int!
+  limit: Int!
+  promoType: String!
+  promoValue: Int!
+  amount: Int!
+  multipleUse: Boolean!
+  mobileOnly: Boolean!
+  firstTimeUser: Boolean!
   clientMutationId: String!
 }
 
-type CreateTimeSlotPayload {
-  timeSlotEdge: TimeSlotEdge
+type CreatePromoCodePayload {
+  promoCodeEdge: PromoCodeEdge
+  viewer: Viewer
+  clientMutationId: String!
+}
+
+input CreateTimeSlotTemplateInput {
+  start: Int!
+  end: Int!
+  limit: Int!
+  clientMutationId: String!
+}
+
+type CreateTimeSlotTemplatePayload {
+  timeSlotTemplateEdge: TimeSlotTemplateEdge
   viewer: Viewer
   clientMutationId: String!
 }
@@ -252,6 +311,17 @@ type DeleteAddressPayload {
   clientMutationId: String!
 }
 
+input DeleteBannerInput {
+  id: String!
+  clientMutationId: String!
+}
+
+type DeleteBannerPayload {
+  deletedId: String!
+  viewer: Viewer
+  clientMutationId: String!
+}
+
 input DeleteCategoryInput {
   id: String!
   clientMutationId: String!
@@ -285,12 +355,23 @@ type DeleteFactoryPayload {
   clientMutationId: String!
 }
 
-input DeleteTimeSlotInput {
+input DeletePromoCodeInput {
   id: String!
   clientMutationId: String!
 }
 
-type DeleteTimeSlotPayload {
+type DeletePromoCodePayload {
+  deletedId: String!
+  viewer: Viewer
+  clientMutationId: String!
+}
+
+input DeleteTimeSlotTemplateInput {
+  id: String!
+  clientMutationId: String!
+}
+
+type DeleteTimeSlotTemplatePayload {
   deletedId: String!
   viewer: Viewer
   clientMutationId: String!
@@ -315,6 +396,24 @@ type FactoryEdge {
   cursor: String!
 }
 
+type Feedback implements Node {
+  id: ID!
+  userId: String!
+  rating: Float!
+  comment: String
+  source: String!
+}
+
+type FeedbackConnection {
+  pageInfo: PageInfo!
+  edges: [FeedbackEdge]
+}
+
+type FeedbackEdge {
+  node: Feedback
+  cursor: String!
+}
+
 type Mutation {
   createCloth(input: CreateClothInput!): CreateClothPayload
   updateCloth(input: UpdateClothInput!): UpdateClothPayload
@@ -334,13 +433,20 @@ type Mutation {
   createVoucher(input: CreateVoucherInput!): CreateVoucherPayload
   createOrder(input: CreateOrderInput!): CreateOrderPayload
   updateOrder(input: UpdateOrderInput!): UpdateOrderPayload
-  createTimeSlot(input: CreateTimeSlotInput!): CreateTimeSlotPayload
+  createTimeSlotTemplate(input: CreateTimeSlotTemplateInput!): CreateTimeSlotTemplatePayload
+  updateTimeSlotTemplate(input: UpdateTimeSlotTemplateInput!): UpdateTimeSlotTemplatePayload
+  deleteTimeSlotTemplate(input: DeleteTimeSlotTemplateInput!): DeleteTimeSlotTemplatePayload
   updateTimeSlot(input: UpdateTimeSlotInput!): UpdateTimeSlotPayload
-  deleteTimeSlot(input: DeleteTimeSlotInput!): DeleteTimeSlotPayload
   createFactory(input: CreateFactoryInput!): CreateFactoryPayload
   updateFactory(input: UpdateFactoryInput!): UpdateFactoryPayload
   deleteFactory(input: DeleteFactoryInput!): DeleteFactoryPayload
-  bulkUpdateOrder(input: BluckUpdateOrderInput!): BluckUpdateOrderPayload
+  createPromoCode(input: CreatePromoCodeInput!): CreatePromoCodePayload
+  updatePromoCode(input: UpdatePromoCodeInput!): UpdatePromoCodePayload
+  deletePromoCode(input: DeletePromoCodeInput!): DeletePromoCodePayload
+  createFeedback(input: CreateFeedbackInput!): CreateFeedbackPayload
+  createBanner(input: CreateBannerInput!): CreateBannerPayload
+  updateBanner(input: UpdateBannerInput!): UpdateBannerPayload
+  deleteBanner(input: DeleteBannerInput!): DeleteBannerPayload
 }
 
 interface Node {
@@ -408,6 +514,34 @@ type PageInfo {
   endCursor: String
 }
 
+type PromoCode implements Node {
+  id: ID!
+  enabled: Boolean!
+  code: String!
+  name: String!
+  description: String
+  start: String!
+  end: String!
+  perUserLimit: Int!
+  limit: Int!
+  promoType: String!
+  promoValue: Int!
+  amount: Int!
+  multipleUse: Boolean!
+  mobileOnly: Boolean!
+  firstTimeUser: Boolean!
+}
+
+type PromoCodeConnection {
+  pageInfo: PageInfo!
+  edges: [PromoCodeEdge]
+}
+
+type PromoCodeEdge {
+  node: PromoCode
+  cursor: String!
+}
+
 type Query {
   viewer: Viewer
   node(id: ID!): Node
@@ -415,18 +549,27 @@ type Query {
 
 type TimeSlot implements Node {
   id: ID!
+  date: Int!
+  limit: Int
+  enabled: Boolean
+  start: String!
+  end: String!
+}
+
+type TimeSlotTemplate implements Node {
+  id: ID!
   start: Int!
   end: Int!
-  enabled: Boolean!
+  limit: Int!
 }
 
-type TimeSlotConnection {
+type TimeSlotTemplateConnection {
   pageInfo: PageInfo!
-  edges: [TimeSlotEdge]
+  edges: [TimeSlotTemplateEdge]
 }
 
-type TimeSlotEdge {
-  node: TimeSlot
+type TimeSlotTemplateEdge {
+  node: TimeSlotTemplate
   cursor: String!
 }
 
@@ -472,6 +615,20 @@ input UpdateAdminInput {
 
 type UpdateAdminPayload {
   admin: Admin
+  clientMutationId: String!
+}
+
+input UpdateBannerInput {
+  id: String!
+  enabled: Boolean
+  title: String
+  link: String
+  position: Int
+  clientMutationId: String!
+}
+
+type UpdateBannerPayload {
+  banner: Banner
   clientMutationId: String!
 }
 
@@ -539,16 +696,52 @@ type UpdateOrderPayload {
   clientMutationId: String!
 }
 
+input UpdatePromoCodeInput {
+  id: String!
+  enabled: Boolean
+  name: String
+  description: String
+  start: String
+  end: String
+  perUserLimit: Int
+  limit: Int
+  promoType: String
+  promoValue: Int
+  amount: Int
+  multipleUse: Boolean
+  mobileOnly: Boolean
+  firstTimeUser: Boolean
+  clientMutationId: String!
+}
+
+type UpdatePromoCodePayload {
+  promoCode: PromoCode
+  clientMutationId: String!
+}
+
 input UpdateTimeSlotInput {
   id: String!
-  start: Int
-  end: Int
+  date: Int!
+  limit: Int
   enabled: Boolean
   clientMutationId: String!
 }
 
 type UpdateTimeSlotPayload {
   timeSlot: TimeSlot
+  clientMutationId: String!
+}
+
+input UpdateTimeSlotTemplateInput {
+  id: String!
+  start: Int
+  end: Int
+  limit: Int
+  clientMutationId: String!
+}
+
+type UpdateTimeSlotTemplatePayload {
+  timeSlotTemplate: TimeSlotTemplate
   clientMutationId: String!
 }
 
@@ -588,7 +781,7 @@ type User implements Node {
   contactVerified: Boolean
   addresses(after: String, first: Int, before: String, last: Int): AddressConnection
   vouchers(all: Boolean, after: String, first: Int, before: String, last: Int): VoucherConnection
-  order(id: String!): Order
+  order(serialNumber: String!): Order
   orders(search: String, after: String, first: Int, before: String, last: Int): OrderConnection
   transactions(after: String, first: Int, before: String, last: Int): TransactionConnection
   wallet: Wallet
@@ -616,8 +809,12 @@ type Viewer implements Node {
   cloth(id: String!): Cloth
   clothes(after: String, first: Int, before: String, last: Int): ClothConnection
   categories(after: String, first: Int, before: String, last: Int): ClothCategoryConnection
-  timeSlots(after: String, first: Int, before: String, last: Int): TimeSlotConnection
+  timeSlotTempaltes(after: String, first: Int, before: String, last: Int): TimeSlotTemplateConnection
+  timeSlots(date: String!): TimeSlot
   factories(after: String, first: Int, before: String, last: Int): FactoryConnection
+  promoCodes(search: String, after: String, first: Int, before: String, last: Int): PromoCodeConnection
+  banners(search: String, after: String, first: Int, before: String, last: Int): BannerConnection
+  feedbacks(search: String, after: String, first: Int, before: String, last: Int): FeedbackConnection
   orderStatus: [String]
 }
 
@@ -628,8 +825,8 @@ type Voucher implements Node {
   value: Float!
   expireOn: String!
   used: Boolean!
-  usedOn: String
-  usedOrderId: String
+  usedAt: String
+  usedOnOrderId: String
 }
 
 type VoucherConnection {
