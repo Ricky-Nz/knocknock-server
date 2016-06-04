@@ -9,8 +9,10 @@ import createUser from './UserCreate';
 import updateUser from './UserUpdate';
 import createWorker from './WorkerCreate';
 import updateWorker from './WorkerUpdate';
+import deleteWorker from './WorkerDelete';
 import createAdmin from './AdminCreate';
 import updateAdmin from './AdminUpdate';
+import deleteAdmin from './AdminDelete';
 import createAddress from './AddressCreate';
 import updateAddress from './AddressUpdate';
 import deleteAddress from './AddressDelete';
@@ -46,8 +48,10 @@ export default new GraphQLObjectType({
     updateUser,
     createWorker,
     updateWorker,
+    deleteWorker,
     createAdmin,
     updateAdmin,
+    deleteAdmin,
     createAddress,
     updateAddress,
     deleteAddress,

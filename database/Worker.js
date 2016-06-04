@@ -27,5 +27,9 @@ export default sequelize.define('worker', {
 	},
 	avatarBucket: {
 		type: STRING
+	},
+	enabled: {
+		type: BOOLEAN,
+		defaultValue: true
 	}
 });

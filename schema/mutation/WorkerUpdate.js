@@ -23,14 +23,20 @@ export default mutationWithClientMutationId({
 	mutateAndGetPayload: ({id, ...args}, context, {rootValue}) =>
 		processFileUpload('knocknock-avatar', rootValue.request.file)
 			.then(upload => {
+				const {id: localId} = fromGlobalId(id);
+
 				if (upload) {
 					args.avatarUrl = upload.imageUrl;
 					args.avatarId = upload.imageId;
 					args.avatarBucket = upload.imageBucket;
-				}
 
-				const {id: localId} = fromGlobalId(id);
-				return DBUser.update(args, {where:{id: localId}})
-					.then(() => ({localId}));
+					return DBWorker.findById(localId)
+						.then(worker => deleteFile(worker.avatarBucket, worker.avatarId))
+						.then(() => DBWorker.update(args, {where:{id: localId}}))
+						.then(() => ({localId}));
+				} else {
+					return DBWorker.update(args, {where:{id: localId}})
+						.then(() => ({localId}));
+				}
 			})
 });

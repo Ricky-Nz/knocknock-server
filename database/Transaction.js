@@ -2,7 +2,7 @@ import sequelize from './connection';
 import { STRING, ENUM, BOOLEAN, INTEGER } from 'sequelize';
 
 export default sequelize.define('transaction', {
-	userId: {
+	walletId: {
 		type: STRING,
 		allowNull: false
 	},
@@ -10,15 +10,25 @@ export default sequelize.define('transaction', {
 		type: INTEGER,
 		allowNull: false
 	},
-	type: {
-		type: ENUM,
-		values: ['deposit', 'payorder'],
+	currency: {
+		type: STRING,
 		allowNull: false
 	},
-	orderId: {
-		type: STRING
+	referenceNo: {
+		type: STRING,
+		allowNull: false
 	},
-	description: {
-		type: STRING
+	paymentMode: {
+		type: STRING,
+		allowNull: false
+	},
+	paymentChannel: {
+		type: STRING,
+		allowNull: false
+	},
+	status: {
+		type: ENUM,
+		values: ['PENDING', 'APPROVED', 'REJECTED'],
+		allowNull: false
 	}
 });

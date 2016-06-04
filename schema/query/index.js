@@ -150,22 +150,6 @@ const { nodeInterface, nodeField } = nodeDefinitions(
   }
 );
 
-export const GraphQLFeedback = new GraphQLObjectType({
-  name: 'Feedback',
-  fields: {
-    id: globalIdField('Feedback'),
-    ...feedbackFields
-  },
-  interfaces: [nodeInterface]
-})
-
-export const {
-  connectionType: GraphQLFeedbackConnection,
-  edgeType: GraphQLFeedbackEdge
-} = connectionDefinitions({
-  nodeType: GraphQLFeedback
-});
-
 export const GraphQLBanner = new GraphQLObjectType({
   name: 'Banner',
   fields: {
@@ -246,11 +230,45 @@ export const {
   nodeType: GraphQLTimeSlot
 });
 
+export const GraphQLUserReference = new GraphQLObjectType({
+  name: 'UserReference',
+  fields: {
+    id: {
+      type: new GraphQLNonNull(GraphQLString),
+      description: 'user id'
+    },
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+      description: 'user name'
+    },
+    email: {
+      type: new GraphQLNonNull(GraphQLString),
+      description: 'user email'
+    }
+  }
+});
+
 export const GraphQLTransaction = new GraphQLObjectType({
   name: 'Transaction',
   fields: {
     id: globalIdField('Transaction'),
-    ...transactionFields
+    ...transactionFields,
+    user: {
+      type: GraphQLUserReference,
+      resolve: (transaction) => {
+        const {id: walletId} = fromGlobalId(transaction.walletId);
+        return DBWallet.findById(walletId)
+          .then(wallet => {
+            const {id: userId} = fromGlobalId(wallet.userId);
+            return DBUser.findById(userId);
+          })
+          .then(user => ({
+            id: toGlobalId('User', user.id),
+            name: user.name,
+            email: user.email
+          }));
+      }
+    }
   },
   interfaces: [nodeInterface]
 });
@@ -445,11 +463,21 @@ export const GraphQLUser = new GraphQLObjectType({
     transactions: {
       type: GraphQLTransactionConnection,
       args: {
+        search: {
+          type: GraphQLString,
+          description: 'search order by order id'
+        },
         ...connectionArgs
       },
-      resolve: (user, args) => {
+      resolve: (user, {search, ...args}) => {
         const userId = toGlobalId('User', user.id);
-        return modelConnection(DBTransaction, {where: {userId}}, args);
+        return DBWallet.findOne({where:{userId}})
+          .then(wallet => modelConnection(DBTransaction, {
+            where: {
+              walletId: toGlobalId('Wallet', wallet.id),
+              ...(search?{referenceNo: {$like: `%${search}%`}}:{})
+            }
+          }, args));
       }
     },
     wallet: {
@@ -465,6 +493,29 @@ export const {
 	edgeType: GraphQLUserEdge
 } = connectionDefinitions({
 	nodeType: GraphQLUser
+});
+
+export const GraphQLFeedback = new GraphQLObjectType({
+  name: 'Feedback',
+  fields: {
+    id: globalIdField('Feedback'),
+    ...feedbackFields,
+    user: {
+      type: GraphQLUser,
+      resolve: (feedback) => {
+        const {id} = fromGlobalId(feedback.userId);
+        return DBUser.findById(id);
+      }
+    }
+  },
+  interfaces: [nodeInterface]
+})
+
+export const {
+  connectionType: GraphQLFeedbackConnection,
+  edgeType: GraphQLFeedbackEdge
+} = connectionDefinitions({
+  nodeType: GraphQLFeedback
 });
 
 export const GraphQLWorker = new GraphQLObjectType({
@@ -625,6 +676,21 @@ export const GraphQLViewer =  new GraphQLObjectType({
         return modelConnection(DBOrder, query, args);
       }
     },
+    transactions: {
+      type: GraphQLTransactionConnection,
+      args: {
+        search: {
+          type: GraphQLString,
+          description: 'search order by order id'
+        },
+        ...connectionArgs
+      },
+      resolve: (obj, {search, ...args}) => {
+        return modelConnection(DBTransaction, search?{where: {
+          referenceNo: {$like: `%${search}%`}
+        }}:{}, args);
+      }
+    },
     cloth: {
       type: GraphQLCloth,
       args: {
@@ -686,10 +752,21 @@ export const GraphQLViewer =  new GraphQLObjectType({
     factories: {
       type: GraphQLFactoryConnection,
       args: {
+        search: {
+          type: GraphQLString,
+          description: 'search'
+        },
         ...connectionArgs
       },
-      resolve: (obj, args) =>
-        modelConnection(DBFactory, {}, args)
+      resolve: (obj, {search, ...args}) =>
+        modelConnection(DBFactory, search?{where:{
+          $or: [
+            {name: {$like: `%${search}%`}},
+            {address: {$like: `%${search}%`}},
+            {contact: {$like: `%${search}%`}},
+            {contactName: {$like: `%${search}%`}}
+          ]
+        }}:{}, args)
     },
     promoCodes: {
       type: GraphQLPromoCodeConnection,

@@ -4,6 +4,7 @@ import { DBUser } from '../../database';
 import { GraphQLUser } from '../query';
 import { getUserInputs } from '../models';
 import { processFileUpload } from '../service';
+import { deleteFile } from '../../datastorage';
 
 export default mutationWithClientMutationId({
 	name: 'UpdateUser',
@@ -23,14 +24,20 @@ export default mutationWithClientMutationId({
 	mutateAndGetPayload: ({id, ...args}, context, {rootValue}) =>
 		processFileUpload('knocknock-avatar', rootValue.request.file)
 			.then(upload => {
+				const {id: localId} = fromGlobalId(id);
+
 				if (upload) {
 					args.avatarUrl = upload.imageUrl;
 					args.avatarId = upload.imageId;
 					args.avatarBucket = upload.imageBucket;
-				}
 
-				const {id: localId} = fromGlobalId(id);
-				return DBUser.update(args, {where:{id: localId}})
-					.then(() => ({localId}));
+					return DBUser.findById(localId)
+						.then(user => deleteFile(user.avatarBucket, user.avatarId))
+						.then(() => DBUser.update(args, {where:{id: localId}}))
+						.then(() => ({localId}));
+				} else {
+					return DBUser.update(args, {where:{id: localId}})
+						.then(() => ({localId}));
+				}
 			})
 });

@@ -1,6 +1,7 @@
 import {
 	GraphQLNonNull,
-	GraphQLString
+	GraphQLString,
+	GraphQLBoolean
 } from 'graphql';
 
 export function getWorkerInputs(update, sensitive) {
@@ -24,6 +25,10 @@ export function getWorkerInputs(update, sensitive) {
 		contact: {
 			type: update ? GraphQLString : new GraphQLNonNull(GraphQLString),
 			description: 'contact phone number'
+		},
+		enabled: {
+			type: update ? GraphQLBoolean : new GraphQLNonNull(GraphQLBoolean),
+			description: 'enable'
 		}
 	};	
 }

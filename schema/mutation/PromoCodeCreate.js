@@ -17,6 +17,8 @@ import {
 	GraphQLPromoCode
 } from '../query';
 
+import { generateCode } from '../service';
+
 export default mutationWithClientMutationId({
 	name: 'CreatePromoCode',
 	inputFields: {
@@ -35,5 +37,7 @@ export default mutationWithClientMutationId({
 			resolve: () => ({})
 		}
 	},
-	mutateAndGetPayload: (args) => DBPromoCode.create(args)
+	mutateAndGetPayload: (args) => {
+		return DBPromoCode.create({...args, code: args.code?args.code:generateCode()});
+	}
 });

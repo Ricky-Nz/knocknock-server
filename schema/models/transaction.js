@@ -1,30 +1,43 @@
 import {
 	GraphQLNonNull,
 	GraphQLString,
+	GraphQLInt,
 	GraphQLBoolean,
 	GraphQLEnumType,
 	GraphQLFloat
 } from 'graphql';
 
 export const transactionFields = {
-	userId: {
+	walletId: {
 		type: new GraphQLNonNull(GraphQLString),
-		description: 'user id'
+		description: 'wallet Id'
 	},
 	value: {
-		type: new GraphQLNonNull(GraphQLString),
+		type: new GraphQLNonNull(GraphQLInt),
 		description: 'transaction value'
 	},
-	type: {
+	currency: {
 		type: new GraphQLNonNull(GraphQLString),
-		description: 'transaction type'
+		description: 'value currency'
 	},
-	orderId: {
-		type: GraphQLString,
-		description: 'related orderId'
+	referenceNo: {
+		type: new GraphQLNonNull(GraphQLString),
+		description: 'transaction reference number'
 	},
-	description: {
-		type: GraphQLString,
-		description: 'transaction description'
+	paymentMode: {
+		type: new GraphQLNonNull(GraphQLString),
+		description: 'transaction payment mode'
+	},
+	paymentChannel: {
+		type: new GraphQLNonNull(GraphQLString),
+		description: 'transaction channel'
+	},
+	status: {
+		type: new GraphQLNonNull(GraphQLString),
+		description: 'transaction status'
+	},
+	createdAt: {
+		type: new GraphQLNonNull(GraphQLString),
+		description: 'created at'
 	}
 };

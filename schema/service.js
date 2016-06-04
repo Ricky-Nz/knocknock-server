@@ -5,6 +5,12 @@ import moment from 'moment';
 import { uploadFile } from '../datastorage';
 import { connectionFromPromisedArraySlice, cursorToOffset, fromGlobalId } from 'graphql-relay';
 import { DBOrder } from '../database';
+import Chance from 'chance';
+
+export function generateCode(argument) {
+  var chance = new Chance();
+  return chance.string({pool: 'poiuytrewqasdfghjklmnbvcxz1234567890', length: 12});
+}
 
 export function formatDate(date) {
   return moment(new Date(date)).format();

@@ -13,7 +13,7 @@ export function getPromoCodeInputs(update) {
 		},
 		...!update&&{
 			code: {
-				type: new GraphQLNonNull(GraphQLString),
+				type: GraphQLString,
 				description: 'start time'
 			}
 		},

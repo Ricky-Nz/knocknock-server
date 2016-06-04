@@ -3,7 +3,6 @@ import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'grap
 import { DBAdmin } from '../../database';
 import { GraphQLAdmin } from '../query';
 import { getAdminInputs } from '../models';
-import { processFileUpload } from '../service';
 
 export default mutationWithClientMutationId({
 	name: 'UpdateAdmin',
@@ -20,17 +19,9 @@ export default mutationWithClientMutationId({
 			resolve: ({localId}) => DBAdmin.findById(localId)
 		}
 	},
-	mutateAndGetPayload: ({id, ...args}, context, {rootValue}) =>
-		processFileUpload('knocknock-avatar', rootValue.request.file)
-			.then(upload => {
-				if (upload) {
-					args.avatarUrl = upload.imageUrl;
-					args.avatarId = upload.imageId;
-					args.avatarBucket = upload.imageBucket;
-				}
-
-				const {id: localId} = fromGlobalId(id);
-				return DBAdmin.update(args, {where:{id: localId}})
-					.then(() => ({localId}));
-			})
+	mutateAndGetPayload: ({id, ...args}) => {
+		const {id: localId} = fromGlobalId(id);
+		return DBAdmin.update(args, {where:{id: localId}})
+			.then(() => ({localId}));
+	}
 });
