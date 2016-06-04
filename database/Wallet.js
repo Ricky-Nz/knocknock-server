@@ -9,7 +9,7 @@ export default sequelize.define('wallet', {
 	},
 	credit: {
 		type: INTEGER,
-		defaultValue: false
+		defaultValue: 0
 	},
 	freeze: {
 		type: BOOLEAN,

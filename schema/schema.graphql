@@ -263,6 +263,7 @@ input CreateUserInput {
   password: String!
   name: String
   contact: String
+  enabled: Boolean
   clientMutationId: String!
 }
 
@@ -582,6 +583,16 @@ type TimeSlot implements Node {
   end: String!
 }
 
+type TimeSlotConnection {
+  pageInfo: PageInfo!
+  edges: [TimeSlotEdge]
+}
+
+type TimeSlotEdge {
+  node: TimeSlot
+  cursor: String!
+}
+
 type TimeSlotTemplate implements Node {
   id: ID!
   start: Int!
@@ -780,6 +791,7 @@ input UpdateUserInput {
   password: String
   name: String
   contact: String
+  enabled: Boolean
   clientMutationId: String!
 }
 
@@ -807,11 +819,12 @@ type User implements Node {
   email: String!
   name: String
   contact: String
+  enabled: Boolean
   avatarUrl: String
   emailVerified: Boolean
   contactVerified: Boolean
   addresses(after: String, first: Int, before: String, last: Int): AddressConnection
-  vouchers(all: Boolean, after: String, first: Int, before: String, last: Int): VoucherConnection
+  vouchers(all: Boolean, search: String, after: String, first: Int, before: String, last: Int): VoucherConnection
   order(serialNumber: String!): Order
   orders(search: String, after: String, first: Int, before: String, last: Int): OrderConnection
   transactions(search: String, after: String, first: Int, before: String, last: Int): TransactionConnection
@@ -847,8 +860,8 @@ type Viewer implements Node {
   cloth(id: String!): Cloth
   clothes(after: String, first: Int, before: String, last: Int): ClothConnection
   categories(after: String, first: Int, before: String, last: Int): ClothCategoryConnection
-  timeSlotTempaltes(after: String, first: Int, before: String, last: Int): TimeSlotTemplateConnection
-  timeSlots(date: String!): TimeSlot
+  timeSlotTemplates(after: String, first: Int, before: String, last: Int): TimeSlotTemplateConnection
+  timeSlots(date: String!, after: String, first: Int, before: String, last: Int): TimeSlotConnection
   factories(search: String, after: String, first: Int, before: String, last: Int): FactoryConnection
   promoCodes(search: String, after: String, first: Int, before: String, last: Int): PromoCodeConnection
   banners(search: String, after: String, first: Int, before: String, last: Int): BannerConnection

@@ -25,6 +25,10 @@ export function getUserInputs(update, sensitive) {
 		contact: {
 			type: GraphQLString,
 			description: 'contact phone number'
+		},
+		enabled: {
+			type: GraphQLBoolean,
+			description: 'enabled'
 		}
 	};	
 }
@@ -44,26 +48,4 @@ export const userFields = {
 		description: 'contact phoen verified'
 	}
 };
-
-// export const userPaginationInputs = {
-// 	role: {
-// 	  type: new GraphQLNonNull(GraphQLString),
-// 	  description: 'user role'
-// 	},
-// 	...searchPaginationInput
-// };
-
-// export function resolveUserPagination(obj, {role, search, page, limit}) {
-// 	return resolvePagination(DBUser, search?{
-// 			$or: [
-// 			  {name: {$like: `%${search}%`}},
-// 			  {email: {$like: `%${search}%`}},
-// 			  {contact: {$like: `%${search}%`}}
-// 			],
-// 			$and: {
-// 				role
-// 			}
-// 		}:{role}, page, limit);
-// }
-
 

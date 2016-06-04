@@ -15,7 +15,8 @@ import {
   toGlobalId,
   fromGlobalId,
   nodeDefinitions,
-  connectionDefinitions
+  connectionDefinitions,
+  connectionFromArray
 } from 'graphql-relay';
 
 import {
@@ -427,11 +428,24 @@ export const GraphQLUser = new GraphQLObjectType({
           type: GraphQLBoolean,
           description: 'show all voucher include used voucher'
         },
+        search: {
+          type: GraphQLString,
+          description: 'search order by order id'
+        },
         ...connectionArgs
       },
-      resolve: (user, {all, ...args}) => {
+      resolve: (user, {all, search, ...args}) => {
         const userId = toGlobalId('User', user.id);
-        return modelConnection(DBVoucher, {where: all?{userId}:{userId, used: false}}, args);
+
+        let query = {where:{userId}};
+        if (!all) {
+          query.where.used = false;
+        }
+        if (search) {
+          query.where.title = {$like: `%${search}%`};
+        }
+
+        return modelConnection(DBVoucher, query, args);
       }
     },
     order: {
@@ -720,7 +734,7 @@ export const GraphQLViewer =  new GraphQLObjectType({
       resolve: (obj, args) =>
         modelConnection(DBClothCategory, {}, args)
     },
-    timeSlotTempaltes: {
+    timeSlotTemplates: {
       type: GraphQLTimeSlotTemplateConnection,
       args: {
         ...connectionArgs
@@ -729,22 +743,29 @@ export const GraphQLViewer =  new GraphQLObjectType({
         modelConnection(DBTimeSlotTemplate, {}, args)
     },
     timeSlots: {
-      type: GraphQLTimeSlot,
+      type: GraphQLTimeSlotConnection,
       args: {
         date: {
           type: new GraphQLNonNull(GraphQLString),
           description: 'date'
-        }
+        },
+        ...connectionArgs
       },
-      resolve: (obj, {date}) =>
+      resolve: (obj, {date, ...args}) =>
         DBTimeSlot.findAll({where:{date: formatToDay(date)}})
           .then(timeSlots => {
             if (timeSlots && timeSlots.length > 0) {
-              return timeSlots;
+              return connectionFromArray(timeSlots, args);
             } else {
               return DBTimeSlotTemplate.findAll()
                 .then(templates => {
+                  const defaultSlots = templates.map(template => ({
+                    ...templates,
+                    date,
+                    enabled: true
+                  }));
 
+                  return connectionFromArray(defaultSlots, args);
                 });
             }
           })

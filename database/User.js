@@ -1,14 +1,11 @@
 import sequelize from './connection';
+import { toGlobalId } from 'graphql-relay';
 import { STRING, ENUM, BOOLEAN } from 'sequelize';
 import Permission from './Permission';
+import Wallet from './Wallet';
 import bcrypt from 'bcrypt';
 
 const User = sequelize.define('user', {
-	role: {
-		type: ENUM,
-		values: ['client', 'worker', 'admin'],
-		allowNull: false
-	},
 	email: {
 		type: STRING,
 		allowNull: false,
@@ -47,7 +44,7 @@ const User = sequelize.define('user', {
 	verifyCode: {
 		type: STRING
 	},
-	banned: {
+	enabled: {
 		type: BOOLEAN,
 		defaultValue: false
 	},
@@ -61,10 +58,14 @@ const User = sequelize.define('user', {
 			user.password = bcrypt.hashSync(user.password, 10);
 		},
 		afterCreate: (user, options, cb) => {
-			Permission.create({
-				userId: user.id
+			Wallet.create({
+				userId: toGlobalId('User', user.id),
+				credit: 0,
 			})
-			.then(permission => cb())
+			.then(() => Permission.create({
+				userId: toGlobalId('User', user.id)
+			}))
+			.then(() => cb())
 			.catch(err => cb(err));
 		} 
 	}

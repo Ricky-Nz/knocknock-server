@@ -17,12 +17,12 @@ export function formatDate(date) {
 }
 
 export function formatToDay(date) {
-  const moment = moment(new Date(date));
-  moment.millisecond(0);
-  moment.second(0);
-  moment.minute(0);
-  moment.hour(0);
-  return moment.format();
+  return moment(new Date(date))
+    .millisecond(0)
+    .second(0)
+    .minute(0)
+    .hour(0)
+    .format();
 }
 
 export function calculateOrderId(userId) {
