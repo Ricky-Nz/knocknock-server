@@ -5,11 +5,13 @@ import {
   GraphQLInt
 } from 'graphql';
 
-export function getTimeSlotInputs() {
+export function getTimeSlotInputs(update) {
 	return {
-		date: {
-			type: new GraphQLNonNull(GraphQLInt),
-			description: 'date'
+		...!update&&{
+			date: {
+				type: new GraphQLNonNull(GraphQLInt),
+				description: 'date'
+			}
 		},
 		limit: {
 			type: GraphQLInt,

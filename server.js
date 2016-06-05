@@ -3,6 +3,7 @@ import express from 'express';
 import graphqlHTTP from 'express-graphql';
 import multer  from 'multer';
 import schema from './schema';
+import path from 'path';
 import { connect } from './database';
 
 const PORT = process.env.PORT||3000;
@@ -25,6 +26,7 @@ connect()
       	graphiql: true,
       	rootValue: { request: req }
       })))
-      .listen(PORT, () => console.log(`GraphQL server running on http://localhost:${PORT}/graphql`));
+      .use(express.static(path.join(__dirname, 'public')))
+      .listen(PORT, () => console.log(`GraphQL server running on http://localhost:${PORT}`));
   })
   .catch(err => console.log(err));

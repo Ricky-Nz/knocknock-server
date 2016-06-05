@@ -11,7 +11,7 @@ export default mutationWithClientMutationId({
 			type: new GraphQLNonNull(GraphQLString),
 			description: 'update item id'
 		},
-		...getTimeSlotInputs()
+		...getTimeSlotInputs(true)
 	},
 	outputFields: {
 		timeSlot: {
@@ -21,6 +21,7 @@ export default mutationWithClientMutationId({
 	},
 	mutateAndGetPayload: ({id, ...args}) => {
 		const {id: localId} = fromGlobalId(id);
+
 		return DBTimeSlot.update(args, {where: {id: localId}})
 			.then(() => ({localId}));
 	}

@@ -27,5 +27,9 @@ export function getFeedbackInputs() {
 }
 
 export const feedbackFields = {
-	...getFeedbackInputs()
+	...getFeedbackInputs(),
+	createdAt: {
+		type: new GraphQLNonNull(GraphQLString),
+		description: 'create time'
+	}
 };

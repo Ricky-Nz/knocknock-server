@@ -370,7 +370,7 @@ export const GraphQLOrder = new GraphQLObjectType({
         ...connectionArgs
       },
       resolve: (order, args) =>
-        modelConnection(DBOrderItem, {where:{orderId: toGlobalId('Order', order.id)}}, args)
+        modelConnection(DBOrderItem, {where:{serialNumber: order.serialNumber}}, args)
     }
   },
   interfaces: [nodeInterface]
@@ -564,7 +564,7 @@ export const {
   nodeType: GraphQLAdmin
 });
 
-export const GraphQLViewer =  new GraphQLObjectType({
+export const GraphQLViewer = new GraphQLObjectType({
   name: 'Viewer',
   fields: {
     id: globalIdField('Viewer', () => 'VIEWER'),
@@ -681,11 +681,29 @@ export const GraphQLViewer =  new GraphQLObjectType({
         ...connectionArgs
       },
       resolve: (obj, {userId, search, status, afterDate, beforeDate, ...args}) => {
-        let query = {where:{}};
+        let query = {where:{status:{$notIn:['order complete', 'deleted', 'canceled']}}};
         if (userId) query.where.userId = userId;
-        if (search) query.where.id = {$like: `%${search}%`};
+        if (search) query.where.serialNumber = {$like: `%${search}%`};
         if (status && status.length > 0) query.where.status = {$in: status};
         if (afterDate||beforeDate) query.where.pickupDate = calculateTimeRnage(afterDate, beforeDate);
+
+        return modelConnection(DBOrder, query, args);
+      }
+    },
+    histories: {
+      type: GraphQLOrderConnection,
+      args: {
+        search: {
+          type: GraphQLString,
+          description: 'search by order id'
+        },
+        ...connectionArgs
+      },
+      resolve: (obj, {search, ...args}) => {
+        let query = {where:{status: {$in: ['order complete', 'deleted', 'canceled']}}};
+        if (search) {
+          query.where.serialNumber = {$like: `%${search}%`};
+        }
 
         return modelConnection(DBOrder, query, args);
       }
@@ -721,18 +739,47 @@ export const GraphQLViewer =  new GraphQLObjectType({
     clothes: {
     	type: GraphQLClothConnection,
       args: {
+        search: {
+          type: GraphQLString,
+          description: 'search order by order id'
+        },
+        categoryId: {
+          type: GraphQLString,
+          description: 'category'
+        },
         ...connectionArgs
       },
-    	resolve: (obj, args) =>
-        modelConnection(DBCloth, {}, args)
+    	resolve: (obj, {search, categoryId, ...args}) => {
+        let query = {where:{}};
+        if (search) {
+          query.where['$or'] = [
+            {nameCn: {$like: `%${search}%`}},
+            {nameEn: {$like: `%${search}%`}}
+          ];
+        }
+        if (categoryId) {
+          query.where.categoryId = categoryId;
+        }
+
+        return modelConnection(DBCloth, query, args);
+      }
     },
     categories: {
       type: GraphQLClothCategoryConnection,
       args: {
+        search: {
+          type: GraphQLString,
+          description: 'search order by order id'
+        },
         ...connectionArgs
       },
-      resolve: (obj, args) =>
-        modelConnection(DBClothCategory, {}, args)
+      resolve: (obj, {search, ...args}) =>
+        modelConnection(DBClothCategory, search?{
+          where: {$or: [
+            {nameCn: {$like: `%${search}%`}},
+            {nameEn: {$like: `%${search}%`}},
+          ]}
+        }:{}, args)
     },
     timeSlotTemplates: {
       type: GraphQLTimeSlotTemplateConnection,
@@ -740,7 +787,7 @@ export const GraphQLViewer =  new GraphQLObjectType({
         ...connectionArgs
       },
       resolve: (obj, args) =>
-        modelConnection(DBTimeSlotTemplate, {}, args)
+        modelConnection(DBTimeSlotTemplate, {order: 'start'}, args)
     },
     timeSlots: {
       type: GraphQLTimeSlotConnection,
@@ -751,24 +798,29 @@ export const GraphQLViewer =  new GraphQLObjectType({
         },
         ...connectionArgs
       },
-      resolve: (obj, {date, ...args}) =>
-        DBTimeSlot.findAll({where:{date: formatToDay(date)}})
+      resolve: (obj, {date, ...args}) => {
+        date = formatToDay(date);
+        return DBTimeSlot.findAll({where:{date}})
           .then(timeSlots => {
             if (timeSlots && timeSlots.length > 0) {
               return connectionFromArray(timeSlots, args);
             } else {
               return DBTimeSlotTemplate.findAll()
                 .then(templates => {
-                  const defaultSlots = templates.map(template => ({
-                    ...templates,
+                  const newSlots = templates.map(template => ({
+                    start: template.start,
+                    end: template.end,
+                    limit: template.limit,
                     date,
                     enabled: true
                   }));
 
-                  return connectionFromArray(defaultSlots, args);
-                });
+                  return DBTimeSlot.bulkCreate(newSlots);
+                })
+                .then(() => modelConnection(DBTimeSlot, {where:{date}}, args));
             }
-          })
+          });
+      }
     },
     factories: {
       type: GraphQLFactoryConnection,

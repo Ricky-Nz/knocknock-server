@@ -3,11 +3,11 @@ import { STRING, BOOLEAN, INTEGER } from 'sequelize';
 
 export default sequelize.define('timeslottemplate', {
 	start: {
-		type: STRING,
+		type: INTEGER,
 		allowNull: false
 	},
 	end: {
-		type: STRING,
+		type: INTEGER,
 		allowNull: false
 	},
 	limit: {

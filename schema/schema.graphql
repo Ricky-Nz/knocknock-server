@@ -426,6 +426,7 @@ type Feedback implements Node {
   rating: Float!
   comment: String
   source: String!
+  createdAt: String!
   user: User
 }
 
@@ -762,7 +763,6 @@ type UpdatePromoCodePayload {
 
 input UpdateTimeSlotInput {
   id: String!
-  date: Int!
   limit: Int
   enabled: Boolean
   clientMutationId: String!
@@ -856,10 +856,11 @@ type Viewer implements Node {
   workers(search: String, after: String, first: Int, before: String, last: Int): WorkerConnection
   admins(search: String, after: String, first: Int, before: String, last: Int): AdminConnection
   orders(userId: String, search: String, status: [String], afterDate: String, beforeDate: String, after: String, first: Int, before: String, last: Int): OrderConnection
+  histories(search: String, after: String, first: Int, before: String, last: Int): OrderConnection
   transactions(search: String, after: String, first: Int, before: String, last: Int): TransactionConnection
   cloth(id: String!): Cloth
-  clothes(after: String, first: Int, before: String, last: Int): ClothConnection
-  categories(after: String, first: Int, before: String, last: Int): ClothCategoryConnection
+  clothes(search: String, categoryId: String, after: String, first: Int, before: String, last: Int): ClothConnection
+  categories(search: String, after: String, first: Int, before: String, last: Int): ClothCategoryConnection
   timeSlotTemplates(after: String, first: Int, before: String, last: Int): TimeSlotTemplateConnection
   timeSlots(date: String!, after: String, first: Int, before: String, last: Int): TimeSlotConnection
   factories(search: String, after: String, first: Int, before: String, last: Int): FactoryConnection
