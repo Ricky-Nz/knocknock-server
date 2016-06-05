@@ -1,6 +1,6 @@
 import sequelize from './connection';
 import { STRING, FLOAT, BOOLEAN, INTEGER } from 'sequelize';
-import ClothCategory from './clothCategory';
+import ClothCategory from './ClothCategory';
 
 function updateCategoryCount(instance, fn) {
 	LaundryCloth.count()
