@@ -10,7 +10,7 @@ import order from './Order';
 import orderItem from './OrderItem';
 import transaction from './Transaction';
 import timeslottemplate from './TimeSlotTemplate';
-import timeslot from './Timeslot';
+import timeslot from './TimeSlot';
 import factory from './Factory';
 import wallet from './Wallet';
 import promoCode from './PromoCode';
