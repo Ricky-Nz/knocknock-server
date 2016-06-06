@@ -5,7 +5,7 @@
   "version": "0.1.0",
   "scripts": {
     "start": "babel-node ./server.js",
-    "update-schema": "babel-node ./scripts/updateSchema.js"
+    "update-schema": "babel-node ./build/updateSchema.js"
   },
   "dependencies": {
     "babel-core": "^6.7.7",
@@ -24,6 +24,8 @@
     "moment": "^2.13.0",
     "multer": "^1.1.0",
     "mysql": "^2.10.2",
+    "pg": "^4.5.6",
+    "phpass": "^0.1.1",
     "sequelize": "^3.23.1"
   },
   "devDependencies": {

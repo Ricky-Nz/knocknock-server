@@ -6,6 +6,9 @@ const Address = sequelize.define('address', {
 		type: STRING,
 		allowNull: false
 	},
+	migrateUserId: {
+		type: STRING
+	},
 	postalCode: {
 		type: STRING,
 		allowNull: false

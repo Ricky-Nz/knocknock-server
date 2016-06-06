@@ -1,35 +1,13 @@
-import {
-	GraphQLNonNull,
-	GraphQLInt,
-	GraphQLList
-} from 'graphql';
-
-import {
-	mutationWithClientMutationId,
-	fromGlobalId,
-	toGlobalId,
-	offsetToCursor
-} from 'graphql-relay';
-
-import {
-	getOrderInputs
-} from '../models';
-
-import {
-	GraphQLOrder,
-	GraphQLOrderItemInput,
-	GraphQLOrderEdge,
-	GraphQLUser
-} from '../query';
-
-import { DBOrder, DBUser, DBOrderItem, DBCloth } from '../../database';
-
+import { GraphQLNonNull, GraphQLInt, GraphQLList } from 'graphql';
+import { mutationWithClientMutationId, fromGlobalId, toGlobalId, offsetToCursor } from 'graphql-relay';
+import { User, Order, OrderItem, Cloth } from '../models';
+import { GraphQLOrder, GraphQLOrderItemInput, GraphQLOrderEdge, GraphQLUser } from '../query';
 import { calculateOrderId, formatDate } from '../service';
 
-export default mutationWithClientMutationId({
+const createOrder = mutationWithClientMutationId({
 	name: 'CreateOrder',
 	inputFields: {
-		...getOrderInputs(),
+		...Order.inputs,
 		orderItems: {
 			type: new GraphQLList(GraphQLOrderItemInput),
 			description: 'order items'
@@ -47,14 +25,14 @@ export default mutationWithClientMutationId({
 			type: GraphQLUser,
 			resolve: (order) => {
 				const {id: localId} = fromGlobalId(order.userId);
-				return DBUser.findById(localId);
+				return User.findById(localId);
 			}
 		}
 	},
 	mutateAndGetPayload: ({orderItems, ...args}) =>
 		calculateOrderId(args.userId)
 			.then(serialNumber => {
-				return DBOrder.create({...args, pickupDate: formatDate(args.pickupDate), serialNumber});
+				return Order.create({...args, pickupDate: formatDate(args.pickupDate), serialNumber});
 			})
 			.then(order => {
 				if (!orderItems || orderItems.length === 0) {
@@ -65,7 +43,7 @@ export default mutationWithClientMutationId({
 						return id;
 					});
 
-					return DBCloth.findAll({where:{id:{$in:clothIds}}})
+					return Cloth.findAll({where:{id:{$in:clothIds}}})
 						.then(clothes => {
 							const bulkItems = orderItems.map(item => {
 								const {id: localClothId} = fromGlobalId(item.productId);
@@ -94,9 +72,38 @@ export default mutationWithClientMutationId({
 								};
 							});
 
-							return DBOrderItem.bulkCreate(bulkItems);
+							return OrderItem.bulkCreate(bulkItems);
 						})
 						.then(() => order);
 				}
 			})
 });
+
+const updateOrder = mutationWithClientMutationId({
+	name: 'UpdateOrder',
+	inputFields: {
+		id: {
+			type: new GraphQLNonNull(GraphQLString),
+			description: 'update order id'
+		},
+		...Order.updates
+	},
+	outputFields: {
+		order: {
+			type: GraphQLOrder,
+			resolve: ({localId}) => Order.findById(localId)
+		}
+	},
+	mutateAndGetPayload: ({id, ...args}) => {
+		const {id: localId} = fromGlobalId(id);
+		return Order.update(args, {where:{id: localId}})
+			.then(() => ({localId}));
+	}
+});
+
+export default {
+	createOrder,
+	updateOrder
+}
+
+

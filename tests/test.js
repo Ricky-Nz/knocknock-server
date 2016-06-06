@@ -1,7 +1,7 @@
-// Load Chance
-var Chance = require('chance');
+class Test {
+	static is() {
+		return true
+	}
+}
 
-// Instantiate Chance so it can be used
-var chance = new Chance();
-
-console.log(chance.string({pool: 'poiuytrewqasdfghjklmnbvcxz1234567890', length: 12}));
+console.log(Test.is());

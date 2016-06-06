@@ -1,26 +1,37 @@
-import {
-  GraphQLBoolean,
-  GraphQLNonNull,
-  GraphQLInt
-} from 'graphql';
+import { GraphQLBoolean, GraphQLNonNull, GraphQLInt } from 'graphql';
+import { DBTimeSlotTemplate } from '../../database';
+import { buildModel } from './modelCommon';
 
-export function getTimeSlotTemplateInputs(update) {
-	return {
-		start: {
-			type: update ? GraphQLInt : new GraphQLNonNull(GraphQLInt),
-			description: 'start time'
-		},
-		end: {
-			type: update ? GraphQLInt : new GraphQLNonNull(GraphQLInt),
-			description: 'end time'
-		},
-		limit: {
-			type: update ? GraphQLInt : new GraphQLNonNull(GraphQLInt),
-			description: 'default slot limit'
-		}
-	};
-}
+const staticFields = {
 
-export const timeSlotTemplateFields = {
-	...getTimeSlotTemplateInputs()
+};
+
+const mutableFields = (update) => ({
+	start: {
+		type: update ? GraphQLInt : new GraphQLNonNull(GraphQLInt),
+		description: 'start time'
+	},
+	end: {
+		type: update ? GraphQLInt : new GraphQLNonNull(GraphQLInt),
+		description: 'end time'
+	},
+	limit: {
+		type: update ? GraphQLInt : new GraphQLNonNull(GraphQLInt),
+		description: 'default slot limit'
+	}
+});
+
+export default {
+	inputs: {
+		...staticFields,
+		...mutableFields()
+	},
+	updates: {
+		...mutableFields(true)
+	},
+	fields: {
+		...staticFields,
+		...mutableFields(false, true)
+	},
+	...DBTimeSlotTemplate
 };

@@ -1,26 +1,37 @@
-import {
-  GraphQLNonNull,
-  GraphQLString,
-  GraphQLInt
-} from 'graphql';
+import { GraphQLNonNull, GraphQLString, GraphQLInt } from 'graphql';
+import { DBCategory } from '../../database';
+import { buildModel } from './modelCommon';
 
-export function getClothCategoryInpts(update) {
-	return {
-		nameCn: {
-			type: update ? GraphQLString : new GraphQLNonNull(GraphQLString),
-			description: 'chinese name'
-		},
-		nameEn: {
-			type: update ? GraphQLString : new GraphQLNonNull(GraphQLString),
-			description: 'english name'
-		}
-	};
-}
+const staticFields = {
 
-export const clothCategoryFields = {
-	...getClothCategoryInpts(),
-	count: {
-		type: GraphQLInt,
-		description: 'items count belong to this category'
+};
+
+const mutableFields = (update) => ({
+	nameCn: {
+		type: update ? GraphQLString : new GraphQLNonNull(GraphQLString),
+		description: 'chinese name'
+	},
+	nameEn: {
+		type: update ? GraphQLString : new GraphQLNonNull(GraphQLString),
+		description: 'english name'
 	}
+});
+
+export default {
+	inputs: {
+		...staticFields,
+		...mutableFields()
+	},
+	updates: {
+		...mutableFields(true)
+	},
+	fields: {
+		...staticFields,
+		...mutableFields(false),
+		count: {
+			type: GraphQLInt,
+			description: 'items count belong to this category'
+		}
+	},
+	...DBCategory
 };

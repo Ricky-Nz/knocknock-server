@@ -20,45 +20,25 @@ import {
 } from 'graphql-relay';
 
 import {
-  userFields,
-  adminFields,
-  workerFields,
-	clothFields,
-  clothCategoryFields,
-  addressFields,
-  voucherFields,
-  orderFields,
-  orderItemFields,
-  transactionFields,
-  timeSlotTemplateFields,
-  timeSlotFields,
-  factoryFields,
-  walletFields,
-  getOrderItemInputs,
-  promoCodeFields,
-  bannerFields,
-  feedbackFields
+  User,
+  Admin,
+  Worker,
+  Address,
+  Cloth,
+  Viewer,
+  ClothCategory,
+  Voucher,
+  Order,
+  OrderItem,
+  Transaction,
+  TimeSlotTemplate,
+  TimeSlot,
+  Factory,
+  Wallet,
+  PromoCode,
+  Banner,
+  Feedback
 } from '../models';
-
-import {
-  DBUser,
-  DBAdmin,
-  DBWorker,
-  DBAddress,
-  DBCloth,
-  DBClothCategory,
-  DBVoucher,
-  DBOrder,
-  DBOrderItem,
-  DBTransaction,
-  DBTimeSlotTemplate,
-  DBTimeSlot,
-  DBFactory,
-  DBWallet,
-  DBPromoCode,
-  DBBanner,
-  DBFeedback
-} from '../../database';
 
 import { modelConnection, formatToDay, calculateTimeRnage } from '../service';
 
@@ -68,42 +48,42 @@ const { nodeInterface, nodeField } = nodeDefinitions(
   (globalId) => {
     const { type, id } = fromGlobalId(globalId);
 
-    if (type === 'User') {
-      return DBUser.findById(id);
-    } else if (type === 'Admin') {
-      return DBAdmin.findById(id);
-    } else if (type === 'Worker') {
-      return DBWorker.findById(id);
-    } else if (type === 'Address') {
-      return DBAddress.findById(id);
-    } else if (type === 'Cloth') {
-      return DBCloth.findById(id);
-    } else if (type === 'Viewer') {
+    if (type === 'Viewer') {
       return new FeakViewerClass();
+    } else if (type === 'User') {
+      return User.findById(id);
+    } else if (type === 'Admin') {
+      return Admin.findById(id);
+    } else if (type === 'Worker') {
+      return Worker.findById(id);
+    } else if (type === 'Address') {
+      return Address.findById(id);
+    } else if (type === 'Cloth') {
+      return Cloth.findById(id);
     } else if (type === 'ClothCategory') {
-      return DBClothCategory.findById(id);
+      return ClothCategory.findById(id);
     } else if (type === 'Voucher') {
-      return DBVoucher.findById(id);
+      return Voucher.findById(id);
     } else if (type === 'Order') {
-      return DBOrder.findById(id);
+      return Order.findById(id);
     } else if (type === 'OrderItem') {
-      return DBOrderItem.findById(id);
+      return OrderItem.findById(id);
     } else if (type === 'Transaction') {
-      return DBTransaction.findById(id);
+      return Transaction.findById(id);
     } else if (type === 'TimeSlotTemplate') {
-      return DBTimeSlotTemplate.findById(id);
+      return TimeSlotTemplate.findById(id);
     } else if (type === 'TimeSlot') {
-      return DBTimeSlot.findById(id);
+      return TimeSlot.findById(id);
     } else if (type === 'Factory') {
-      return DBFactory.findById(id);
+      return Factory.findById(id);
     } else if (type === 'Wallet') {
-      return DBWallet.findById(id);
+      return Wallet.findById(id);
     } else if (type === 'PromoCode') {
-      return DBPromoCode.findById(id);
+      return PromoCode.findById(id);
     } else if (type === 'Banner') {
-      return DBBanner.findById(id);
+      return Banner.findById(id);
     } else if (type === 'Feedback') {
-      return DBFeedback.findById(id);
+      return Feedback.findById(id);
     } else {
       return null;
     }
@@ -111,39 +91,39 @@ const { nodeInterface, nodeField } = nodeDefinitions(
   (obj) => {
   	if (obj instanceof FeakViewerClass) {
     	return GraphQLViewer;
-    } else if (obj instanceof DBUser) {
+    } else if (User.is(obj)) {
   		return GraphQLUser;
-  	} else if (obj instanceof DBAdmin) {
+  	} else if (Admin.is(obj)) {
       return GraphQLAdmin;
-    } else if (obj instanceof DBWorker) {
+    } else if (Worker.is(obj)) {
       return GraphQLWorker;
-    } else if (obj instanceof DBAddress) {
+    } else if (Address.is(obj)) {
       return GraphQLAddress;
-    } else if (obj instanceof DBCloth) {
+    } else if (Cloth.is(obj)) {
       return GraphQLCloth;
-    } else if (obj instanceof DBClothCategory) {
+    } else if (ClothCategory.is(obj)) {
       return GraphQLClothCategory;
-    } else if (obj instanceof DBVoucher) {
+    } else if (Voucher.is(obj)) {
       return GraphQLVoucher;
-    } else if (obj instanceof DBOrder) {
+    } else if (Order.is(obj)) {
       return GraphQLOrder;
-    } else if (obj instanceof DBOrderItem) {
+    } else if (OrderItem.is(obj)) {
       return GraphQLOrderItem;
-    } else if (obj instanceof DBTransaction) {
+    } else if (Transaction.is(obj)) {
       return GraphQLTransaction;
-    } else if (obj instanceof DBTimeSlotTemplate) {
+    } else if (TimeSlotTemplate.is(obj)) {
       return GraphQLTimeSlotTemplate;
-    } else if (obj instanceof DBTimeSlot) {
+    } else if (TimeSlot.is(obj)) {
       return GraphQLTimeSlot;
-    } else if (obj instanceof DBFactory) {
+    } else if (Factory.is(obj)) {
       return GraphQLFactory;
-    } else if (obj instanceof DBWallet) {
+    } else if (Wallet.is(obj)) {
       return GraphQLWallet;
-    } else if (obj instanceof DBPromoCode) {
+    } else if (PromoCode.is(obj)) {
       return GraphQLPromoCode;
-    } else if (obj instanceof DBBanner) {
+    } else if (Banner.is(obj)) {
       return GraphQLBanner;
-    } else if (obj instanceof DBFeedback) {
+    } else if (Feedback.is(obj)) {
       return GraphQLFeedback;
     } else {
   		return null;
@@ -155,7 +135,7 @@ export const GraphQLBanner = new GraphQLObjectType({
   name: 'Banner',
   fields: {
     id: globalIdField('Banner'),
-    ...bannerFields
+    ...Banner.fields
   },
   interfaces: [nodeInterface]
 })
@@ -171,7 +151,7 @@ export const GraphQLPromoCode = new GraphQLObjectType({
   name: 'PromoCode',
   fields: {
     id: globalIdField('PromoCode'),
-    ...promoCodeFields
+    ...PromoCode.fields
   },
   interfaces: [nodeInterface]
 })
@@ -187,7 +167,7 @@ export const GraphQLFactory = new GraphQLObjectType({
   name: 'Factory',
   fields: {
     id: globalIdField('Factory'),
-    ...factoryFields
+    ...Factory.fields
   },
   interfaces: [nodeInterface]
 });
@@ -203,7 +183,7 @@ export const GraphQLTimeSlotTemplate = new GraphQLObjectType({
   name: 'TimeSlotTemplate',
   fields: {
     id: globalIdField('TimeSlotTemplate'),
-    ...timeSlotTemplateFields
+    ...TimeSlotTemplate.fields
   },
   interfaces: [nodeInterface]
 });
@@ -219,7 +199,7 @@ export const GraphQLTimeSlot = new GraphQLObjectType({
   name: 'TimeSlot',
   fields: {
     id: globalIdField('TimeSlot'),
-    ...timeSlotFields
+    ...TimeSlot.fields
   },
   interfaces: [nodeInterface]
 });
@@ -253,15 +233,15 @@ export const GraphQLTransaction = new GraphQLObjectType({
   name: 'Transaction',
   fields: {
     id: globalIdField('Transaction'),
-    ...transactionFields,
+    ...Transaction.fields,
     user: {
       type: GraphQLUserReference,
       resolve: (transaction) => {
         const {id: walletId} = fromGlobalId(transaction.walletId);
-        return DBWallet.findById(walletId)
+        return Transaction.findById(walletId)
           .then(wallet => {
             const {id: userId} = fromGlobalId(wallet.userId);
-            return DBUser.findById(userId);
+            return User.findById(userId);
           })
           .then(user => ({
             id: toGlobalId('User', user.id),
@@ -285,7 +265,7 @@ export const GraphQLClothCategory = new GraphQLObjectType({
   name: 'ClothCategory',
   fields: {
     id: globalIdField('ClothCategory'),
-    ...clothCategoryFields
+    ...ClothCategory.fields
   },
   interfaces: [nodeInterface]
 });
@@ -301,7 +281,7 @@ export const GraphQLCloth = new GraphQLObjectType({
 	name: 'Cloth',
 	fields: {
     id: globalIdField('Cloth'),
-		...clothFields
+		...Cloth.fields
 	},
 	interfaces: [nodeInterface]
 });
@@ -317,7 +297,7 @@ export const GraphQLVoucher = new GraphQLObjectType({
   name: 'Voucher',
   fields: {
     id: globalIdField('Voucher'),
-    ...voucherFields,
+    ...Voucher.fields,
   },
   interfaces: [nodeInterface]
 });
@@ -332,7 +312,7 @@ export const {
 export const GraphQLOrderItemInput = new GraphQLInputObjectType({
   name: 'OrderItemInput',
   fields: {
-    ...getOrderItemInputs()
+    ...OrderItem.inputs
   }
 });
 
@@ -340,7 +320,7 @@ export const GraphQLOrderItem = new GraphQLObjectType({
   name: 'OrderItem',
   fields: {
     id: globalIdField('OrderItem'),
-    ...orderItemFields
+    ...OrderItem.fields
   },
   interfaces: [nodeInterface]
 });
@@ -356,12 +336,12 @@ export const GraphQLOrder = new GraphQLObjectType({
   name: 'Order',
   fields: {
     id: globalIdField('Order'),
-    ...orderFields,
+    ...Order.fields,
     userAvatar: {
       type: GraphQLString,
       resolve: (order) => {
         const {id} = fromGlobalId(order.userId);
-        return DBUser.findById(id).then(user => user.avatarUrl);
+        return User.findById(id).then(user => user.avatarUrl);
       }
     },
     orderItems: {
@@ -370,7 +350,7 @@ export const GraphQLOrder = new GraphQLObjectType({
         ...connectionArgs
       },
       resolve: (order, args) =>
-        modelConnection(DBOrderItem, {where:{serialNumber: order.serialNumber}}, args)
+        modelConnection(OrderItem, {where:{serialNumber: order.serialNumber}}, args)
     }
   },
   interfaces: [nodeInterface]
@@ -387,7 +367,7 @@ export const GraphQLAddress = new GraphQLObjectType({
   name: 'Address',
   fields: {
     id: globalIdField('Address'),
-    ...addressFields
+    ...Address.fields
   },
   interfaces: [nodeInterface]
 });
@@ -403,7 +383,7 @@ export const GraphQLWallet = new GraphQLObjectType({
   name: 'Wallet',
   fields: {
     id: globalIdField('Wallet'),
-    ...walletFields
+    ...Wallet.fields
   },
   interfaces: [nodeInterface]
 });
@@ -412,14 +392,14 @@ export const GraphQLUser = new GraphQLObjectType({
 	name: 'User',
 	fields: {
     id: globalIdField('User'),
-		...userFields,
+		...User.fields,
     addresses: {
       type: GraphQLAddressConnection,
       args: {
         ...connectionArgs
       },
       resolve: (user, args) =>
-        modelConnection(DBAddress, {where:{userId: toGlobalId('User', user.id)}}, args)
+        modelConnection(Address, {where:{userId: toGlobalId('User', user.id)}}, args)
     },
     vouchers: {
       type: GraphQLVoucherConnection,
@@ -445,7 +425,7 @@ export const GraphQLUser = new GraphQLObjectType({
           query.where.title = {$like: `%${search}%`};
         }
 
-        return modelConnection(DBVoucher, query, args);
+        return modelConnection(Voucher, query, args);
       }
     },
     order: {
@@ -456,7 +436,7 @@ export const GraphQLUser = new GraphQLObjectType({
           description: 'order id'
         }
       },
-      resolve: (obj, {serialNumber}) => DBOrder.findOne({where:{serialNumber}})
+      resolve: (obj, {serialNumber}) => Order.findOne({where:{serialNumber}})
     },
     orders: {
       type: GraphQLOrderConnection,
@@ -469,7 +449,7 @@ export const GraphQLUser = new GraphQLObjectType({
       },
       resolve: (user, {search, ...args}) => {
         const userId = toGlobalId('User', user.id);
-        return modelConnection(DBOrder, {where: search?{userId, $or: [
+        return modelConnection(Order, {where: search?{userId, $or: [
             {id: {$like: `%${search}%`}}
           ]}:{userId}}, args);
       }
@@ -485,8 +465,8 @@ export const GraphQLUser = new GraphQLObjectType({
       },
       resolve: (user, {search, ...args}) => {
         const userId = toGlobalId('User', user.id);
-        return DBWallet.findOne({where:{userId}})
-          .then(wallet => modelConnection(DBTransaction, {
+        return Wallet.findOne({where:{userId}})
+          .then(wallet => modelConnection(Transaction, {
             where: {
               walletId: toGlobalId('Wallet', wallet.id),
               ...(search?{referenceNo: {$like: `%${search}%`}}:{})
@@ -496,7 +476,7 @@ export const GraphQLUser = new GraphQLObjectType({
     },
     wallet: {
       type: GraphQLWallet,
-      resolve: (user) => DBWallet.findOne({where:{userId:toGlobalId('User', user.id)}})
+      resolve: (user) => Wallet.findOne({where:{userId:toGlobalId('User', user.id)}})
     }
 	},
 	interfaces: [nodeInterface]
@@ -513,12 +493,12 @@ export const GraphQLFeedback = new GraphQLObjectType({
   name: 'Feedback',
   fields: {
     id: globalIdField('Feedback'),
-    ...feedbackFields,
+    ...Feedback.fields,
     user: {
       type: GraphQLUser,
       resolve: (feedback) => {
         const {id} = fromGlobalId(feedback.userId);
-        return DBUser.findById(id);
+        return User.findById(id);
       }
     }
   },
@@ -536,7 +516,7 @@ export const GraphQLWorker = new GraphQLObjectType({
   name: 'Worker',
   fields: {
     id: globalIdField('Worker'),
-    ...workerFields
+    ...Worker.fields
   },
   interfaces: [nodeInterface]
 });
@@ -552,7 +532,7 @@ export const GraphQLAdmin = new GraphQLObjectType({
   name: 'Admin',
   fields: {
     id: globalIdField('Admin'),
-    ...adminFields
+    ...Admin.fields
   },
   interfaces: [nodeInterface]
 });
@@ -578,7 +558,7 @@ export const GraphQLViewer = new GraphQLObjectType({
       },
       resolve: (obj, {id}) => {
         const {id: localId} = fromGlobalId(id);
-        return DBUser.findById(localId);
+        return User.findById(localId);
       }
     },
     worker: {
@@ -591,7 +571,7 @@ export const GraphQLViewer = new GraphQLObjectType({
       },
       resolve: (obj, {id}) => {
         const {id: localId} = fromGlobalId(id);
-        return DBWorker.findById(localId);
+        return Worker.findById(localId);
       }
     },
     admin: {
@@ -604,7 +584,7 @@ export const GraphQLViewer = new GraphQLObjectType({
       },
       resolve: (obj, {id}) => {
         const {id: localId} = fromGlobalId(id);
-        return DBAdmin.findById(localId);
+        return Admin.findById(localId);
       }
     },
     users: {
@@ -617,7 +597,7 @@ export const GraphQLViewer = new GraphQLObjectType({
         ...connectionArgs
       },
       resolve: (obj, {search, ...args}) =>
-        modelConnection(DBUser, search?{where:{$or:[
+        modelConnection(User, search?{where:{$or:[
             {name: {$like: `%${search}%`}},
             {email: {$like: `%${search}%`}},
             {contact: {$like: `%${search}%`}}
@@ -633,7 +613,7 @@ export const GraphQLViewer = new GraphQLObjectType({
         ...connectionArgs
       },
       resolve: (obj, {search, ...args}) =>
-        modelConnection(DBWorker, search?{where:{$or:[
+        modelConnection(Worker, search?{where:{$or:[
             {name: {$like: `%${search}%`}},
             {email: {$like: `%${search}%`}},
             {contact: {$like: `%${search}%`}}
@@ -649,7 +629,7 @@ export const GraphQLViewer = new GraphQLObjectType({
         ...connectionArgs
       },
       resolve: (obj, {search, ...args}) =>
-        modelConnection(DBAdmin, search?{where:{$or:[
+        modelConnection(Admin, search?{where:{$or:[
             {name: {$like: `%${search}%`}},
             {email: {$like: `%${search}%`}},
             {contact: {$like: `%${search}%`}}
@@ -687,7 +667,7 @@ export const GraphQLViewer = new GraphQLObjectType({
         if (status && status.length > 0) query.where.status = {$in: status};
         if (afterDate||beforeDate) query.where.pickupDate = calculateTimeRnage(afterDate, beforeDate);
 
-        return modelConnection(DBOrder, query, args);
+        return modelConnection(Order, query, args);
       }
     },
     histories: {
@@ -705,7 +685,7 @@ export const GraphQLViewer = new GraphQLObjectType({
           query.where.serialNumber = {$like: `%${search}%`};
         }
 
-        return modelConnection(DBOrder, query, args);
+        return modelConnection(Order, query, args);
       }
     },
     transactions: {
@@ -718,7 +698,7 @@ export const GraphQLViewer = new GraphQLObjectType({
         ...connectionArgs
       },
       resolve: (obj, {search, ...args}) => {
-        return modelConnection(DBTransaction, search?{where: {
+        return modelConnection(Transaction, search?{where: {
           referenceNo: {$like: `%${search}%`}
         }}:{}, args);
       }
@@ -733,7 +713,7 @@ export const GraphQLViewer = new GraphQLObjectType({
       },
       resolve: (obj, {id}) => {
         const {id: localId} = fromGlobalId(id);
-        return DBCloth.findById(localId);
+        return Cloth.findById(localId);
       }
     },
     clothes: {
@@ -761,7 +741,7 @@ export const GraphQLViewer = new GraphQLObjectType({
           query.where.categoryId = categoryId;
         }
 
-        return modelConnection(DBCloth, query, args);
+        return modelConnection(Cloth, query, args);
       }
     },
     categories: {
@@ -774,7 +754,7 @@ export const GraphQLViewer = new GraphQLObjectType({
         ...connectionArgs
       },
       resolve: (obj, {search, ...args}) =>
-        modelConnection(DBClothCategory, search?{
+        modelConnection(ClothCategory, search?{
           where: {$or: [
             {nameCn: {$like: `%${search}%`}},
             {nameEn: {$like: `%${search}%`}},
@@ -787,7 +767,7 @@ export const GraphQLViewer = new GraphQLObjectType({
         ...connectionArgs
       },
       resolve: (obj, args) =>
-        modelConnection(DBTimeSlotTemplate, {order: 'start'}, args)
+        modelConnection(TimeSlotTemplate, {order: 'start'}, args)
     },
     timeSlots: {
       type: GraphQLTimeSlotConnection,
@@ -800,12 +780,12 @@ export const GraphQLViewer = new GraphQLObjectType({
       },
       resolve: (obj, {date, ...args}) => {
         date = formatToDay(date);
-        return DBTimeSlot.findAll({where:{date}})
+        return TimeSlot.findAll({where:{date}})
           .then(timeSlots => {
             if (timeSlots && timeSlots.length > 0) {
               return connectionFromArray(timeSlots, args);
             } else {
-              return DBTimeSlotTemplate.findAll()
+              return TimeSlotTemplate.findAll()
                 .then(templates => {
                   const newSlots = templates.map(template => ({
                     start: template.start,
@@ -815,9 +795,9 @@ export const GraphQLViewer = new GraphQLObjectType({
                     enabled: true
                   }));
 
-                  return DBTimeSlot.bulkCreate(newSlots);
+                  return TimeSlot.bulkCreate(newSlots);
                 })
-                .then(() => modelConnection(DBTimeSlot, {where:{date}}, args));
+                .then(() => modelConnection(TimeSlot, {where:{date}}, args));
             }
           });
       }
@@ -832,7 +812,7 @@ export const GraphQLViewer = new GraphQLObjectType({
         ...connectionArgs
       },
       resolve: (obj, {search, ...args}) =>
-        modelConnection(DBFactory, search?{where:{
+        modelConnection(Factory, search?{where:{
           $or: [
             {name: {$like: `%${search}%`}},
             {address: {$like: `%${search}%`}},
@@ -851,7 +831,7 @@ export const GraphQLViewer = new GraphQLObjectType({
         ...connectionArgs
       },
       resolve: (obj, {search, ...args}) =>
-        modelConnection(DBPromoCode, search?{where:{
+        modelConnection(PromoCode, search?{where:{
           code: {$like: `%${search}%`}
         }}:{}, args)
     },
@@ -865,7 +845,7 @@ export const GraphQLViewer = new GraphQLObjectType({
         ...connectionArgs
       },
       resolve: (obj, {search, ...args}) =>
-        modelConnection(DBBanner, search?{where:{
+        modelConnection(Banner, search?{where:{
           title: {$like: `%${search}%`}
         }, order: 'position'}:{order: 'position'}, args)
     },
@@ -879,7 +859,7 @@ export const GraphQLViewer = new GraphQLObjectType({
         ...connectionArgs
       },
       resolve: (obj, {search, ...args}) =>
-        modelConnection(DBFeedback, search?{where:{
+        modelConnection(Feedback, search?{where:{
           comment: {$like: `%${search}%`}
         }}:{}, args)
     },

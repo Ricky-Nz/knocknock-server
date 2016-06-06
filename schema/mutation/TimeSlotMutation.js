@@ -1,28 +1,32 @@
 import { GraphQLString, GraphQLNonNull } from 'graphql';
 import { mutationWithClientMutationId, fromGlobalId } from 'graphql-relay';
-import { getTimeSlotInputs } from '../models';
+import { TimeSlot } from '../models';
 import { GraphQLTimeSlot } from '../query';
-import { DBTimeSlot } from '../../database';
 
-export default mutationWithClientMutationId({
+const updateTimeSlot = mutationWithClientMutationId({
 	name: 'UpdateTimeSlot',
 	inputFields: {
 		id: {
 			type: new GraphQLNonNull(GraphQLString),
 			description: 'update item id'
 		},
-		...getTimeSlotInputs(true)
+		...TimeSlot.inputs
 	},
 	outputFields: {
 		timeSlot: {
 			type: GraphQLTimeSlot,
-			resolve: ({localId}) => DBTimeSlot.findById(localId)
+			resolve: ({localId}) => TimeSlot.findById(localId)
 		}
 	},
 	mutateAndGetPayload: ({id, ...args}) => {
 		const {id: localId} = fromGlobalId(id);
 
-		return DBTimeSlot.update(args, {where: {id: localId}})
+		return TimeSlot.update(args, {where: {id: localId}})
 			.then(() => ({localId}));
 	}
 });
+
+
+export default {
+	updateTimeSlot
+};

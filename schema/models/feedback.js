@@ -1,35 +1,45 @@
-import {
-  GraphQLBoolean,
-  GraphQLNonNull,
-  GraphQLString,
-  GraphQLFloat
-} from 'graphql';
+import { GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
+import { DBFeedback } from '../../database';
+import { buildModel } from './modelCommon';
 
-export function getFeedbackInputs() {
-	return {
-		userId: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'user id'
-		},
-		rating: {
-			type: new GraphQLNonNull(GraphQLFloat),
-			description: 'rating'
-		},
-		comment: {
-			type: GraphQLString,
-			description: 'description'
-		},
-		source: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'feedback source'
-		}
-	};
-}
+const staticFields = {
 
-export const feedbackFields = {
-	...getFeedbackInputs(),
-	createdAt: {
+};
+
+const mutableFields = (update) => ({
+	userId: {
 		type: new GraphQLNonNull(GraphQLString),
-		description: 'create time'
+		description: 'user id'
+	},
+	rating: {
+		type: new GraphQLNonNull(GraphQLFloat),
+		description: 'rating'
+	},
+	comment: {
+		type: GraphQLString,
+		description: 'description'
+	},
+	source: {
+		type: new GraphQLNonNull(GraphQLString),
+		description: 'feedback source'
 	}
+});
+
+export default {
+	inputs: {
+		...staticFields,
+		...mutableFields()
+	},
+	updates: {
+		...mutableFields(true)
+	},
+	fields: {
+		...staticFields,
+		...mutableFields(false, true),
+		createdAt: {
+			type: new GraphQLNonNull(GraphQLString),
+			description: 'create time'
+		}
+	},
+	...DBFeedback
 };
