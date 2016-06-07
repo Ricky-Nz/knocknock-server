@@ -3,7 +3,7 @@ import { mutationWithClientMutationId, offsetToCursor } from 'graphql-relay';
 import { Cloth } from '../models';
 import { GraphQLCloth, GraphQLClothEdge, GraphQLViewer } from '../query';
 import { processFileUpload } from '../service';
-import { deleteFile } from '../../datastorage';
+import { deleteFile } from '../../service/datastorage';
 
 const createCloth = mutationWithClientMutationId({
 	name: 'CreateCloth',

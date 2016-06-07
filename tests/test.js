@@ -1,12 +1,4 @@
+import { DBUserAddresses } from '../service/database';
 
-function test(test) {
-	return {
-		id: 'TT',
-		...test&&{
-			test: 'test'
-		}
-	};
-}
-
-console.log(test());
-console.log(test(true));
+DBUserAddresses.findOne({attributes: ['id', 'user_id', 'contact_no', 'unit_number', 'name', 'address', 'postal_code', 'apartment_type', 'district_id', 'note', 'created_on']})
+	.then(address => console.log(address));

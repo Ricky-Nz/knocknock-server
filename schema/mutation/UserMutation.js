@@ -3,7 +3,7 @@ import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'grap
 import { GraphQLUserEdge, GraphQLViewer } from '../query';
 import { User } from '../models';
 import { processFileUpload } from '../service';
-import { deleteFile } from '../../datastorage';
+import { deleteFile } from '../../service/datastorage';
 
 const createUser = mutationWithClientMutationId({
 	name: 'CreateUser',

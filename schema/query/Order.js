@@ -1,4 +1,4 @@
-import { GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
+import { GraphQLObjectType, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField, connectionArgs } from 'graphql-relay';
 import { DBUsers, DBOrderStatuses, DBOrderDetails } from '../../service/database';
 import { modelConnection } from '../utils';

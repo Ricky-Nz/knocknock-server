@@ -1,4 +1,4 @@
-import { GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
+import { GraphQLObjectType, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField } from 'graphql-relay';
 
 // id			
@@ -28,39 +28,39 @@ export default function (nodeInterface) {
 	  fields: {
 	  	id: globalIdField('Cloth'),
 			categoryId: {
-				type: new GraphQLNonNull(GraphQLString),
+				type: GraphQLString,
 				reslove: (obj) => obj.sub_category_id
 			},
 			nameEn: {
-				type: new GraphQLNonNull(GraphQLString),
+				type: GraphQLString,
 				reslove: (obj) => obj.name_en
 			},
 			nameCn: {
-				type: new GraphQLNonNull(GraphQLString),
+				type: GraphQLString,
 				reslove: (obj) => obj.name_ch
 			},
 			washPrice: {
-				type: new GraphQLNonNull(GraphQLFloat),
+				type: GraphQLFloat,
 				reslove: (obj) => obj.wash_iron_price
 			},
 			dryCleanPrice: {
-				type: new GraphQLNonNull(GraphQLFloat),
+				type: GraphQLFloat,
 				reslove: (obj) => obj.dry_clean_price
 			},
 			ironPrice: {
-				type: new GraphQLNonNull(GraphQLFloat),
+				type: GraphQLFloat,
 				reslove: (obj) => obj.iron_price
 			},
 			washPriceDiscount: {
-				type: new GraphQLNonNull(GraphQLFloat),
+				type: GraphQLFloat,
 				reslove: (obj) => obj.discount_wash_iron_price
 			},
 			dryCleanPriceDiscount: {
-				type: new GraphQLNonNull(GraphQLFloat),
+				type: GraphQLFloat,
 				reslove: (obj) => obj.discount_dry_clean_price
 			},
 			ironPriceDiscount: {
-				type: update ? GraphQLFloat : new GraphQLNonNull(GraphQLFloat),
+				type: GraphQLFloat,
 				reslove: (obj) => obj.discount_iron_price
 			},
 			special: {
@@ -68,7 +68,7 @@ export default function (nodeInterface) {
 				reslove: (obj) => obj.special_item
 			},
 			imageUrl: {
-				type: new GraphQLNonNull(GraphQLString),
+				type: GraphQLString,
 				reslove: (obj) => obj.image_url
 			}
 	  },

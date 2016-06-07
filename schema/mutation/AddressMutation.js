@@ -80,7 +80,7 @@ const updateAddress = mutationWithClientMutationId({
 	mutateAndGetPayload: ({id, postalCode, address, contact}) => {
 		const {id: dbId } = fromGlobalId(id);
 		return DBUserAddresses.update({
-				postalCode. postalCode,
+				postalCode,
 				address,
 				contact_no: contact
 			}, {where:{id:dbId}})

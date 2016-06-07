@@ -1,4 +1,4 @@
-import { GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
+import { GraphQLObjectType, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField } from 'graphql-relay';
 
 // id			
@@ -19,7 +19,7 @@ export default function (nodeInterface) {
 			time: {
 				type: GraphQLString,
 				resolve: (obj) => obj.time
-			}
+			},
 			quantity: {
 				type: GraphQLInt,
 				resolve: (obj) => obj.quantity

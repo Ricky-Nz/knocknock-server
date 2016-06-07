@@ -1,5 +1,5 @@
-import { GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
-import { connectionDefinitions, globalIdField } from 'graphql-relay';
+import { GraphQLObjectType, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
+import { connectionDefinitions, globalIdField, connectionArgs } from 'graphql-relay';
 
 // id      
 // first_name      
@@ -46,8 +46,7 @@ export default function (nodeInterface, {
   GraphQLVoucherConnection,
   GraphQLTransactionConnection,
   GraphQLOrderConnection,
-  GraphQLOrder,
-  GraphQLWallet
+  GraphQLOrder
 }) {
   const nodeType = new GraphQLObjectType({
     name: 'User',
@@ -161,10 +160,6 @@ export default function (nodeInterface, {
               }
             }, args));
         }
-      },
-      wallet: {
-        type: GraphQLWallet,
-        resolve: (user) => Wallet.findOne({where:{userId:toGlobalId('User', user.id)}})
       }
     },
     interfaces: [nodeInterface]

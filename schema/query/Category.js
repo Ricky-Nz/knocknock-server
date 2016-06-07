@@ -1,4 +1,4 @@
-import { GraphQLNonNull, GraphQLString, GraphQLInt } from 'graphql';
+import { GraphQLObjectType, GraphQLNonNull, GraphQLString, GraphQLInt } from 'graphql';
 import { connectionDefinitions, globalIdField } from 'graphql-relay';
 
 // id			

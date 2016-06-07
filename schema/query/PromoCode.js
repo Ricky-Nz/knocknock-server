@@ -1,4 +1,4 @@
-import { GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
+import { GraphQLObjectType, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField } from 'graphql-relay';
 
 // id			
@@ -60,11 +60,11 @@ export default function (nodeInterface) {
 				resolve: (obj) => obj.promo_type
 			},
 			flatDiscount: {
-				type: update ? GraphQLFloat,
+				type: GraphQLFloat,
 				resolve: (obj) => obj.flat_discount
 			},
 			discountPercent: {
-				type: update ? GraphQLFloat,
+				type: GraphQLFloat,
 				resolve: (obj) => obj.discount_percent
 			},
 			multipleUse: {

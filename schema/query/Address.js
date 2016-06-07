@@ -1,3 +1,4 @@
+import { GraphQLObjectType, GraphQLNonNull, GraphQLString } from 'graphql';
 import { connectionDefinitions, globalIdField } from 'graphql-relay';
 
 // id			

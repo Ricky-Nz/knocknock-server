@@ -1,110 +1,104 @@
-import {
-  GraphQLList,
-  GraphQLString,
-  GraphQLNonNull,
-  GraphQLObjectType,
-  GraphQLInputObjectType,
-  GraphQLSchema,
-  GraphQLBoolean
-} from 'graphql';
+import { GraphQLObjectType } from 'graphql';
+import { nodeDefinitions } from 'graphql-relay';
+import { Users, Admins, Workers, UserAddresses, Items, SubCategories,
+  Vouchers, Orders, OrderDetails, OrderTransactions, OrderSlots, DistrictTimeSlots,
+  Factories, PromoCodes, PromoionBanners, UserFeedbacks } from '../../service/database';
+import addressQuery from './Address';
+import adminQuery from './Admin';
+import bannerQuery from './Banner';
+import categoryQuery from './Category';
+import clothQuery from './Cloth';
+import factoryQuery from './Factory';
+import feedbackQuery from './Feedback';
+import orderQuery from './Order';
+import orderItemQuery from './OrderItem';
+import promoCodeQuery from './PromoCode';
+import timeSlotQuery from './TimeSlot';
+import timeSlotTemplateQuery from './TimeSlotTemplate';
+import transactionQuery from './Transaction';
+import userQuery from './User';
+import viewerQuery from './Viewer';
+import voucherQuery from './Voucher';
+import workerQuery from './Worker';
 
-import {
-	connectionArgs,
-  cursorToOffset,
-  globalIdField,
-  toGlobalId,
-  fromGlobalId,
-  nodeDefinitions,
-  connectionDefinitions,
-  connectionFromArray
-} from 'graphql-relay';
-
-import address from './Address';
-
-import { modelConnection, formatToDay, calculateTimeRnage } from '../service';
-
-class FeakViewerClass {}
+class Viewer {}
 
 const { nodeInterface, nodeField } = nodeDefinitions(
   (globalId) => {
     const { type, id } = fromGlobalId(globalId);
 
     if (type === 'Viewer') {
-      return new FeakViewerClass();
+      return new Viewer();
     } else if (type === 'User') {
-      return User.findById(id);
+      return Users.findById(id);
     } else if (type === 'Admin') {
-      return Admin.findById(id);
+      return Admins.findById(id);
     } else if (type === 'Worker') {
-      return Worker.findById(id);
+      return Workers.findById(id);
     } else if (type === 'Address') {
-      return Address.findById(id);
+      return UserAddresses.findById(id);
     } else if (type === 'Cloth') {
-      return Cloth.findById(id);
+      return Items.findById(id);
     } else if (type === 'ClothCategory') {
-      return ClothCategory.findById(id);
+      return SubCategories.findById(id);
     } else if (type === 'Voucher') {
-      return Voucher.findById(id);
+      return Vouchers.findById(id);
     } else if (type === 'Order') {
-      return Order.findById(id);
+      return Orders.findById(id);
     } else if (type === 'OrderItem') {
-      return OrderItem.findById(id);
+      return OrderDetails.findById(id);
     } else if (type === 'Transaction') {
-      return Transaction.findById(id);
+      return OrderTransactions.findById(id);
     } else if (type === 'TimeSlotTemplate') {
-      return TimeSlotTemplate.findById(id);
+      return DistrictTimeSlots.findById(id);
     } else if (type === 'TimeSlot') {
-      return TimeSlot.findById(id);
+      return OrderSlots.findById(id);
     } else if (type === 'Factory') {
-      return Factory.findById(id);
-    } else if (type === 'Wallet') {
-      return Wallet.findById(id);
+      return Factories.findById(id);
     } else if (type === 'PromoCode') {
-      return PromoCode.findById(id);
+      return PromoCodes.findById(id);
     } else if (type === 'Banner') {
-      return Banner.findById(id);
+      return PromoionBanners.findById(id);
     } else if (type === 'Feedback') {
-      return Feedback.findById(id);
+      return UserFeedbacks.findById(id);
     } else {
       return null;
     }
   },
   (obj) => {
-  	if (obj instanceof FeakViewerClass) {
+  	if (obj instanceof Viewer) {
     	return GraphQLViewer;
-    } else if (User.is(obj)) {
+    } else if (obj instanceof Users) {
   		return GraphQLUser;
-  	} else if (Admin.is(obj)) {
+  	} else if (obj instanceof Admins) {
       return GraphQLAdmin;
-    } else if (Worker.is(obj)) {
+    } else if (obj instanceof Workers) {
       return GraphQLWorker;
-    } else if (Address.is(obj)) {
+    } else if (obj instanceof UserAddresses) {
       return GraphQLAddress;
-    } else if (Cloth.is(obj)) {
+    } else if (obj instanceof Items) {
       return GraphQLCloth;
-    } else if (ClothCategory.is(obj)) {
+    } else if (obj instanceof SubCategories) {
       return GraphQLClothCategory;
-    } else if (Voucher.is(obj)) {
+    } else if (obj instanceof Vouchers) {
       return GraphQLVoucher;
-    } else if (Order.is(obj)) {
+    } else if (obj instanceof Orders) {
       return GraphQLOrder;
-    } else if (OrderItem.is(obj)) {
+    } else if (obj instanceof OrderDetails) {
       return GraphQLOrderItem;
-    } else if (Transaction.is(obj)) {
+    } else if (obj instanceof OrderTransactions) {
       return GraphQLTransaction;
-    } else if (TimeSlotTemplate.is(obj)) {
+    } else if (obj instanceof DistrictTimeSlots) {
       return GraphQLTimeSlotTemplate;
-    } else if (TimeSlot.is(obj)) {
+    } else if (obj instanceof OrderSlots) {
       return GraphQLTimeSlot;
-    } else if (Factory.is(obj)) {
+    } else if (obj instanceof Factories) {
       return GraphQLFactory;
-    } else if (Wallet.is(obj)) {
-      return GraphQLWallet;
-    } else if (PromoCode.is(obj)) {
+    } else if (obj instanceof PromoCodes) {
       return GraphQLPromoCode;
-    } else if (Banner.is(obj)) {
+    } else if (obj instanceof PromoionBanners) {
       return GraphQLBanner;
-    } else if (Feedback.is(obj)) {
+    } else if (obj instanceof UserFeedbacks) {
       return GraphQLFeedback;
     } else {
   		return null;
@@ -170,7 +164,7 @@ export const {
   nodeType: GraphQLVoucher,
   connectionType: GraphQLVoucherConnection,
   edgeType: GraphQLVoucherEdge
-} = vouvherQuery(nodeInterface);
+} = voucherQuery(nodeInterface);
 
 export const {
   nodeType: GraphQLOrderItem,
@@ -182,25 +176,25 @@ export const {
   nodeType: GraphQLOrder,
   connectionType: GraphQLOrderConnection,
   edgeType: GraphQLOrderEdge
-} = orderQuery(nodeInterface);
-
-export const {
-  nodeType: GraphQLWallet,
-  connectionType: GraphQLWalletConnection,
-  edgeType: GraphQLWalletEdge
-} = walletQuery(nodeInterface);
+} = orderQuery(nodeInterface, {GraphQLOrderItemConnection});
 
 export const {
   nodeType: GraphQLUser,
   connectionType: GraphQLUserConnection,
   edgeType: GraphQLUserEdge
-} = userQuery(nodeInterface);
+} = userQuery(nodeInterface, {
+  GraphQLAddressConnection,
+  GraphQLVoucherConnection,
+  GraphQLTransactionConnection,
+  GraphQLOrderConnection,
+  GraphQLOrder
+});
 
 export const {
   nodeType: GraphQLFeedback,
   connectionType: GraphQLFeedbackConnection,
   edgeType: GraphQLFeedbackEdge
-} = feedbackQuery(nodeInterface);
+} = feedbackQuery(nodeInterface, {GraphQLUser});
 
 export const {
   nodeType: GraphQLWorker,
@@ -216,7 +210,25 @@ export const {
 
 export const {
   nodeType: GraphQLViewer
-} = vieserQuery(nodeInterface);
+} = viewerQuery(nodeInterface, {
+  GraphQLUser,
+  GraphQLWorker,
+  GraphQLAdmin,
+  GraphQLCloth,
+  GraphQLUserConnection,
+  GraphQLWorkerConnection,
+  GraphQLAdminConnection,
+  GraphQLOrderConnection,
+  GraphQLTransactionConnection,
+  GraphQLClothConnection,
+  GraphQLClothCategoryConnection,
+  GraphQLTimeSlotTemplateConnection,
+  GraphQLTimeSlotConnection,
+  GraphQLFactoryConnection,
+  GraphQLPromoCodeConnection,
+  GraphQLBannerConnection,
+  GraphQLFeedbackConnection
+});
 
 export default new GraphQLObjectType({
   name: 'Query',
@@ -224,7 +236,7 @@ export default new GraphQLObjectType({
   fields: {
     viewer: {
       type: GraphQLViewer,
-      resolve: () => new FeakViewerClass()
+      resolve: () => new Viewer()
     },
     node: nodeField
   }

@@ -2,9 +2,9 @@ import jwt from 'jsonwebtoken';
 import path from 'path';
 import fs from 'fs';
 import moment from 'moment';
-import { uploadFile } from '../datastorage';
+import { uploadFile } from '../service/datastorage';
 import { connectionFromPromisedArraySlice, cursorToOffset, fromGlobalId } from 'graphql-relay';
-import { DBOrder } from '../database';
+import { DBOrder } from '../service/database';
 import Chance from 'chance';
 
 export function generateCode(argument) {

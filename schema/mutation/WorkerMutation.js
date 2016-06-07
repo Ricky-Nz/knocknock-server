@@ -3,7 +3,7 @@ import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'grap
 import { GraphQLWorkerEdge, GraphQLViewer } from '../query';
 import { Worker } from '../models';
 import { processFileUpload } from '../service';
-import { deleteFile } from '../../datastorage';
+import { deleteFile } from '../../service/datastorage';
 
 const createWorker = mutationWithClientMutationId({
 	name: 'CreateWorker',

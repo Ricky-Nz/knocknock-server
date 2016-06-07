@@ -3,7 +3,7 @@ import { mutationWithClientMutationId, fromGlobalId, offsetToCursor } from 'grap
 import { GraphQLBanner, GraphQLBannerEdge, GraphQLViewer } from '../query';
 import { Banner } from '../models';
 import { processFileUpload } from '../service';
-import { deleteFile } from '../../datastorage';
+import { deleteFile } from '../../service/datastorage';
 
 const createBanner = mutationWithClientMutationId({
 	name: 'CreateBanner',
