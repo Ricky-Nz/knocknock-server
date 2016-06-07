@@ -3,6 +3,18 @@ import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'grap
 import { GraphQLAdminEdge, GraphQLViewer } from '../query';
 import { Admin } from '../models';
 
+// id			
+// first_name			
+// last_name			
+// address			
+// postal_code			
+// contact_no			
+// created_on			
+// email			
+// encrypted_password			
+// reset_password_token			
+// reset_password_sent_at
+
 const createAdmin = mutationWithClientMutationId({
 	name: 'CreateAdmin',
 	inputFields: {

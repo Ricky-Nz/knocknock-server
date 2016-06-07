@@ -1,12 +1,35 @@
 import { GraphQLString, GraphQLNonNull } from 'graphql';
-import { mutationWithClientMutationId, offsetToCursor } from 'graphql-relay';
-import { User, Address } from '../models';
+import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'graphql-relay';
+import { DBUserAddresses, DBUsers } from '../../service/database';
 import { GraphQLUser, GraphQLAddress, GraphQLAddressEdge } from '../query';
+
+// id			
+// user_id			
+// name			
+// address			
+// postal_code			
+// apartment_type			
+// district_id			
+// note			
+// created_on			
+// unit_number			
+// contact_no
 
 const createAddress = mutationWithClientMutationId({
 	name: 'CreateAddress',
 	inputFields: {
-		...Address.inputs
+		userId: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		postalCode: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		address: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		contact: {
+			type: new GraphQLNonNull(GraphQLString)
+		}
 	},
 	outputFields: {
 		addressEdge: {
@@ -18,48 +41,75 @@ const createAddress = mutationWithClientMutationId({
 		},
 		user: {
 			type: GraphQLUser,
-			resolve: (address) => User.findById(address.userId)
+			resolve: (address) => DBUsers.findById(address.userId)
 		}
 	},
-	mutateAndGetPayload: (args) => Address.create(args)
+	mutateAndGetPayload: ({userId, postalCode, address, contact}) => {
+		const {id: dbUserId} = fromGlobalId(userId);
+		return DBUserAddresses.create({
+			user_id: dbUserId,
+			postal_code: postalCode,
+			address,
+			contact_no: contact
+		})
+	}
 });
 
 const updateAddress = mutationWithClientMutationId({
 	name: 'UpdateAddress',
 	inputFields: {
-		...Address.updates
+		id: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		postalCode: {
+			type: GraphQLString
+		},
+		address: {
+			type: GraphQLString
+		},
+		contact: {
+			type: GraphQLString
+		}
 	},
 	outputFields: {
 		address: {
 			type: GraphQLAddress,
-			resolve: ({id}) => Address.findById(id)
+			resolve: ({dbId}) => DBUserAddresses.findById(dbId)
 		}
 	},
-	mutateAndGetPayload: ({id, ...args}) =>
-		Address.updateById(id, args).then(() => ({id}))
+	mutateAndGetPayload: ({id, postalCode, address, contact}) => {
+		const {id: dbId } = fromGlobalId(id);
+		return DBUserAddresses.update({
+				postalCode. postalCode,
+				address,
+				contact_no: contact
+			}, {where:{id:dbId}})
+		.then(() => ({dbId}));
+	}
 });
 
 const deleteAddress = mutationWithClientMutationId({
 	name: 'DeleteAddress',
 	inputFields: {
 		id: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'delete item id'
+			type: new GraphQLNonNull(GraphQLString)
 		}
 	},
 	outputFields: {
 		deletedId: {
 			type: new GraphQLNonNull(GraphQLString),
-			resolve: ({id}) => id
+			resolve: ({addressId}) => addressId
 		},
 		user: {
 			type: GraphQLUser,
-			resolve: ({userId}) => User.findById(userId)
+			resolve: ({userId}) => DBUsers.findById(userId)
 		}
 	},
-	mutateAndGetPayload: ({id}) =>
-		Address.findById(id)
-			.then(address => address.destroy().then(() => ({userId: address.userId, id})))
+	mutateAndGetPayload: ({id}) => {
+		const {id: dbId} = fromGlobalId(id);
+		return DBUserAddresses.findById(dbId)
+			.then(address => address.destroy().then(() => ({userId: address.userId, addressId: dbId})))
+	}
 });
 
 export default {

@@ -1,7 +1,12 @@
-class Test {
-	static is() {
-		return true
-	}
+
+function test(test) {
+	return {
+		id: 'TT',
+		...test&&{
+			test: 'test'
+		}
+	};
 }
 
-console.log(Test.is());
+console.log(test());
+console.log(test(true));
