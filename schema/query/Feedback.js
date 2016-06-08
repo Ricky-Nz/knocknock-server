@@ -1,12 +1,12 @@
 import { GraphQLObjectType, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField } from 'graphql-relay';
-import { DBUsers } from '../../service/database';
+import { Users } from '../../service/database';
 
-// id      
-// user_id     
-// rating      
-// comment     
-// created
+   // { id: 1,
+   //   user_id: 922,
+   //   rating: 3,
+   //   comment: 'sdfsdf',
+   //   created: Wed Mar 16 2016 11:38:47 GMT+0800 (SGT) },
 
 export default function (nodeInterface, {GraphQLUser}) {
   const nodeType = new GraphQLObjectType({
@@ -34,7 +34,7 @@ export default function (nodeInterface, {GraphQLUser}) {
         resolve: (obj) => {
           if (!obj.user_id) return null;
 
-          return DBUsers.findById(obj.user_id);
+          return Users.findById(obj.user_id);
         }
       }
     },

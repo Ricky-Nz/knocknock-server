@@ -1,13 +1,12 @@
 import { GraphQLObjectType, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField } from 'graphql-relay';
 
-// id			
-// title			
-// value			
-// expire_on			
-// created_on			
-// disabled			
-// seen
+  // { id: 855,
+  //   title: 'KnocKnocK Voucher',
+  //   value: '5.00',
+  //   expire_on: Sat Jun 18 2016 08:00:00 GMT+0800 (SGT),
+  //   created_on: Sat Jun 04 2016 20:23:39 GMT+0800 (SGT),
+  //   disabled: false,
 
 export default function (nodeInterface) {
 	const nodeType = new GraphQLObjectType({

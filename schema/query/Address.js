@@ -1,17 +1,17 @@
 import { GraphQLObjectType, GraphQLNonNull, GraphQLString } from 'graphql';
 import { connectionDefinitions, globalIdField } from 'graphql-relay';
 
-// id			
-// user_id			
-// name			
-// address			
-// postal_code			
-// apartment_type			
-// district_id			
-// note			
-// created_on			
-// unit_number			
-// contact_no
+   // { id: 53,
+   //   user_id: 130,
+   //   name: 'Home',
+   //   address: 'Block 818, Tampines Street 81, #03-604',
+   //   postal_code: '520818',
+   //   apartment_type: 'hdb',
+   //   district_id: 53,
+   //   note: '',
+   //   created_on: Tue Jun 30 2015 10:18:37 GMT+0800 (SGT),
+   //   unit_number: null,
+   //   contact_no: null },
 
 export default function (nodeInterface) {
 	const nodeType = new GraphQLObjectType({
@@ -19,19 +19,19 @@ export default function (nodeInterface) {
 	  fields: {
 	  	id: globalIdField('Address'),
 			userId: {
-				type: new GraphQLNonNull(GraphQLString),
+				type: GraphQLString,
 				resolve: (obj) => obj.user_id
 			},
 			postalCode: {
-				type: new GraphQLNonNull(GraphQLString),
+				type: GraphQLString,
 				resolve: (obj) => obj.postal_code
 			},
 			address: {
-				type: new GraphQLNonNull(GraphQLString),
+				type: GraphQLString,
 				resolve: (obj) => obj.address
 			},
 			contact: {
-				type: new GraphQLNonNull(GraphQLString),
+				type: GraphQLString,
 				resolve: (obj) => obj.contact_no
 			}
 	  },

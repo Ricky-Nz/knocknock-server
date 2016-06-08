@@ -60,13 +60,16 @@ export default sequelize.define('orders', {
 		type: INTEGER
 	},
 	created_on: {
-		type: DATE
+		type: DATE,
+		allowNull: false
 	},
 	pickup_date: {
-		type: DATE
+		type: DATE,
+		allowNull: false
 	},
 	pickup_time: {
-		type: STRING
+		type: STRING,
+		allowNull: false
 	},
 	drop_off_date: {
 		type: DATE
@@ -87,7 +90,8 @@ export default sequelize.define('orders', {
 		type: STRING
 	},
 	paid: {
-		type: BOOLEAN
+		type: BOOLEAN,
+		defaultValue: false
 	},
 	pay_later: {
 		type: BOOLEAN

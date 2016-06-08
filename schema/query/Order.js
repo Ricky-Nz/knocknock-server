@@ -1,69 +1,69 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField, connectionArgs } from 'graphql-relay';
-import { DBUsers, DBOrderStatuses, DBOrderDetails } from '../../service/database';
+import { Users, OrderStatuses, OrderDetails } from '../../service/database';
 import { modelConnection } from '../utils';
 
-// id      
-// pickup_worker_id      
-// drop_off_worker_id      
-// user_id     
-// order_status_id     
-// drop_off_district_id      
-// pickup_district_id      
-// factory_id      
-// description     
-// lazy_order      
-// express_order     
-// total_price     
-// pickup_address      
-// pickup_postal_code      
-// pickup_apartment_type     
-// drop_off_address      
-// drop_off_postal_code      
-// drop_off_apartment_type     
-// speed_rating      
-// attitude_rating     
-// created_on      
-// pickup_date     
-// pickup_time     
-// drop_off_date     
-// drop_off_time     
-// review      
-// pickup_changed      
-// deliver_changed     
-// paypal_ref_no     
-// paid      
-// pay_later     
-// payment_mode      
-// to_pay_price      
-// voucher_id      
-// free      
-// worker_checked      
-// user_checked      
-// order_source_id     
-// qr_code_url     
-// factory_worker_id     
-// factory_received_date     
-// factory_completed_date      
-// is_merged     
-// signature_url     
-// merged_order_ids      
-// is_imported     
-// is_mergable     
-// order_number      
-// pickup_contact_no     
-// drop_off_contact_no     
-// recurring_order_id      
-// promo_code_id     
-// promo_discount      
-// voucher_discount      
-// pickup_time_end     
-// drop_off_time_end     
-// pickup_unit_number      
-// drop_off_unit_number      
-// drop_off_description      
-// pickup_address_name     
-// drop_off_address_name
+   // { id: 826,
+   //   pickup_worker_id: 11,
+   //   drop_off_worker_id: 8,
+   //   user_id: 798,
+   //   order_status_id: 7,
+   //   drop_off_district_id: 57,
+   //   pickup_district_id: 57,
+   //   factory_id: null,
+   //   description: '',
+   //   lazy_order: false,
+   //   express_order: false,
+   //   total_price: '10.90',
+   //   pickup_address: '104B Edgefield Plains 04-35',
+   //   pickup_postal_code: '822104',
+   //   pickup_apartment_type: 'hdb',
+   //   drop_off_address: '104B Edgefield Plains 04-35',
+   //   drop_off_postal_code: '822104',
+   //   drop_off_apartment_type: 'hdb',
+   //   speed_rating: null,
+   //   attitude_rating: null,
+   //   created_on: Fri Sep 25 2015 17:33:23 GMT+0800 (SGT),
+   //   pickup_date: Mon Sep 28 2015 09:00:00 GMT+0800 (SGT),
+   //   pickup_time: '09:00:00',
+   //   drop_off_date: Tue Oct 06 2015 13:00:00 GMT+0800 (SGT),
+   //   drop_off_time: '13:00:00',
+   //   review: null,
+   //   pickup_changed: false,
+   //   deliver_changed: false,
+   //   paypal_ref_no: null,
+   //   paid: true,
+   //   pay_later: null,
+   //   payment_mode: 'credit',
+   //   to_pay_price: '10.90',
+   //   voucher_id: null,
+   //   free: null,
+   //   worker_checked: true,
+   //   user_checked: false,
+   //   order_source_id: 0,
+   //   qr_code_url: null,
+   //   factory_worker_id: null,
+   //   factory_received_date: null,
+   //   factory_completed_date: null,
+   //   is_merged: false,
+   //   signature_url: null,
+   //   merged_order_ids: null,
+   //   is_imported: null,
+   //   is_mergable: null,
+   //   order_number: null,
+   //   pickup_contact_no: null,
+   //   drop_off_contact_no: null,
+   //   recurring_order_id: null,
+   //   promo_code_id: null,
+   //   promo_discount: null,
+   //   voucher_discount: null,
+   //   pickup_time_end: '11:00:00',
+   //   drop_off_time_end: '15:00:00',
+   //   pickup_unit_number: null,
+   //   drop_off_unit_number: null,
+   //   drop_off_description: null,
+   //   pickup_address_name: null,
+   //   drop_off_address_name: null },
 
 export default function (nodeInterface, {GraphQLOrderItemConnection}) {
   const nodeType = new GraphQLObjectType({
@@ -84,7 +84,7 @@ export default function (nodeInterface, {GraphQLOrderItemConnection}) {
       },
       status: {
         type: GraphQLString,
-        resolve: (obj) => DBOrderStatuses.findById(obj.order_status_id)
+        resolve: (obj) => OrderStatuses.findById(obj.order_status_id)
           .then(status => status.status)
       },
       pickupDate: {
@@ -105,7 +105,7 @@ export default function (nodeInterface, {GraphQLOrderItemConnection}) {
       },
       serialNumber: {
         type: GraphQLString,
-        resolve: (obj) => obj.order_number
+        resolve: (obj) => obj.id
       },
       totalPrice: {
         type: GraphQLInt,
@@ -113,8 +113,7 @@ export default function (nodeInterface, {GraphQLOrderItemConnection}) {
       },
       userAvatar: {
         type: GraphQLString,
-        resolve: (obj) =>
-          DBUsers.findById(obj.user_id).then(user => user.profile_image_url_small)
+        resolve: (obj) => Users.findById(obj.user_id).then(user => user.profile_image_url_small)
       },
       orderItems: {
         type: GraphQLOrderItemConnection,
@@ -122,7 +121,7 @@ export default function (nodeInterface, {GraphQLOrderItemConnection}) {
           ...connectionArgs
         },
         resolve: (obj, args) =>
-          modelConnection(DBOrderDetails, {where:{order_id: obj.id}}, args)
+          modelConnection(OrderDetails, {where:{order_id: obj.id}}, args)
       }
     },
     interfaces: [nodeInterface]

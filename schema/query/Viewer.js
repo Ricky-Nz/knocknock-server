@@ -1,5 +1,7 @@
 import { GraphQLObjectType, GraphQLList, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField, connectionArgs } from 'graphql-relay';
+import { Users, Workers, Admins, Items, SubCategories, DefaultDistrictTimeSlots } from '../../service/database';
+import { formatToDay } from '../utils';
 
 export default function (nodeInterface, {
   GraphQLUser,
@@ -28,52 +30,48 @@ export default function (nodeInterface, {
         type: GraphQLUser,
         args: {
           id: {
-            type: new GraphQLNonNull(GraphQLString),
-            description: 'user id'
+            type: new GraphQLNonNull(GraphQLString)
           }
         },
         resolve: (obj, {id}) => {
           const {id: localId} = fromGlobalId(id);
-          return User.findById(localId);
+          return Users.findById(localId);
         }
       },
       worker: {
         type: GraphQLWorker,
         args: {
           id: {
-            type: new GraphQLNonNull(GraphQLString),
-            description: 'worker id'
+            type: new GraphQLNonNull(GraphQLString)
           }
         },
         resolve: (obj, {id}) => {
           const {id: localId} = fromGlobalId(id);
-          return Worker.findById(localId);
+          return Workers.findById(localId);
         }
       },
       admin: {
         type: GraphQLAdmin,
         args: {
           id: {
-            type: new GraphQLNonNull(GraphQLString),
-            description: 'admin id'
+            type: new GraphQLNonNull(GraphQLString)
           }
         },
         resolve: (obj, {id}) => {
           const {id: localId} = fromGlobalId(id);
-          return Admin.findById(localId);
+          return Admins.findById(localId);
         }
       },
       users: {
         type: GraphQLUserConnection,
         args: {
           search: {
-            type: GraphQLString,
-            description: 'search user'
+            type: GraphQLString
           },
           ...connectionArgs
         },
         resolve: (obj, {search, ...args}) =>
-          modelConnection(User, search?{where:{$or:[
+          modelConnection(Users, search?{where:{$or:[
               {name: {$like: `%${search}%`}},
               {email: {$like: `%${search}%`}},
               {contact: {$like: `%${search}%`}}
@@ -83,13 +81,12 @@ export default function (nodeInterface, {
         type: GraphQLWorkerConnection,
         args: {
           search: {
-            type: GraphQLString,
-            description: 'search worker'
+            type: GraphQLString
           },
           ...connectionArgs
         },
         resolve: (obj, {search, ...args}) =>
-          modelConnection(Worker, search?{where:{$or:[
+          modelConnection(Workers, search?{where:{$or:[
               {name: {$like: `%${search}%`}},
               {email: {$like: `%${search}%`}},
               {contact: {$like: `%${search}%`}}
@@ -99,13 +96,12 @@ export default function (nodeInterface, {
         type: GraphQLAdminConnection,
         args: {
           search: {
-            type: GraphQLString,
-            description: 'search admin'
+            type: GraphQLString
           },
           ...connectionArgs
         },
         resolve: (obj, {search, ...args}) =>
-          modelConnection(Admin, search?{where:{$or:[
+          modelConnection(Admins, search?{where:{$or:[
               {name: {$like: `%${search}%`}},
               {email: {$like: `%${search}%`}},
               {contact: {$like: `%${search}%`}}
@@ -115,32 +111,34 @@ export default function (nodeInterface, {
         type: GraphQLOrderConnection,
         args: {
           userId: {
-            type: GraphQLString,
-            description: 'user id'
+            type: GraphQLString
           },
           search: {
-            type: GraphQLString,
-            description: 'search by order id'
+            type: GraphQLString
           },
-          status: {
-            type: new GraphQLList(GraphQLString),
-            description: 'order status'
+          statusId: {
+            type: new GraphQLList(GraphQLString)
           },
           afterDate: {
-            type: GraphQLString,
-            description: 'start date'
+            type: GraphQLString
           },
           beforeDate: {
-            type: GraphQLString,
-            description: 'end date'
+            type: GraphQLString
           },
           ...connectionArgs
         },
         resolve: (obj, {userId, search, status, afterDate, beforeDate, ...args}) => {
           let query = {where:{status:{$notIn:['order complete', 'deleted', 'canceled']}}};
-          if (userId) query.where.userId = userId;
-          if (search) query.where.serialNumber = {$like: `%${search}%`};
-          if (status && status.length > 0) query.where.status = {$in: status};
+          if (userId) {
+            const {id: localUseriId} = fromGlobalId(userId);
+            query.where.user_id = localUseriId;
+          }
+          if (search) {
+            query.where.id = {$like: `%${search}%`};
+          }
+          if (status && status.length > 0) {
+            query.where.order_status_id = {$in: status};
+          }
           if (afterDate||beforeDate) query.where.pickupDate = calculateTimeRnage(afterDate, beforeDate);
 
           return modelConnection(Order, query, args);
@@ -150,46 +148,29 @@ export default function (nodeInterface, {
         type: GraphQLOrderConnection,
         args: {
           search: {
-            type: GraphQLString,
-            description: 'search by order id'
+            type: GraphQLString
           },
           ...connectionArgs
         },
         resolve: (obj, {search, ...args}) => {
           let query = {where:{status: {$in: ['order complete', 'deleted', 'canceled']}}};
           if (search) {
-            query.where.serialNumber = {$like: `%${search}%`};
+            query.where.id = {$like: `%${search}%`};
           }
 
-          return modelConnection(Order, query, args);
-        }
-      },
-      transactions: {
-        type: GraphQLTransactionConnection,
-        args: {
-          search: {
-            type: GraphQLString,
-            description: 'search order by order id'
-          },
-          ...connectionArgs
-        },
-        resolve: (obj, {search, ...args}) => {
-          return modelConnection(Transaction, search?{where: {
-            referenceNo: {$like: `%${search}%`}
-          }}:{}, args);
+          return modelConnection(Orders, query, args);
         }
       },
       cloth: {
         type: GraphQLCloth,
         args: {
           id: {
-            type: new GraphQLNonNull(GraphQLString),
-            description: 'laundry cloth id'
+            type: new GraphQLNonNull(GraphQLString)
           }
         },
         resolve: (obj, {id}) => {
           const {id: localId} = fromGlobalId(id);
-          return Cloth.findById(localId);
+          return Items.findById(localId);
         }
       },
       clothes: {
@@ -209,31 +190,31 @@ export default function (nodeInterface, {
           let query = {where:{}};
           if (search) {
             query.where['$or'] = [
-              {nameCn: {$like: `%${search}%`}},
-              {nameEn: {$like: `%${search}%`}}
+              {name_ch: {$like: `%${search}%`}},
+              {name_en: {$like: `%${search}%`}}
             ];
           }
           if (categoryId) {
-            query.where.categoryId = categoryId;
+            const {id: localCategoryId} = fromGlobalId(categoryId);
+            query.where.sub_category_id = localCategoryId;
           }
 
-          return modelConnection(Cloth, query, args);
+          return modelConnection(Items, query, args);
         }
       },
       categories: {
         type: GraphQLClothCategoryConnection,
         args: {
           search: {
-            type: GraphQLString,
-            description: 'search order by order id'
+            type: GraphQLString
           },
           ...connectionArgs
         },
         resolve: (obj, {search, ...args}) =>
-          modelConnection(ClothCategory, search?{
+          modelConnection(SubCategories, search?{
             where: {$or: [
-              {nameCn: {$like: `%${search}%`}},
-              {nameEn: {$like: `%${search}%`}},
+              {name_ch: {$like: `%${search}%`}},
+              {name_en: {$like: `%${search}%`}},
             ]}
           }:{}, args)
       },
@@ -243,20 +224,19 @@ export default function (nodeInterface, {
           ...connectionArgs
         },
         resolve: (obj, args) =>
-          modelConnection(TimeSlotTemplate, {order: 'start'}, args)
+          modelConnection(DefaultDistrictTimeSlots, {order: 'start'}, args)
       },
       timeSlots: {
         type: GraphQLTimeSlotConnection,
         args: {
           date: {
-            type: new GraphQLNonNull(GraphQLString),
-            description: 'date'
+            type: new GraphQLNonNull(GraphQLString)
           },
           ...connectionArgs
         },
         resolve: (obj, {date, ...args}) => {
           date = formatToDay(date);
-          return TimeSlot.findAll({where:{date}})
+          return DefaultDistrictTimeSlots.findAll({where:{date}})
             .then(timeSlots => {
               if (timeSlots && timeSlots.length > 0) {
                 return connectionFromArray(timeSlots, args);

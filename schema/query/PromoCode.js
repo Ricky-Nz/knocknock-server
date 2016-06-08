@@ -1,26 +1,26 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField } from 'graphql-relay';
 
-// id			
-// name			
-// start_date			
-// end_date			
-// status			
-// limit			
-// allow_multiple_use			
-// only_app			
-// promo_type			
-// discount_percent			
-// flat_discount			
-// created_at			
-// created_by			
-// updated_at			
-// updated_by			
-// code			
-// remarks			
-// user_limit			
-// per_user_limit			
-// firsttime_user
+   // { id: 6,
+   //   name: 'test7',
+   //   start_date: Sun Apr 03 2016 17:58:00 GMT+0800 (SGT),
+   //   end_date: Wed Apr 06 2016 09:30:00 GMT+0800 (SGT),
+   //   status: 1,
+   //   limit: 3,
+   //   allow_multiple_use: true,
+   //   only_app: null,
+   //   promo_type: 1,
+   //   discount_percent: null,
+   //   flat_discount: 1,
+   //   created_at: Sun Apr 03 2016 10:03:21 GMT+0800 (SGT),
+   //   created_by: 'Admin ',
+   //   updated_at: Mon Apr 04 2016 13:22:59 GMT+0800 (SGT),
+   //   updated_by: 'Admin ',
+   //   code: 'UunNkaK',
+   //   remarks: '',
+   //   user_limit: 2,
+   //   per_user_limit: 3,
+   //   firsttime_user: false },
 
 export default function (nodeInterface) {
 	const nodeType = new GraphQLObjectType({
@@ -29,7 +29,7 @@ export default function (nodeInterface) {
 	  	id: globalIdField('PromoCode'),
 			enabled: {
 				type: GraphQLBoolean,
-				resolve: (obj) => obj.status === 'enabled'
+				resolve: (obj) => obj.status == 1
 			},
 			name: {
 				type: GraphQLString,

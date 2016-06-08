@@ -3,13 +3,16 @@ import { STRING, FLOAT, DATE, BOOLEAN, INTEGER } from 'sequelize';
 
 export default sequelize.define('items', {
 	sub_category_id: {
-		type: INTEGER
+		type: INTEGER,
+		allowNull: false
 	},
 	name_en: {
-		type: STRING
+		type: STRING,
+		allowNull: false
 	},
 	name_ch: {
-		type: STRING
+		type: STRING,
+		allowNull: false
 	},
 	wash_iron_price: {
 		type: FLOAT
@@ -42,7 +45,8 @@ export default sequelize.define('items', {
 		type: STRING
 	},
 	created_on: {
-		type: STRING
+		type: STRING,
+		allowNull: false
 	},
 	disabled: {
 		type: DATE

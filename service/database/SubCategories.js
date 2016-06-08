@@ -6,16 +6,19 @@ export default sequelize.define('sub_categories', {
 		type: INTEGER
 	},
 	name_en: {
-		type: STRING
+		type: STRING,
+		allowNull: false
 	},
 	name_ch: {
-		type: STRING
+		type: STRING,
+		allowNull: false
 	},
 	items_count: {
 		type: INTEGER
 	},
 	created_on: {
-		type: DATE
+		type: DATE,
+		allowNull: false
 	},
 	image_url: {
 		type: STRING

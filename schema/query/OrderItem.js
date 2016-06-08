@@ -1,12 +1,12 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField } from 'graphql-relay';
 
-// id			
-// order_id			
-// item_id			
-// quantity			
-// laundry_type			
-// price
+   // { id: 239,
+   //   order_id: 117,
+   //   item_id: 1,
+   //   quantity: 1,
+   //   laundry_type: 'wash',
+   //   price: '2.90' },
 
 export default function (nodeInterface) {
 	const nodeType = new GraphQLObjectType({

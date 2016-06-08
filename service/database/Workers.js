@@ -24,7 +24,8 @@ export default sequelize.define('workers', {
 		type: STRING
 	},
 	can_view_worker: {
-		type: BOOLEAN
+		type: BOOLEAN,
+		allowNull: false
 	},
 	disabled: {
 		type: BOOLEAN
@@ -33,13 +34,16 @@ export default sequelize.define('workers', {
 		type: STRING
 	},
 	created_on: {
-		type: DATE
+		type: DATE,
+		allowNull: false
 	},
 	email: {
-		type: STRING
+		type: STRING,
+		allowNull: false
 	},
 	encrypted_password: {
-		type: STRING
+		type: STRING,
+		allowNull: false
 	},
 	reset_password_token: {
 		type: STRING
@@ -63,7 +67,8 @@ export default sequelize.define('workers', {
 		type: STRING
 	},
 	is_factory_worker: {
-		type: BOOLEAN
+		type: BOOLEAN,
+		allowNull: false
 	},
 	factory_id: {
 		type: INTEGER

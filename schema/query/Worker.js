@@ -1,30 +1,30 @@
 import { GraphQLObjectType, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField } from 'graphql-relay';
 
-// id			
-// first_name			
-// last_name			
-// points			
-// contact_no			
-// profile_image_url_small			
-// profile_image_url_medium			
-// profile_image_url_big			
-// can_view_worker			
-// disabled			
-// note			
-// created_on			
-// email			
-// encrypted_password			
-// reset_password_token			
-// reset_password_sent_at			
-// color_hash			
-// location_updated_at			
-// latitude			
-// longitude			
-// last_known_location			
-// is_factory_worker			
-// factory_id			
-// sort_order
+  // { id: 33,
+  //   first_name: 'Victoria',
+  //   last_name: 'Yvonne',
+  //   points: 312,
+  //   contact_no: '83395026',
+  //   profile_image_url_small: 'https://s3-ap-southeast-1.amazonaws.com/knocknock/users/default_small.jpg',
+  //   profile_image_url_medium: 'https://s3-ap-southeast-1.amazonaws.com/knocknock/users/default_medium.jpg',
+  //   profile_image_url_big: 'https://s3-ap-southeast-1.amazonaws.com/knocknock/users/default_big.jpg',
+  //   can_view_worker: true,
+  //   disabled: false,
+  //   note: '',
+  //   created_on: Tue Jun 30 2015 10:18:36 GMT+0800 (SGT),
+  //   email: 'pt4@knocknockapp.com',
+  //   encrypted_password: '$2a$10$mzLKBZNm3D1M5VM9UXNWwuSswcrFXtnOaBg4lQ/P7uYEIksBXpECy',
+  //   reset_password_token: null,
+  //   reset_password_sent_at: null,
+  //   color_hash: '#7fdb23',
+  //   location_updated_at: null,
+  //   latitude: null,
+  //   longitude: null,
+  //   last_known_location: null,
+  //   is_factory_worker: false,
+  //   factory_id: null,
+  //   sort_order: 0 } ]
 
 export default function (nodeInterface) {
 	const nodeType = new GraphQLObjectType({

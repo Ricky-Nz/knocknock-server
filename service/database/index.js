@@ -1,37 +1,19 @@
-import Admins from './Admins';
-import DistrictTimeSlots from './DistrictTimeSlots';
-import Factories from './Factories';
-import Items from './Items';
-import OrderDetails from './OrderDetails';
-import Orders from './Orders';
-import OrderSlots from './OrderSlots';
-import OrderTransactions from './OrderTransactions';
-import Permissions from './Permissions';
-import PromoCodes from './PromoCodes';
-import PromotionBanners from './PromotionBanners';
-import SubCategories from './SubCategories';
-import UserAddresses from './UserAddresses';
-import UserFeedbacks from './UserFeedbacks';
-import Users from './Users';
-import Vouchers from './Vouchers';
-import Workers from './Workers';
-
-export default {
-	Admins,
-	DistrictTimeSlots,
-	Factories,
-	Items,
-	OrderDetails,
-	Orders,
-	OrderSlots,
-	OrderTransactions,
-	Permissions,
-	PromoCodes,
-	PromotionBanners,
-	SubCategories,
-	UserAddresses,
-	UserFeedbacks,
-	Users,
-	Vouchers,
-	Workers
-};
+export { default as Admins } from './Admins';
+export { default as DefaultDistrictTimeSlots } from './DefaultDistrictTimeSlots';
+export { default as Factories } from './Factories';
+export { default as Items } from './Items';
+export { default as OrderDetails } from './OrderDetails';
+export { default as OrderStatuses } from './OrderStatuses';
+export { default as Orders } from './Orders';
+export { default as OrderSlots } from './OrderSlots';
+export { default as OrderTransactions } from './OrderTransactions';
+export { default as Permissions } from './Permissions';
+export { default as PromoCodes } from './PromoCodes';
+export { default as PromotionBanners } from './PromotionBanners';
+export { default as SubCategories } from './SubCategories';
+export { default as UserAddresses } from './UserAddresses';
+export { default as UserFeedbacks } from './UserFeedbacks';
+export { default as Users } from './Users';
+export { default as Vouchers } from './Vouchers';
+export { default as Workers } from './Workers';
+export { default as UserVouchers } from './UserVouchers';

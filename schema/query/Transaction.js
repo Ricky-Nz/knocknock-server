@@ -1,82 +1,43 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField } from 'graphql-relay';
 
-// id     
-// name     
-// address      
-// postal_code      
-// contact_no     
-// contact_name     
-// profile_image_url_small      
-// profile_image_url_medium     
-// profile_image_url_big      
-// created_on
-
-const GraphQLUserReference = new GraphQLObjectType({
-  name: 'UserReference',
-  fields: {
-    id: {
-      type: new GraphQLNonNull(GraphQLString),
-      description: 'user id'
-    },
-    name: {
-      type: new GraphQLNonNull(GraphQLString),
-      description: 'user name'
-    },
-    email: {
-      type: new GraphQLNonNull(GraphQLString),
-      description: 'user email'
-    }
-  }
-});
+  // { id: 595,
+  //   user_id: 5057,
+  //   order_ids: '[]',
+  //   voucher_ids: null,
+  //   promo_code_id: null,
+  //   total_promo_discount: '0.00',
+  //   original_amount: '29.60',
+  //   payable_amount: '29.60',
+  //   payment_mode: 'paypal',
+  //   payment_ref_token: '5RN866641Y037764C',
+  //   created_at: Sun Jun 05 2016 16:26:12 GMT+0800 (SGT),
+  //   total_voucher_amount: '0.00' },
 
 export default function (nodeInterface) {
   const nodeType = new GraphQLObjectType({
     name: 'Transaction',
     fields: {
       id: globalIdField('Transaction'),
-      walletId: {
-        type: new GraphQLNonNull(GraphQLString),
-        description: 'wallet Id'
+      originalAmount: {
+        type: GraphQLFloat,
+        resolve: (obj) => obj.original_amount
       },
-      value: {
-        type: new GraphQLNonNull(GraphQLInt),
-        description: 'transaction value'
-      },
-      currency: {
-        type: new GraphQLNonNull(GraphQLString),
-        description: 'value currency'
+      payableAmount: {
+        type: GraphQLFloat,
+        resolve: (obj) => obj.payable_amount
       },
       referenceNo: {
-        type: new GraphQLNonNull(GraphQLString),
-        description: 'transaction reference number'
+        type: GraphQLString,
+        resolve: (obj) => obj.payment_ref_token
       },
       paymentMode: {
-        type: new GraphQLNonNull(GraphQLString),
-        description: 'transaction payment mode'
-      },
-      paymentChannel: {
-        type: new GraphQLNonNull(GraphQLString),
-        description: 'transaction channel'
-      },
-      status: {
-        type: new GraphQLNonNull(GraphQLString),
-        description: 'transaction status'
+        type: GraphQLString,
+        resolve: (obj) => obj.payment_mode
       },
       createdAt: {
-        type: new GraphQLNonNull(GraphQLString),
-        description: 'created at'
-      },
-      user: {
-        type: GraphQLUserReference,
-        resolve: (transaction) =>
-          Transaction.findById(transaction.walletId)
-            .then(wallet => User.findById(userId))
-            .then(user => ({
-              id: toGlobalId('User', user.id),
-              name: user.name,
-              email: user.email
-            }))
+        type: GraphQLString,
+        resolve: (obj) => obj.created_at
       }
     },
     interfaces: [nodeInterface]

@@ -3,19 +3,23 @@ import { STRING, FLOAT, DATE, BOOLEAN, INTEGER } from 'sequelize';
 
 export default sequelize.define('factories', {
 	name: {
-		type: STRING
+		type: STRING,
+		allowNull: false
 	},
 	address: {
 		type: STRING
 	},
 	postal_code: {
-		type: STRING
+		type: STRING,
+		allowNull: false
 	},
 	contact_no: {
-		type: STRING
+		type: STRING,
+		allowNull: false
 	},
 	contact_name: {
-		type: STRING
+		type: STRING,
+		allowNull: false
 	},
 	profile_image_url_small: {
 		type: STRING
@@ -27,6 +31,7 @@ export default sequelize.define('factories', {
 		type: STRING
 	},
 	created_on: {
-		type: DATE
+		type: DATE,
+		allowNull: false
 	}
 }, {timestamps: false});

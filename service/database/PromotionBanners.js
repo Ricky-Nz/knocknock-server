@@ -1,7 +1,7 @@
 import sequelize from './connection';
 import { STRING, FLOAT, DATE, BOOLEAN, INTEGER, ENUM } from 'sequelize';
 
-export default sequelize.define('banner', {
+export default sequelize.define('promotion_banners', {
 	banner_name: {
 		type: STRING
 	},

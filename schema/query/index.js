@@ -19,6 +19,7 @@ import transactionQuery from './Transaction';
 import userQuery from './User';
 import viewerQuery from './Viewer';
 import voucherQuery from './Voucher';
+import assignedVoucherQuery from './Voucher';
 import workerQuery from './Worker';
 
 class Viewer {}
@@ -43,6 +44,8 @@ const { nodeInterface, nodeField } = nodeDefinitions(
       return SubCategories.findById(id);
     } else if (type === 'Voucher') {
       return Vouchers.findById(id);
+    } else if (type === 'AssignedVoucher') {
+      return AssignedVoucher.findById(id);
     } else if (type === 'Order') {
       return Orders.findById(id);
     } else if (type === 'OrderItem') {
@@ -82,6 +85,8 @@ const { nodeInterface, nodeField } = nodeDefinitions(
       return GraphQLClothCategory;
     } else if (obj instanceof Vouchers) {
       return GraphQLVoucher;
+    } else if (obj instanceof AssignedVoucher) {
+      return GraphQLAssignedVoucher;
     } else if (obj instanceof Orders) {
       return GraphQLOrder;
     } else if (obj instanceof OrderDetails) {
@@ -165,6 +170,12 @@ export const {
   connectionType: GraphQLVoucherConnection,
   edgeType: GraphQLVoucherEdge
 } = voucherQuery(nodeInterface);
+
+export const {
+  nodeType: GraphQLAssignedVoucher,
+  connectionType: GraphQLAssignedVoucherConnection,
+  edgeType: GraphQLAssignedVoucherEdge
+} = assignedVoucherQuery(nodeInterface, {GraphQLVoucher});
 
 export const {
   nodeType: GraphQLOrderItem,
