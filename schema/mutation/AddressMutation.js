@@ -1,7 +1,7 @@
 import { GraphQLString, GraphQLNonNull } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'graphql-relay';
-import { DBUserAddresses, DBUsers } from '../../service/database';
 import { GraphQLUser, GraphQLAddress, GraphQLAddressEdge } from '../query';
+import { UserAddresses, Users } from '../../service/database';
 
 // id			
 // user_id			
@@ -41,15 +41,15 @@ const createAddress = mutationWithClientMutationId({
 		},
 		user: {
 			type: GraphQLUser,
-			resolve: (address) => DBUsers.findById(address.userId)
+			resolve: (address) => Users.findById(address.user_id)
 		}
 	},
 	mutateAndGetPayload: ({userId, postalCode, address, contact}) => {
 		const {id: dbUserId} = fromGlobalId(userId);
-		return DBUserAddresses.create({
+		return UserAddresses.create({
 			user_id: dbUserId,
 			postal_code: postalCode,
-			address,
+			address: address,
 			contact_no: contact
 		})
 	}
@@ -74,14 +74,14 @@ const updateAddress = mutationWithClientMutationId({
 	outputFields: {
 		address: {
 			type: GraphQLAddress,
-			resolve: ({dbId}) => DBUserAddresses.findById(dbId)
+			resolve: ({dbId}) => UserAddresses.findById(dbId)
 		}
 	},
 	mutateAndGetPayload: ({id, postalCode, address, contact}) => {
 		const {id: dbId } = fromGlobalId(id);
-		return DBUserAddresses.update({
-				postalCode,
-				address,
+		return UserAddresses.update({
+				postal_code: postalCode,
+				address: address,
 				contact_no: contact
 			}, {where:{id:dbId}})
 		.then(() => ({dbId}));
@@ -102,13 +102,13 @@ const deleteAddress = mutationWithClientMutationId({
 		},
 		user: {
 			type: GraphQLUser,
-			resolve: ({userId}) => DBUsers.findById(userId)
+			resolve: ({userId}) => Users.findById(userId)
 		}
 	},
 	mutateAndGetPayload: ({id}) => {
 		const {id: dbId} = fromGlobalId(id);
-		return DBUserAddresses.findById(dbId)
-			.then(address => address.destroy().then(() => ({userId: address.userId, addressId: dbId})))
+		return UserAddresses.findById(dbId)
+			.then(address => address.destroy().then(() => ({userId: address.userId, addressId: id})))
 	}
 });
 

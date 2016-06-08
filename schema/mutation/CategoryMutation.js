@@ -1,12 +1,26 @@
 import { GraphQLString, GraphQLNonNull } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor } from 'graphql-relay';
-import { ClothCategory } from '../models';
 import { GraphQLClothCategory, GraphQLClothCategoryEdge, GraphQLViewer } from '../query';
+import { SubCategories } from '../../service/database';
+
+// id			
+// category_id			
+// name_en			
+// name_ch			
+// items_count			
+// created_on			
+// image_url			
+// item_order
 
 const createCategory = mutationWithClientMutationId({
 	name: 'CreateCategory',
 	inputFields: {
-		...ClothCategory.inputs
+		nameCn: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		nameEn: {
+			type: new GraphQLNonNull(GraphQLString)
+		}
 	},
 	outputFields: {
 		categoryEdge: {
@@ -21,28 +35,39 @@ const createCategory = mutationWithClientMutationId({
 			resolve: () => ({})
 		}
 	},
-	mutateAndGetPayload: (args) => ClothCategory.create(args)
+	mutateAndGetPayload: ({nameEn, nameCn}) =>
+		SubCategories.create({
+			name_ch: nameCn,
+			name_en: nameEn,
+			created_on: new Date()
+		})
 });
 
 const updateCategory = mutationWithClientMutationId({
 	name: 'UpdateCategory',
 	inputFields: {
 		id: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'update item id'
+			type: new GraphQLNonNull(GraphQLString)
 		},
-		...ClothCategory.updates
+		nameCn: {
+			type: GraphQLString
+		},
+		nameEn: {
+			type: GraphQLString
+		}
 	},
 	outputFields: {
 		category: {
 			type: GraphQLClothCategory,
-			resolve: ({localId}) => ClothCategory.findById(localId)
+			resolve: ({localId}) => SubCategories.findById(localId)
 		}
 	},
-	mutateAndGetPayload: ({id, ...args}) => {
+	mutateAndGetPayload: ({id, nameEn, nameCn}) => {
 		const {id: localId} = fromGlobalId(id);
-		return ClothCategory.update(args, {where:{id:localId}})
-			.then(() => ({localId}));
+		return SubCategories.update({
+			name_en: nameEn,
+			name_ch: nameCn
+		}, {where:{id:localId}}).then(() => ({localId}));
 	}
 });
 
@@ -50,8 +75,7 @@ const deleteCategory = mutationWithClientMutationId({
 	name: 'DeleteCategory',
 	inputFields: {
 		id: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'delete item id'
+			type: new GraphQLNonNull(GraphQLString)
 		}
 	},
 	outputFields: {
@@ -66,7 +90,7 @@ const deleteCategory = mutationWithClientMutationId({
 	},
 	mutateAndGetPayload: ({id}) => {
 		const {id: localId} = fromGlobalId(id);
-		return ClothCategory.destroy({where:{id:localId}})
+		return SubCategories.destroy({where:{id:localId}})
 			.then(() => ({id}));
 	}
 });

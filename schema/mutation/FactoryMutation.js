@@ -1,12 +1,37 @@
 import { GraphQLString, GraphQLNonNull } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'graphql-relay';
-import { Factory } from '../models';
 import { GraphQLViewer, GraphQLFactory, GraphQLFactoryEdge } from '../query';
+import { Factories } from '../../service/database';
+
+// id			
+// name			
+// address			
+// postal_code			
+// contact_no			
+// contact_name			
+// profile_image_url_small			
+// profile_image_url_medium			
+// profile_image_url_big			
+// created_on
 
 const createFactory = mutationWithClientMutationId({
 	name: 'CreateFactory',
 	inputFields: {
-		...Factory.inputs
+		name: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		address: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		postalCode: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		contact: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		contactName: {
+			type: new GraphQLNonNull(GraphQLString)
+		}
 	},
 	outputFields: {
 		factoryEdge: {
@@ -21,38 +46,62 @@ const createFactory = mutationWithClientMutationId({
 			resolve: () => ({})
 		}
 	},
-	mutateAndGetPayload: (args) => Factory.create(args)
+	mutateAndGetPayload: ({name, address, postalCode, contact, contactName}) =>
+		Factories.create({
+			name,
+			address,
+			postal_code: postalCode,
+			contact_no: contact,
+			contact_name: contactName
+		})
 });
 
 const updateFactory = mutationWithClientMutationId({
 	name: 'UpdateFactory',
 	inputFields: {
 		id: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'update item id'
+			type: new GraphQLNonNull(GraphQLString)
 		},
-		...Factory.updates
+		name: {
+			type: GraphQLString
+		},
+		address: {
+			type: GraphQLString
+		},
+		postalCode: {
+			type: GraphQLString
+		},
+		contact: {
+			type: GraphQLString
+		},
+		contactName: {
+			type: GraphQLString
+		}
 	},
 	outputFields: {
 		factory: {
 			type: GraphQLFactory,
-			resolve: ({localId}) => Factory.findById(localId)
+			resolve: ({localId}) => Factories.findById(localId)
 		}
 	},
-	mutateAndGetPayload: ({id, ...args}) => {
+	mutateAndGetPayload: ({id, name, address, postalCode, contact, contactName}) => {
 		const {id: localId} = fromGlobalId(id);
-		return Factory.update(args, {where: {id: localId}})
-			.then(() => ({localId}));
+		return Factories.update({
+			name,
+			address,
+			postal_code: postalCode,
+			contact_no: contact,
+			contact_name: contactName
+		}, {where: {id: localId}}).then(() => ({localId}));
 	}
 });
 
 
-const deleteFactory mutationWithClientMutationId({
+const deleteFactory = mutationWithClientMutationId({
 	name: 'DeleteFactory',
 	inputFields: {
 		id: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'factory id'
+			type: new GraphQLNonNull(GraphQLString)
 		}
 	},
 	outputFields: {
@@ -67,7 +116,7 @@ const deleteFactory mutationWithClientMutationId({
 	},
 	mutateAndGetPayload: ({id, ...args}) => {
 		const {id: localId} = fromGlobalId(id);
-		return Factory.destroy({where:{id:localId}})
+		return Factories.destroy({where:{id:localId}})
 			.then(() => ({id}));
 	}
 });

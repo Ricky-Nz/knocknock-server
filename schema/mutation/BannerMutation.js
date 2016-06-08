@@ -1,14 +1,41 @@
-import { GraphQLNonNull, GraphQLString } from 'graphql';
+import { GraphQLNonNull, GraphQLString, GraphQLBoolean, GraphQLInt } from 'graphql';
 import { mutationWithClientMutationId, fromGlobalId, offsetToCursor } from 'graphql-relay';
 import { GraphQLBanner, GraphQLBannerEdge, GraphQLViewer } from '../query';
-import { Banner } from '../models';
-import { processFileUpload } from '../service';
+import { PromotionBanners } from '../../service/database';
+import { processFileUpload } from '../utils';
 import { deleteFile } from '../../service/datastorage';
+
+// id			
+// banner_name			
+// banner_title			
+// banner_description			
+// banner_link			
+// start_date			
+// end_date			
+// is_enabled			
+// created			
+// created_by			
+// updated			
+// updated_by			
+// banner_image_url			
+// banner_order			
+// banner_section
 
 const createBanner = mutationWithClientMutationId({
 	name: 'CreateBanner',
 	inputFields: {
-		...Banner.inputs
+		enabled: {
+			type: GraphQLBoolean
+		},
+		title: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		link: {
+			type: GraphQLString
+		},
+		position: {
+			type: new GraphQLNonNull(GraphQLInt)
+		}
 	},
 	outputFields: {
 		bannerEdge: {
@@ -23,16 +50,19 @@ const createBanner = mutationWithClientMutationId({
 			resolve: () => ({})
 		}
 	},
-	mutateAndGetPayload: (args, context, {rootValue}) =>
+	mutateAndGetPayload: ({enabled, title, link, position}, context, {rootValue}) =>
 		processFileUpload('knocknock-banner', rootValue.request.file)
 			.then(upload => {
-				if (upload) {
-					args.imageUrl = upload.imageUrl;
-					args.imageId = upload.imageId;
-					args.imageBucket = upload.imageBucket;
-				}
+				if (!upload) throw('Upload file failed')
 
-				return Banner.create(args);
+				return PromotionBanners.create({
+					is_enabled: enabled,
+					banner_title: title,
+					banner_link: link,
+					banner_order: position,
+					banner_image_url: upload.imageUrl,
+					created: new Date()
+				});
 			})
 });
 
@@ -43,39 +73,38 @@ const updateBanner = mutationWithClientMutationId({
 			type: new GraphQLNonNull(GraphQLString),
 			description: 'banner id'
 		},
-		...Banner.updates
+		enabled: {
+			type: GraphQLBoolean
+		},
+		title: {
+			type: GraphQLString
+		},
+		link: {
+			type: GraphQLString
+		},
+		position: {
+			type: GraphQLInt
+		}
 	},
 	outputFields: {
 		banner: {
 			type: GraphQLBanner,
-			resolve: ({localId}) => Banner.findById(localId)
+			resolve: ({localId}) => PromotionBanners.findById(localId)
 		}
 	},
-	mutateAndGetPayload: ({id, ...args}, context, {rootValue}) => {
+	mutateAndGetPayload: ({id, enabled, title, link, position}, context, {rootValue}) => {
 		const {id: localId} = fromGlobalId(id);
 
 		return processFileUpload('knocknock-banner', rootValue.request.file)
-			.then(upload => {
-				if (upload) {
-					args.imageUrl = upload.imageUrl;
-					args.imageId = upload.imageId;
-					args.imageBucket = upload.imageBucket;
+			.then(upload => PromotionBanners.update({
+				is_enabled: enabled,
+				banner_title: title,
+				banner_link: link,
+				banner_order: position,
+				...upload&&{
+					banner_image_url: upload.imageUrl
 				}
-
-				return Banner.findById(localId)
-						.then(banner => ({banner, args}))
-			})
-			.then(({banner, args}) => {
-				if (banner.imageId && banner.imageBucket
-					&& banner.imageId && banner.imageId !== banner.imageId) {
-					return deleteFile(banner.imageBucket, banner.imageId)
-						.then(() => banner.update(args))
-						.catch(() => banner.update(args));
-				} else {
-					return banner.update(args); 
-				}
-			})
-			.then(() => ({localId}));
+			}, {where:{id: localId}})).then(() => ({localId}))
 	}
 });
 
@@ -83,8 +112,7 @@ const deleteBanner = mutationWithClientMutationId({
 	name: 'DeleteBanner',
 	inputFields: {
 		id: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'banner id'
+			type: new GraphQLNonNull(GraphQLString)
 		}
 	},
 	outputFields: {
@@ -100,17 +128,7 @@ const deleteBanner = mutationWithClientMutationId({
 	mutateAndGetPayload: ({id}) => {
 		const {id: localId} = fromGlobalId(id);
 
-		return Banner.findById(localId)
-			.then(banner => {
-				if (banner.imageId && banner.imageBucket) {
-					return deleteFile(banner.imageBucket, banner.imageId)
-						.then(() => banner)
-						.catch(() => banner);
-				} else {
-					return banner;
-				}
-			})
-			.then(banner => banner.destroy())
+		return PromotionBanners.destroy({where:{id: localId}})
 			.then(() => ({id}));
 	}
 });

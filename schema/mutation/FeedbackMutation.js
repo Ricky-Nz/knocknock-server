@@ -1,11 +1,26 @@
+import { GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor } from 'graphql-relay';
-import { Feedback } from '../models';
 import { GraphQLViewer, GraphQLFeedbackEdge } from '../query';
+import { UserFeedbacks } from '../../service/database';
 
-const createFeedback mutationWithClientMutationId({
+// id      
+// user_id     
+// rating      
+// comment     
+// created
+
+const createFeedback = mutationWithClientMutationId({
 	name: 'CreateFeedback',
 	inputFields: {
-		...Feedback.inputs
+    userId: {
+      type: new GraphQLNonNull(GraphQLString)
+    },
+    rating: {
+      type: new GraphQLNonNull(GraphQLFloat)
+    },
+    comment: {
+      type: GraphQLString
+    }
 	},
 	outputFields: {
 		feedbackEdge: {
@@ -20,7 +35,13 @@ const createFeedback mutationWithClientMutationId({
 			resolve: () => ({})
 		}
 	},
-	mutateAndGetPayload: (args) => Feedback.create(args)
+	mutateAndGetPayload: ({userId, rating, comment}) => 
+		UserFeedbacks.create({
+			user_id: userId,
+			rating,
+			comment,
+			created: new Date()
+		})
 });
 
 export default {

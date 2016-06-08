@@ -1,16 +1,157 @@
-import { GraphQLNonNull, GraphQLInt, GraphQLList } from 'graphql';
+import { GraphQLInputObjectType, GraphQLNonNull, GraphQLBoolean, GraphQLInt, GraphQLList, GraphQLString } from 'graphql';
 import { mutationWithClientMutationId, fromGlobalId, toGlobalId, offsetToCursor } from 'graphql-relay';
-import { User, Order, OrderItem, Cloth } from '../models';
-import { GraphQLOrder, GraphQLOrderItemInput, GraphQLOrderEdge, GraphQLUser } from '../query';
-import { calculateOrderId, formatDate } from '../service';
+import { GraphQLOrder, GraphQLOrderEdge, GraphQLUser } from '../query';
+import { Users, Orders, OrderDetails, Items } from '../../service/database';
+
+// id      
+// pickup_worker_id      
+// drop_off_worker_id      
+// user_id     
+// order_status_id     
+// drop_off_district_id      
+// pickup_district_id      
+// factory_id      
+// description     
+// lazy_order      
+// express_order     
+// total_price     
+// pickup_address      
+// pickup_postal_code      
+// pickup_apartment_type     
+// drop_off_address      
+// drop_off_postal_code      
+// drop_off_apartment_type     
+// speed_rating      
+// attitude_rating     
+// created_on      
+// pickup_date     
+// pickup_time     
+// drop_off_date     
+// drop_off_time     
+// review      
+// pickup_changed      
+// deliver_changed     
+// paypal_ref_no     
+// paid      
+// pay_later     
+// payment_mode      
+// to_pay_price      
+// voucher_id      
+// free      
+// worker_checked      
+// user_checked      
+// order_source_id     
+// qr_code_url     
+// factory_worker_id     
+// factory_received_date     
+// factory_completed_date      
+// is_merged     
+// signature_url     
+// merged_order_ids      
+// is_imported     
+// is_mergable     
+// order_number      
+// pickup_contact_no     
+// drop_off_contact_no     
+// recurring_order_id      
+// promo_code_id     
+// promo_discount      
+// voucher_discount      
+// pickup_time_end     
+// drop_off_time_end     
+// pickup_unit_number      
+// drop_off_unit_number      
+// drop_off_description      
+// pickup_address_name     
+// drop_off_address_name
+
+// id			
+// order_id			
+// item_id			
+// quantity			
+// laundry_type			
+// price
+
+const GraphQLOrderItemInput = new GraphQLInputObjectType({
+	name: 'OrderItemInput',
+	fields: {
+		productId: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		quantity: {
+			type: new GraphQLNonNull(GraphQLInt)
+		},
+		washType: {
+			type: new GraphQLNonNull(GraphQLString)
+		}
+	}
+});
+
+function prepareOrderItems(orderItems) {
+	const clothIds = orderItems.map(item => {
+		const {id} = fromGlobalId(item.productId);
+		return id;
+	});
+
+	return Items.findAll({where:{id:{$in:clothIds}}})
+		.then(clothes => {
+			return orderItems.map(({productId, quantity, washType}) => {
+				const {id: localClothId} = fromGlobalId(productId);
+				const cloth = clothes.find(cloth => cloth.id == localClothId);
+				
+				let itemPrice;
+				switch(washType) {
+					case 'Wash&Iron':
+						itemPrice = cloth.washPrice;
+						break;
+					case 'Dry Clean':
+						itemPrice = cloth.dryCleanPrice;
+						break;
+					case 'Iron':
+						itemPrice = cloth.ironPrice;
+						break;
+				}
+
+				return {
+					order_id: order.id,
+					item_id: localClothId,
+					quantity,
+					laundry_type: washType,
+					price: itemPrice
+				};
+			});
+		});
+}
 
 const createOrder = mutationWithClientMutationId({
 	name: 'CreateOrder',
 	inputFields: {
-		...Order.inputs,
+    userId: {
+      type: new GraphQLNonNull(GraphQLString)
+    },
+    express: {
+      type: GraphQLBoolean
+    },
+    note: {
+      type: GraphQLString
+    },
+    status: {
+      type: GraphQLString
+    },
+    pickupDate: {
+      type: new GraphQLNonNull(GraphQLString)
+    },
+    pickupTime: {
+      type: new GraphQLNonNull(GraphQLString)
+    },
+    pickupAddress: {
+      type: new GraphQLNonNull(GraphQLString)
+    },
+    pickupWorkerId: {
+      type: GraphQLString
+    },
 		orderItems: {
-			type: new GraphQLList(GraphQLOrderItemInput),
-			description: 'order items'
+			type: new GraphQLList(GraphQLOrderItemInput)
 		}
 	},
 	outputFields: {
@@ -23,81 +164,97 @@ const createOrder = mutationWithClientMutationId({
 		},
 		user: {
 			type: GraphQLUser,
-			resolve: (order) => {
-				const {id: localId} = fromGlobalId(order.userId);
-				return User.findById(localId);
-			}
+			resolve: (order) => Users.findById(order.user_id)
 		}
 	},
-	mutateAndGetPayload: ({orderItems, ...args}) =>
-		calculateOrderId(args.userId)
-			.then(serialNumber => {
-				return Order.create({...args, pickupDate: formatDate(args.pickupDate), serialNumber});
+	mutateAndGetPayload: ({userId, express, note, status, pickupDate,
+		pickupTime, pickupAddress, pickupWorkerId, orderItems}) => {
+		const {id: localUserId} = fromGlobalId(userId);
+		return Orders.create({
+				user_id: localUserId,
+				express_order: express,
+				description: note,
+				order_status_id: status,
+				pickup_date: pickupDate,
+				pickup_time: pickupTime,
+				pickup_address: pickupAddress,
+				pickup_worker_id: pickupWorkerId
 			})
 			.then(order => {
 				if (!orderItems || orderItems.length === 0) {
 					return order;
 				} else {
-					const clothIds = orderItems.map(item => {
-						const {id} = fromGlobalId(item.productId);
-						return id;
-					});
-
-					return Cloth.findAll({where:{id:{$in:clothIds}}})
-						.then(clothes => {
-							const bulkItems = orderItems.map(item => {
-								const {id: localClothId} = fromGlobalId(item.productId);
-								const cloth = clothes.find(cloth => cloth.id == localClothId);
-								
-								let itemPrice;
-								switch(item.washType) {
-									case 'Wash&Iron':
-										itemPrice = cloth.washPrice;
-										break;
-									case 'Dry Clean':
-										itemPrice = cloth.dryCleanPrice;
-										break;
-									case 'Iron':
-										itemPrice = cloth.ironPrice;
-										break;
-								}
-
-								return {
-									...item,
-									serialNumber: order.serialNumber,
-									itemPrice,
-									itemNameCn: cloth.nameCn,
-									itemNameEn: cloth.nameEn,
-									itemImageUrl: cloth.imageUrl
-								};
-							});
-
-							return OrderItem.bulkCreate(bulkItems);
-						})
+					return prepareOrderItems(orderItems)
+						.then(items => OrderDetails.bulkCreate(items))
 						.then(() => order);
 				}
 			})
+	}
 });
 
 const updateOrder = mutationWithClientMutationId({
 	name: 'UpdateOrder',
 	inputFields: {
 		id: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'update order id'
+			type: new GraphQLNonNull(GraphQLString)
 		},
-		...Order.updates
+    express: {
+      type: GraphQLBoolean
+    },
+    note: {
+      type: GraphQLString
+    },
+    status: {
+      type: GraphQLString
+    },
+    pickupDate: {
+      type: GraphQLString
+    },
+    pickupTime: {
+      type: GraphQLString
+    },
+    pickupAddress: {
+      type: GraphQLString
+    },
+    pickupWorkerId: {
+      type: GraphQLString
+    },
+		orderItems: {
+			type: new GraphQLList(GraphQLOrderItemInput)
+		}
 	},
 	outputFields: {
 		order: {
 			type: GraphQLOrder,
-			resolve: ({localId}) => Order.findById(localId)
+			resolve: ({localId}) => Orders.findById(localId)
 		}
 	},
-	mutateAndGetPayload: ({id, ...args}) => {
+	mutateAndGetPayload: ({id, express, note, status, pickupDate, pickupTime, pickupAddress, pickupWorkerId, orderItems}) => {
 		const {id: localId} = fromGlobalId(id);
-		return Order.update(args, {where:{id: localId}})
-			.then(() => ({localId}));
+		return Order.update({
+			express_order: express,
+			description: note,
+			order_status_id: status,
+			pickup_date: pickupDate,
+			pickup_time: pickupTime,
+			pickup_address: pickupAddress,
+			pickup_worker_id: pickupWorkerId
+		}, {where:{id: localId}}).then(() => {
+			if (orderItems) {
+				OrderDetails.destory({where:{order_id: localId}})
+					.then(() => {
+						if (orderItems.length > 0) {
+							return prepareOrderItems(orderItems)
+								.then(items => OrderDetails.bulkCreate(items))
+								.then(() => ({localId}));
+						} else {
+							return {localId};
+						}
+					})
+			} else {
+				return {localId};
+			}
+		});
 	}
 });
 

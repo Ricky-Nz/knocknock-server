@@ -11,9 +11,9 @@ import { connectionDefinitions, globalIdField } from 'graphql-relay';
 
 export default function (nodeInterface) {
 	const nodeType = new GraphQLObjectType({
-	  name: 'Factory',
+	  name: 'Voucher',
 	  fields: {
-	  	id: globalIdField('Factory'),
+	  	id: globalIdField('Voucher'),
 			title: {
 				type: GraphQLString,
 				resolve: (obj) => obj.title

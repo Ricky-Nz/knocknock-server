@@ -1,28 +1,46 @@
-import { GraphQLString, GraphQLNonNull } from 'graphql';
+import { GraphQLString, GraphQLNonNull, GraphQLInt, GraphQLBoolean } from 'graphql';
 import { mutationWithClientMutationId, fromGlobalId } from 'graphql-relay';
-import { TimeSlot } from '../models';
 import { GraphQLTimeSlot } from '../query';
+import { OrderSlots } from '../../service/database';
+
+// id			
+// date			
+// time			
+// quantity			
+// created_on
 
 const updateTimeSlot = mutationWithClientMutationId({
 	name: 'UpdateTimeSlot',
 	inputFields: {
 		id: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'update item id'
+			type: new GraphQLNonNull(GraphQLString)
 		},
-		...TimeSlot.inputs
+		date: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		time: {
+			type: GraphQLString
+		},
+		quantity: {
+			type: GraphQLInt
+		},
+		enabled: {
+			type: GraphQLBoolean
+		}
 	},
 	outputFields: {
 		timeSlot: {
 			type: GraphQLTimeSlot,
-			resolve: ({localId}) => TimeSlot.findById(localId)
+			resolve: ({localId}) => OrderSlots.findById(localId)
 		}
 	},
-	mutateAndGetPayload: ({id, ...args}) => {
+	mutateAndGetPayload: ({id, date, time, quantity, enabled}) => {
 		const {id: localId} = fromGlobalId(id);
-
-		return TimeSlot.update(args, {where: {id: localId}})
-			.then(() => ({localId}));
+		return OrderSlots.update({
+			date,
+			time,
+			quantity
+		}, {where: {id: localId}}).then(() => ({localId}));
 	}
 });
 

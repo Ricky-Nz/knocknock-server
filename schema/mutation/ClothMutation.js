@@ -1,14 +1,64 @@
-import { GraphQLNonNull, GraphQLString } from 'graphql';
+import { GraphQLNonNull, GraphQLString, GraphQLFloat, GraphQLBoolean } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor } from 'graphql-relay';
-import { Cloth } from '../models';
 import { GraphQLCloth, GraphQLClothEdge, GraphQLViewer } from '../query';
-import { processFileUpload } from '../service';
+import { processFileUpload } from '../utils';
 import { deleteFile } from '../../service/datastorage';
+import { Items } from '../../service/database';
+
+// id			
+// sub_category_id			
+// name_en			
+// name_ch			
+// wash_iron_price			
+// dry_clean_price			
+// iron_price			
+// discount_wash_iron_price			
+// discount_dry_clean_price			
+// discount_iron_price			
+// have_discount_dry_clean_price			
+// have_discount_wash_iron_price			
+// have_discount_iron_price			
+// image_url			
+// created_on			
+// disabled			
+// item_order			
+// special_item			
+// hide_from_user			
+// description
 
 const createCloth = mutationWithClientMutationId({
 	name: 'CreateCloth',
 	inputFields: {
-		...Cloth.inputs
+		categoryId: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		nameEn: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		nameCn: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		washPrice: {
+			type: new GraphQLNonNull(GraphQLFloat)
+		},
+		dryCleanPrice: {
+			type: new GraphQLNonNull(GraphQLFloat)
+		},
+		ironPrice: {
+			type: new GraphQLNonNull(GraphQLFloat)
+		},
+		washPriceDiscount: {
+			type: new GraphQLNonNull(GraphQLFloat)
+		},
+		dryCleanPriceDiscount: {
+			type: new GraphQLNonNull(GraphQLFloat)
+		},
+		ironPriceDiscount: {
+			type: new GraphQLNonNull(GraphQLFloat)
+		},
+		special: {
+			type: GraphQLBoolean
+		}
 	},
 	outputFields: {
 		clothEdge: {
@@ -23,16 +73,25 @@ const createCloth = mutationWithClientMutationId({
 			resolve: () => ({})
 		}
 	},
-	mutateAndGetPayload: (args, context, {rootValue}) =>
+	mutateAndGetPayload: ({categoryId, nameEn, nameCn, washPrice, dryCleanPrice, ironPrice,
+		washPriceDiscount, dryCleanPriceDiscount, ironPriceDiscount, special}, context, {rootValue}) =>
 		processFileUpload('knocknock-laundry', rootValue.request.file)
 			.then(upload => {
-				if (upload) {
-					args.imageUrl = upload.imageUrl;
-					args.imageId = upload.imageId;
-					args.imageBucket = upload.imageBucket;
-				}
+				if (!upload) throw 'Upload file failed';
 
-				return Cloth.create(args);
+				return Items.create({
+					sub_category_id: categoryId,
+					name_en: nameEn,
+					name_ch: nameCn,
+					wash_iron_price: washPrice,
+					dry_clean_price: dryCleanPrice,
+					iron_price: ironPrice,
+					discount_wash_iron_price: washPriceDiscount,
+					discount_dry_clean_price: dryCleanPriceDiscount,
+					discount_iron_price: ironPriceDiscount,
+					special_item: special,
+					image_url: upload.imageUrl
+				});
 			})
 });
 
@@ -43,38 +102,63 @@ const updateCloth = mutationWithClientMutationId({
 			type: new GraphQLNonNull(GraphQLString),
 			description: 'cloth id'
 		},
-		...getClothInputs(true)
+		categoryId: {
+			type: GraphQLString
+		},
+		nameEn: {
+			type: GraphQLString
+		},
+		nameCn: {
+			type: GraphQLString
+		},
+		washPrice: {
+			type: GraphQLFloat
+		},
+		dryCleanPrice: {
+			type: GraphQLFloat
+		},
+		ironPrice: {
+			type: GraphQLFloat
+		},
+		washPriceDiscount: {
+			type: GraphQLFloat
+		},
+		dryCleanPriceDiscount: {
+			type: GraphQLFloat
+		},
+		ironPriceDiscount: {
+			type: GraphQLFloat
+		},
+		special: {
+			type: GraphQLBoolean
+		}
 	},
 	outputFields: {
 		cloth: {
 			type: GraphQLCloth,
-			resolve: ({localId}) => Cloth.findById(localId)
+			resolve: ({localId}) => Items.findById(localId)
 		}
 	},
-	mutateAndGetPayload: ({id, ...args}, context, {rootValue}) => {
+	mutateAndGetPayload: ({id, categoryId, nameEn, nameCn, washPrice, dryCleanPrice, ironPrice,
+		washPriceDiscount, dryCleanPriceDiscount, ironPriceDiscount, special}, context, {rootValue}) => {
 		const {id: localId} = fromGlobalId(id);
 
 		return processFileUpload('knocknock-laundry', rootValue.request.file)
-			.then(upload => {
-				if (upload) {
-					args.imageUrl = upload.imageUrl;
-					args.imageId = upload.imageId;
-					args.imageBucket = upload.imageBucket;
+			.then(upload => Items.update({
+				sub_category_id: categoryId,
+				name_en: nameEn,
+				name_ch: nameCn,
+				wash_iron_price: washPrice,
+				dry_clean_price: dryCleanPrice,
+				iron_price: ironPrice,
+				discount_wash_iron_price: washPriceDiscount,
+				discount_dry_clean_price: dryCleanPriceDiscount,
+				discount_iron_price: ironPriceDiscount,
+				special_item: special,
+				...upload&&{
+					image_url: upload.imageUrl
 				}
-
-				return Cloth.findById(localId)
-						.then(cloth => ({cloth, args}))
-			})
-			.then(({cloth, args}) => {
-				if (cloth.imageId && cloth.imageBucket
-					&& args.imageId && args.imageId !== cloth.imageId) {
-					return deleteFile(cloth.imageBucket, cloth.imageId)
-						.then(() => cloth.update(args))
-						.catch(() => cloth.update(args));
-				} else {
-					return cloth.update(args); 
-				}
-			})
+			}, {where:{id: localId}}))
 			.then(() => ({localId}));
 	}
 });
@@ -83,8 +167,7 @@ const deleteCloth = mutationWithClientMutationId({
 	name: 'DeleteCloth',
 	inputFields: {
 		id: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'cloth id'
+			type: new GraphQLNonNull(GraphQLString)
 		}
 	},
 	outputFields: {
@@ -100,17 +183,7 @@ const deleteCloth = mutationWithClientMutationId({
 	mutateAndGetPayload: ({id}) => {
 		const {id: localId} = fromGlobalId(id);
 
-		return Cloth.findById(localId)
-			.then(cloth => {
-				if (cloth.imageId && cloth.imageBucket) {
-					return deleteFile(cloth.imageBucket, cloth.imageId)
-						.then(() => cloth)
-						.catch(() => cloth);
-				} else {
-					return cloth;
-				}
-			})
-			.then(cloth => cloth.destroy())
+		return Items.destroy({where:{id: localId}})
 			.then(() => ({id}));
 	}
 });

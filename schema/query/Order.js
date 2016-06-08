@@ -67,9 +67,9 @@ import { modelConnection } from '../utils';
 
 export default function (nodeInterface, {GraphQLOrderItemConnection}) {
   const nodeType = new GraphQLObjectType({
-    name: 'Feedback',
+    name: 'Order',
     fields: {
-      id: globalIdField('Feedback'),
+      id: globalIdField('Order'),
       userId: {
         type: GraphQLString,
         resolve: (obj) => obj.user_id

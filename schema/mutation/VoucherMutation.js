@@ -1,11 +1,31 @@
+import { GraphQLNonNull, GraphQLString, GraphQLFloat, GraphQLBoolean } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'graphql-relay';
-import { User, Voucher } from '../models';
-import { GraphQLUser, GraphQLVoucher, GraphQLVoucherEdge } from '../query';
+import { GraphQLViewer, GraphQLVoucher, GraphQLVoucherEdge } from '../query';
+import { Vouchers } from '../../service/database';
+
+// id			
+// title			
+// value			
+// expire_on			
+// created_on			
+// disabled			
+// seen
 
 const createVoucher = mutationWithClientMutationId({
 	name: 'CreateVoucher',
 	inputFields: {
-		...Voucher.inputs
+		title: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		value: {
+			type: new GraphQLNonNull(GraphQLFloat)
+		},
+		expireOn: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		enabled: {
+			type: new GraphQLNonNull(GraphQLBoolean)
+		}
 	},
 	outputFields: {
 		voucherEdge: {
@@ -15,15 +35,18 @@ const createVoucher = mutationWithClientMutationId({
 				node: voucher
 			})
 		},
-		user: {
-			type: GraphQLUser,
-			resolve: (voucher) => {
-				const {id: localId} = fromGlobalId(voucher.userId);
-				return User.findById(localId);
-			}
+		viewer: {
+			type: GraphQLViewer,
+			resolve: () => ({})
 		}
 	},
-	mutateAndGetPayload: (args) => Voucher.create(args)
+	mutateAndGetPayload: ({title, value, expireOn, enabled}) =>
+		Vouchers.create({
+			title,
+			value,
+			expire_on: expireOn,
+			disabled: !enabled
+		})
 });
 
 export default {

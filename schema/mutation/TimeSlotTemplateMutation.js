@@ -1,12 +1,27 @@
-import { GraphQLString, GraphQLNonNull } from 'graphql';
+import { GraphQLString, GraphQLNonNull, GraphQLInt } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor, fromGlobalId,} from 'graphql-relay';
-import { TimeSlotTemplate } from '../models';
 import { GraphQLViewer, GraphQLTimeSlotTemplateEdge, GraphQLTimeSlotTemplate } from '../query';
+import { DistrictTimeSlots } from '../../service/database';
+
+// id			
+// district_id			
+// time			
+// max_pickup			
+// updated			
+// created			
+// max_dropoff			
+// current_pickup			
+// current_dropoff
 
 const createTimeSlotTemplate = mutationWithClientMutationId({
 	name: 'CreateTimeSlotTemplate',
 	inputFields: {
-		...TimeSlotTemplate.inputs
+		time: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		limit: {
+			type: new GraphQLNonNull(GraphQLInt)
+		}
 	},
 	outputFields: {
 		timeSlotTemplateEdge: {
@@ -21,17 +36,26 @@ const createTimeSlotTemplate = mutationWithClientMutationId({
 			resolve: () => ({})
 		}
 	},
-	mutateAndGetPayload: (args) => TimeSlotTemplate.create(args)
+	mutateAndGetPayload: ({time, limit}) =>
+		DistrictTimeSlots.create({
+			time,
+			max_pickup: limit,
+			created: new Date()
+		})
 });
 
 const updateTimeSlotTemplate = mutationWithClientMutationId({
 	name: 'UpdateTimeSlotTemplate',
 	inputFields: {
 		id: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'update item id'
+			type: new GraphQLNonNull(GraphQLString)
 		},
-		...TimeSlotTemplate.updates
+		time: {
+			type: GraphQLString
+		},
+		limit: {
+			type: GraphQLInt
+		}
 	},
 	outputFields: {
 		timeSlotTemplate: {
@@ -39,10 +63,12 @@ const updateTimeSlotTemplate = mutationWithClientMutationId({
 			resolve: ({localId}) => TimeSlotTemplate.findById(localId)
 		}
 	},
-	mutateAndGetPayload: ({id, ...args}) => {
+	mutateAndGetPayload: ({id, time, limit}) => {
 		const {id: localId} = fromGlobalId(id);
-		return TimeSlotTemplate.update(args, {where: {id: localId}})
-			.then(() => ({localId}));
+		return DistrictTimeSlots.update({
+			time,
+			max_pickup: limit
+		}, {where: {id: localId}}).then(() => ({localId}));
 	}
 });
 
@@ -50,8 +76,7 @@ const deleteTimeSlotTemplate = mutationWithClientMutationId({
 	name: 'DeleteTimeSlotTemplate',
 	inputFields: {
 		id: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'time slot tempalte id'
+			type: new GraphQLNonNull(GraphQLString)
 		}
 	},
 	outputFields: {
@@ -66,7 +91,7 @@ const deleteTimeSlotTemplate = mutationWithClientMutationId({
 	},
 	mutateAndGetPayload: ({id, ...args}) => {
 		const {id: localId} = fromGlobalId(id);
-		return DBTimeSlotTemplate.destroy({where:{id:localId}})
+		return DistrictTimeSlots.destroy({where:{id:localId}})
 			.then(() => ({id}));
 	}
 });

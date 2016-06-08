@@ -31,6 +31,10 @@ export default function (nodeInterface) {
 	  name: 'Worker',
 	  fields: {
 	  	id: globalIdField('Worker'),
+	  	email: {
+	  		type: GraphQLString,
+	  		resolve: (obj) => obj.email
+	  	},
 			firstName: {
 				type: GraphQLString,
 				resolve: (obj) => obj.first_name
@@ -44,7 +48,7 @@ export default function (nodeInterface) {
 				resolve: (obj) => obj.contact_no
 			},
 			enabled: {
-				type: GraphQLString,
+				type: GraphQLBoolean,
 				resolve: (obj) => !obj.disabled
 			},
 			avatarUrl: {

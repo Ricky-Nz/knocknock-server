@@ -1,7 +1,7 @@
 import { GraphQLNonNull, GraphQLString } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'graphql-relay';
-import { GraphQLAdminEdge, GraphQLViewer } from '../query';
-import { Admin } from '../models';
+import { GraphQLAdminEdge, GraphQLAdmin, GraphQLViewer } from '../query';
+import { Admins } from '../../service/database';
 
 // id			
 // first_name			
@@ -18,7 +18,21 @@ import { Admin } from '../models';
 const createAdmin = mutationWithClientMutationId({
 	name: 'CreateAdmin',
 	inputFields: {
-		...Admin.inputs
+		email: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		password: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		firstName: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		lastName: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		contact: {
+			type: new GraphQLNonNull(GraphQLString)
+		}
 	},
 	outputFields: {
 		adminEdge: {
@@ -33,28 +47,50 @@ const createAdmin = mutationWithClientMutationId({
 			resolve: () => ({})
 		}
 	},
-	mutateAndGetPayload: (args) => Admin.create(args)
+	mutateAndGetPayload: ({email, password, firstName, lastName, contact}) =>
+		Admins.create({
+			email: email,
+			encrypted_password: password,
+			first_name: firstName,
+			last_name: lastName,
+			contact_no: contact,
+			created_on: new Date()
+		})
 });
 
 const updateAdmin = mutationWithClientMutationId({
 	name: 'UpdateAdmin',
 	inputFields: {
 		id: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'admin id'
+			type: new GraphQLNonNull(GraphQLString)
 		},
-		...Admin.updates
+		password: {
+			type: GraphQLString
+		},
+		firstName: {
+			type: GraphQLString
+		},
+		lastName: {
+			type: GraphQLString
+		},
+		contact: {
+			type: GraphQLString
+		}
 	},
 	outputFields: {
 		admin: {
 			type: GraphQLAdmin,
-			resolve: ({localId}) => Admin.findById(localId)
+			resolve: ({localId}) => Admins.findById(localId)
 		}
 	},
-	mutateAndGetPayload: ({id, ...args}) => {
+	mutateAndGetPayload: ({id, password, firstName, lastName, contact}) => {
 		const {id: localId} = fromGlobalId(id);
-		return Admin.update(args, {where:{id: localId}})
-			.then(() => ({localId}));
+		return Admins.update({
+				first_name: firstName,
+				last_name: lastName,
+				contact_no: contact,
+				encrypted_password: password 
+			}, {where:{id: localId}}).then(() => ({localId}));
 	}
 });
 
@@ -62,8 +98,7 @@ const deleteAdmin = mutationWithClientMutationId({
 	name: 'DeleteAdmin',
 	inputFields: {
 		id: {
-			type: new GraphQLNonNull(GraphQLString),
-			description: 'admin id'
+			type: new GraphQLNonNull(GraphQLString)
 		}
 	},
 	outputFields: {
@@ -76,9 +111,9 @@ const deleteAdmin = mutationWithClientMutationId({
 			resolve: () => ({})
 		}
 	},
-	mutateAndGetPayload: ({id, ...args}) => {
+	mutateAndGetPayload: ({id}) => {
 		const {id: localId} = fromGlobalId(id);
-		return Admin.destroy({where:{id:localId}})
+		return Admins.destroy({where:{id:localId}})
 			.then(() => ({id}));
 	}
 });
