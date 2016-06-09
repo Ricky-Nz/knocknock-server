@@ -1,5 +1,5 @@
 import { GraphQLObjectType, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
-import { connectionDefinitions, globalIdField } from 'graphql-relay';
+import { connectionDefinitions, globalIdField, toGlobalId } from 'graphql-relay';
 import { Vouchers } from '../../service/database';
 
   // { id: 7549,
@@ -13,6 +13,10 @@ export default function (nodeInterface, {GraphQLVoucher}) {
 	  name: 'AssignedVoucher',
 	  fields: {
 	  	id: globalIdField('AssignedVoucher'),
+	  	userId: {
+	  		type: new GraphQLNonNull(GraphQLString),
+	  		resolve: (obj) => toGlobalId('User', obj.user_id)
+	  	},
 			used: {
 				type: GraphQLBoolean,
 				resolve: (obj) => obj.used

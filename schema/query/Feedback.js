@@ -1,5 +1,5 @@
 import { GraphQLObjectType, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
-import { connectionDefinitions, globalIdField } from 'graphql-relay';
+import { connectionDefinitions, globalIdField, toGlobalId } from 'graphql-relay';
 import { Users } from '../../service/database';
 
    // { id: 1,
@@ -15,7 +15,7 @@ export default function (nodeInterface, {GraphQLUser}) {
       id: globalIdField('Feedback'),
       userId: {
         type: GraphQLString,
-        resolve: (obj) => obj.user_id
+        resolve: (obj) => toGlobalId('User', obj.user_id)
       },
       rating: {
         type: GraphQLFloat,

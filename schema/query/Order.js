@@ -1,5 +1,5 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
-import { connectionDefinitions, globalIdField, connectionArgs } from 'graphql-relay';
+import { connectionDefinitions, globalIdField, connectionArgs, toGlobalId } from 'graphql-relay';
 import { Users, OrderStatuses, OrderDetails } from '../../service/database';
 import { modelConnection } from '../utils';
 
@@ -65,14 +65,14 @@ import { modelConnection } from '../utils';
    //   pickup_address_name: null,
    //   drop_off_address_name: null },
 
-export default function (nodeInterface, {GraphQLOrderItemConnection}) {
+export default function (nodeInterface, {GraphQLOrderItemConnection, GraphQLOrderStatus}) {
   const nodeType = new GraphQLObjectType({
     name: 'Order',
     fields: {
       id: globalIdField('Order'),
       userId: {
         type: GraphQLString,
-        resolve: (obj) => obj.user_id
+        resolve: (obj) => toGlobalId('User', obj.user_id)
       },
       express: {
         type: GraphQLBoolean,
@@ -83,9 +83,8 @@ export default function (nodeInterface, {GraphQLOrderItemConnection}) {
         resolve: (obj) => obj.description
       },
       status: {
-        type: GraphQLString,
+        type: GraphQLOrderStatus,
         resolve: (obj) => OrderStatuses.findById(obj.order_status_id)
-          .then(status => status.status)
       },
       pickupDate: {
         type: GraphQLString,
@@ -101,11 +100,7 @@ export default function (nodeInterface, {GraphQLOrderItemConnection}) {
       },
       pickupWorkerId: {
         type: GraphQLString,
-        resolve: (obj) => obj.pickup_worker_id
-      },
-      serialNumber: {
-        type: GraphQLString,
-        resolve: (obj) => obj.id
+        resolve: (obj) => toGlobalId('Worker', obj.pickup_worker_id)
       },
       totalPrice: {
         type: GraphQLInt,

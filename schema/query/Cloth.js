@@ -1,5 +1,5 @@
 import { GraphQLObjectType, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
-import { connectionDefinitions, globalIdField } from 'graphql-relay';
+import { connectionDefinitions, globalIdField, toGlobalId } from 'graphql-relay';
 
    // { id: 18,
    //   sub_category_id: 3,
@@ -29,7 +29,7 @@ export default function (nodeInterface) {
 	  	id: globalIdField('Cloth'),
 			categoryId: {
 				type: new GraphQLNonNull(GraphQLString),
-				reslove: (obj) => obj.sub_category_id
+				reslove: (obj) => toGlobalId('Category', obj.sub_category_id)
 			},
 			nameEn: {
 				type: new GraphQLNonNull(GraphQLString),

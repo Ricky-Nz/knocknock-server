@@ -12,17 +12,13 @@ export function generateCode(argument) {
   return chance.string({pool: 'poiuytrewqasdfghjklmnbvcxz1234567890', length: 12});
 }
 
-export function formatDate(date) {
-  return moment(new Date(date)).format();
-}
-
-export function formatToDay(date) {
-  return moment(new Date(date))
-    .millisecond(0)
-    .second(0)
-    .minute(0)
-    .hour(0)
-    .format();
+export function formatTime(date, hour=0, minute=0, second=0, millisecond=0) {
+  let format = new Date(date);
+  format.setHours(hour);
+  format.setMinutes(minute);
+  format.setSeconds(second);
+  format.setMilliseconds(millisecond);
+  return format;
 }
 
 export function calculateOrderId(userId) {

@@ -1,5 +1,5 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
-import { connectionDefinitions, globalIdField } from 'graphql-relay';
+import { connectionDefinitions, globalIdField, toGlobalId } from 'graphql-relay';
 
    // { id: 239,
    //   order_id: 117,
@@ -15,11 +15,11 @@ export default function (nodeInterface) {
 	  	id: globalIdField('OrderItem'),
 	  	orederId: {
 	  		type: GraphQLString,
-	  		resolve: (obj) => obj.order_id
+	  		resolve: (obj) => toGlobalId('Order', obj.order_id)
 	  	},
 			productId: {
 				type: GraphQLString,
-				resolve: (obj) => obj.item_id
+				resolve: (obj) => toGlobalId('Cloth', obj.item_id)
 			},
 			washType: {
 				type: GraphQLString,

@@ -1,6 +1,7 @@
 import { GraphQLObjectType, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField, connectionArgs } from 'graphql-relay';
 import { Orders, UserAddresses, UserVouchers } from '../../service/database';
+import { modelConnection } from '../utils';
 
   // { id: 3812,
   //   first_name: 'li fan',
@@ -103,15 +104,15 @@ export default function (nodeInterface, {
           ...connectionArgs
         },
         resolve: (user, {all, search, ...args}) => {
-          let query = {where:{user_id: user.id}};
+          let where = {user_id: user.id};
           if (!all) {
-            query.where.used = false;
+            where.used = false;
           }
           if (search) {
-            query.where.title = {$like: `%${search}%`};
+            where.title = {$like: `%${search}%`};
           }
 
-          return modelConnection(UserVouchers, query, args);
+          return modelConnection(UserVouchers, {where}, args);
         }
       },
       order: {
@@ -121,29 +122,26 @@ export default function (nodeInterface, {
             type: new GraphQLNonNull(GraphQLString)
           }
         },
-        resolve: (obj, {id}) => {
+        resolve: (user, {id}) => {
           const {id: localId} = fromGlobalId(id);
-          return Orders.findById(localId);
+          return Orders.findOne({user_id: user.id, id: localId});
         }
       },
       orders: {
         type: GraphQLOrderConnection,
         args: {
           search: {
-            type: GraphQLString,
-            description: 'search order by order id'
+            type: GraphQLString
           },
           ...connectionArgs
         },
         resolve: (user, {search, ...args}) => {
-          let query = {where:{user_id: user.id}};
+          let where = {user_id: user.id};
           if (search) {
-            query.where['$or'] = [
-              {id: {$like: `%${search}%`}}
-            ];
+            where.id = {$like: `%${search}%`};
           }
 
-          return modelConnection(Orders, query, args);
+          return modelConnection(Orders, {where}, args);
         }
       }
     },

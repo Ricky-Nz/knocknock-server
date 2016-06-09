@@ -5,10 +5,10 @@ schema {
 
 type Address implements Node {
   id: ID!
-  userId: String!
-  postalCode: String!
-  address: String!
-  contact: String!
+  userId: String
+  postalCode: String
+  address: String
+  contact: String
 }
 
 type AddressConnection {
@@ -24,9 +24,9 @@ type AddressEdge {
 type Admin implements Node {
   id: ID!
   email: String!
-  firstName: String!
-  lastName: String!
-  contact: String!
+  firstName: String
+  lastName: String
+  contact: String
 }
 
 type AdminConnection {
@@ -36,6 +36,24 @@ type AdminConnection {
 
 type AdminEdge {
   node: Admin
+  cursor: String!
+}
+
+type AssignedVoucher implements Node {
+  id: ID!
+  userId: String!
+  used: Boolean
+  createdAt: String
+  voucher: Voucher
+}
+
+type AssignedVoucherConnection {
+  pageInfo: PageInfo!
+  edges: [AssignedVoucherEdge]
+}
+
+type AssignedVoucherEdge {
+  node: AssignedVoucher
   cursor: String!
 }
 
@@ -76,9 +94,9 @@ type CategoryEdge {
 
 type Cloth implements Node {
   id: ID!
-  categoryId: String
-  nameEn: String
-  nameCn: String
+  categoryId: String!
+  nameEn: String!
+  nameCn: String!
   washPrice: Float
   dryCleanPrice: Float
   ironPrice: Float
@@ -485,12 +503,11 @@ type Order implements Node {
   userId: String
   express: Boolean
   note: String
-  status: String
+  status: OrderStatus
   pickupDate: String
   pickupTime: String
   pickupAddress: String
   pickupWorkerId: String
-  serialNumber: String
   totalPrice: Int
   userAvatar: String
   orderItems(after: String, first: Int, before: String, last: Int): OrderItemConnection
@@ -529,6 +546,12 @@ input OrderItemInput {
   productId: String!
   quantity: Int!
   washType: String!
+}
+
+type OrderStatus implements Node {
+  id: ID!
+  status: String
+  stage: Int
 }
 
 type PageInfo {
@@ -594,36 +617,8 @@ type TimeSlotTemplate implements Node {
   limit: Int
 }
 
-type TimeSlotTemplateConnection {
-  pageInfo: PageInfo!
-  edges: [TimeSlotTemplateEdge]
-}
-
 type TimeSlotTemplateEdge {
   node: TimeSlotTemplate
-  cursor: String!
-}
-
-type Transaction implements Node {
-  id: ID!
-  walletId: String!
-  value: Int!
-  currency: String!
-  referenceNo: String!
-  paymentMode: String!
-  paymentChannel: String!
-  status: String!
-  createdAt: String!
-  user: UserReference
-}
-
-type TransactionConnection {
-  pageInfo: PageInfo!
-  edges: [TransactionEdge]
-}
-
-type TransactionEdge {
-  node: Transaction
   cursor: String!
 }
 
@@ -822,10 +817,9 @@ type User implements Node {
   avatarUrl: String
   isVerified: Boolean
   addresses(after: String, first: Int, before: String, last: Int): AddressConnection
-  vouchers(all: Boolean, search: String, after: String, first: Int, before: String, last: Int): VoucherConnection
-  order(serialNumber: String!): Order
+  vouchers(all: Boolean, search: String, after: String, first: Int, before: String, last: Int): AssignedVoucherConnection
+  order(id: String!): Order
   orders(search: String, after: String, first: Int, before: String, last: Int): OrderConnection
-  transactions(search: String, after: String, first: Int, before: String, last: Int): TransactionConnection
 }
 
 type UserConnection {
@@ -838,33 +832,26 @@ type UserEdge {
   cursor: String!
 }
 
-type UserReference {
-  id: String!
-  name: String!
-  email: String!
-}
-
 type Viewer implements Node {
   id: ID!
   user(id: String!): User
   worker(id: String!): Worker
   admin(id: String!): Admin
+  cloth(id: String!): Cloth
   users(search: String, after: String, first: Int, before: String, last: Int): UserConnection
   workers(search: String, after: String, first: Int, before: String, last: Int): WorkerConnection
   admins(search: String, after: String, first: Int, before: String, last: Int): AdminConnection
-  orders(userId: String, search: String, status: [String], afterDate: String, beforeDate: String, after: String, first: Int, before: String, last: Int): OrderConnection
+  orders(userId: String, search: String, statusIds: [String], afterDate: String, beforeDate: String, after: String, first: Int, before: String, last: Int): OrderConnection
   histories(search: String, after: String, first: Int, before: String, last: Int): OrderConnection
-  transactions(search: String, after: String, first: Int, before: String, last: Int): TransactionConnection
-  cloth(id: String!): Cloth
   clothes(search: String, categoryId: String, after: String, first: Int, before: String, last: Int): ClothConnection
   categories(search: String, after: String, first: Int, before: String, last: Int): CategoryConnection
-  timeSlotTemplates(after: String, first: Int, before: String, last: Int): TimeSlotTemplateConnection
   timeSlots(date: String!, after: String, first: Int, before: String, last: Int): TimeSlotConnection
   factories(search: String, after: String, first: Int, before: String, last: Int): FactoryConnection
+  vouchers(search: String, after: String, first: Int, before: String, last: Int): VoucherConnection
   promoCodes(search: String, after: String, first: Int, before: String, last: Int): PromoCodeConnection
   banners(search: String, after: String, first: Int, before: String, last: Int): BannerConnection
   feedbacks(search: String, after: String, first: Int, before: String, last: Int): FeedbackConnection
-  orderStatus: [String]
+  orderStatus: [OrderStatus]
 }
 
 type Voucher implements Node {

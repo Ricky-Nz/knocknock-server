@@ -2,7 +2,7 @@ import { GraphQLObjectType } from 'graphql';
 import { nodeDefinitions } from 'graphql-relay';
 import { Users, Admins, Workers, UserAddresses, Items, SubCategories,
   Vouchers, Orders, OrderDetails, OrderTransactions, OrderSlots, DistrictTimeSlots,
-  Factories, PromoCodes, PromoionBanners, UserFeedbacks } from '../../service/database';
+  Factories, PromoCodes, PromoionBanners, UserFeedbacks, OrderStatuses } from '../../service/database';
 import addressQuery from './Address';
 import adminQuery from './Admin';
 import bannerQuery from './Banner';
@@ -19,8 +19,9 @@ import transactionQuery from './Transaction';
 import userQuery from './User';
 import viewerQuery from './Viewer';
 import voucherQuery from './Voucher';
-import assignedVoucherQuery from './Voucher';
+import assignedVoucherQuery from './AssignedVoucher';
 import workerQuery from './Worker';
+import orderStatusQuery from './OrderStatus';
 
 class Viewer {}
 
@@ -64,6 +65,8 @@ const { nodeInterface, nodeField } = nodeDefinitions(
       return PromoionBanners.findById(id);
     } else if (type === 'Feedback') {
       return UserFeedbacks.findById(id);
+    } else if (type === 'OrderStatus') {
+      return OrderStatuses.findById(id);
     } else {
       return null;
     }
@@ -105,11 +108,19 @@ const { nodeInterface, nodeField } = nodeDefinitions(
       return GraphQLBanner;
     } else if (obj instanceof UserFeedbacks) {
       return GraphQLFeedback;
+    } else if (obj instanceof OrderStatuses) {
+      return GraphQLOrderStatus;
     } else {
   		return null;
   	}
   }
 );
+
+export const {
+  nodeType: GraphQLOrderStatus,
+  connectionType: GraphQLStatusConnection,
+  edgeType: GraphQLStatusEdge
+} = orderStatusQuery(nodeInterface);
 
 export const {
   nodeType: GraphQLAddress,
@@ -187,7 +198,10 @@ export const {
   nodeType: GraphQLOrder,
   connectionType: GraphQLOrderConnection,
   edgeType: GraphQLOrderEdge
-} = orderQuery(nodeInterface, {GraphQLOrderItemConnection});
+} = orderQuery(nodeInterface, {
+  GraphQLOrderItemConnection,
+  GraphQLOrderStatus
+});
 
 export const {
   nodeType: GraphQLUser,
@@ -195,7 +209,7 @@ export const {
   edgeType: GraphQLUserEdge
 } = userQuery(nodeInterface, {
   GraphQLAddressConnection,
-  GraphQLVoucherConnection,
+  GraphQLAssignedVoucherConnection,
   GraphQLTransactionConnection,
   GraphQLOrderConnection,
   GraphQLOrder
@@ -226,6 +240,7 @@ export const {
   GraphQLWorker,
   GraphQLAdmin,
   GraphQLCloth,
+  GraphQLOrderStatus,
   GraphQLUserConnection,
   GraphQLWorkerConnection,
   GraphQLAdminConnection,
@@ -237,6 +252,7 @@ export const {
   GraphQLTimeSlotConnection,
   GraphQLFactoryConnection,
   GraphQLPromoCodeConnection,
+  GraphQLVoucherConnection,
   GraphQLBannerConnection,
   GraphQLFeedbackConnection
 });

@@ -19,7 +19,8 @@ export default function (nodeInterface) {
 	  fields: {
 	  	id: globalIdField('Admin'),
 			email: {
-				type: new GraphQLNonNull(GraphQLString)
+				type: new GraphQLNonNull(GraphQLString),
+				resolve: (obj) => obj.email
 			},
 			firstName: {
 				type: GraphQLString,

@@ -1,5 +1,5 @@
 import { GraphQLObjectType, GraphQLNonNull, GraphQLString } from 'graphql';
-import { connectionDefinitions, globalIdField } from 'graphql-relay';
+import { connectionDefinitions, globalIdField, toGlobalId } from 'graphql-relay';
 
    // { id: 53,
    //   user_id: 130,
@@ -20,7 +20,7 @@ export default function (nodeInterface) {
 	  	id: globalIdField('Address'),
 			userId: {
 				type: GraphQLString,
-				resolve: (obj) => obj.user_id
+				resolve: (obj) => toGlobalId('User', obj.user_id)
 			},
 			postalCode: {
 				type: GraphQLString,

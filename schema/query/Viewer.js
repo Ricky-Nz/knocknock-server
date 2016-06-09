@@ -1,13 +1,15 @@
 import { GraphQLObjectType, GraphQLList, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField, connectionArgs } from 'graphql-relay';
-import { Users, Workers, Admins, Items, SubCategories, DefaultDistrictTimeSlots } from '../../service/database';
-import { formatToDay } from '../utils';
+import { Users, Workers, Admins, Items, SubCategories, OrderSlots,
+  OrderStatuses, UserFeedbacks, PromotionBanners, PromoCodes, Factories, Vouchers } from '../../service/database';
+import { modelConnection, formatTime } from '../utils';
 
 export default function (nodeInterface, {
   GraphQLUser,
   GraphQLWorker,
   GraphQLAdmin,
   GraphQLCloth,
+  GraphQLOrderStatus,
   GraphQLUserConnection,
   GraphQLWorkerConnection,
   GraphQLAdminConnection,
@@ -19,6 +21,7 @@ export default function (nodeInterface, {
   GraphQLTimeSlotConnection,
   GraphQLFactoryConnection,
   GraphQLPromoCodeConnection,
+  GraphQLVoucherConnection,
   GraphQLBannerConnection,
   GraphQLFeedbackConnection
 }) {
@@ -62,105 +65,6 @@ export default function (nodeInterface, {
           return Admins.findById(localId);
         }
       },
-      users: {
-        type: GraphQLUserConnection,
-        args: {
-          search: {
-            type: GraphQLString
-          },
-          ...connectionArgs
-        },
-        resolve: (obj, {search, ...args}) =>
-          modelConnection(Users, search?{where:{$or:[
-              {name: {$like: `%${search}%`}},
-              {email: {$like: `%${search}%`}},
-              {contact: {$like: `%${search}%`}}
-            ]}}:{}, args)
-      },
-      workers: {
-        type: GraphQLWorkerConnection,
-        args: {
-          search: {
-            type: GraphQLString
-          },
-          ...connectionArgs
-        },
-        resolve: (obj, {search, ...args}) =>
-          modelConnection(Workers, search?{where:{$or:[
-              {name: {$like: `%${search}%`}},
-              {email: {$like: `%${search}%`}},
-              {contact: {$like: `%${search}%`}}
-            ]}}:{}, args)
-      },
-      admins: {
-        type: GraphQLAdminConnection,
-        args: {
-          search: {
-            type: GraphQLString
-          },
-          ...connectionArgs
-        },
-        resolve: (obj, {search, ...args}) =>
-          modelConnection(Admins, search?{where:{$or:[
-              {name: {$like: `%${search}%`}},
-              {email: {$like: `%${search}%`}},
-              {contact: {$like: `%${search}%`}}
-            ]}}:{}, args)
-      },
-      orders: {
-        type: GraphQLOrderConnection,
-        args: {
-          userId: {
-            type: GraphQLString
-          },
-          search: {
-            type: GraphQLString
-          },
-          statusId: {
-            type: new GraphQLList(GraphQLString)
-          },
-          afterDate: {
-            type: GraphQLString
-          },
-          beforeDate: {
-            type: GraphQLString
-          },
-          ...connectionArgs
-        },
-        resolve: (obj, {userId, search, status, afterDate, beforeDate, ...args}) => {
-          let query = {where:{status:{$notIn:['order complete', 'deleted', 'canceled']}}};
-          if (userId) {
-            const {id: localUseriId} = fromGlobalId(userId);
-            query.where.user_id = localUseriId;
-          }
-          if (search) {
-            query.where.id = {$like: `%${search}%`};
-          }
-          if (status && status.length > 0) {
-            query.where.order_status_id = {$in: status};
-          }
-          if (afterDate||beforeDate) query.where.pickupDate = calculateTimeRnage(afterDate, beforeDate);
-
-          return modelConnection(Order, query, args);
-        }
-      },
-      histories: {
-        type: GraphQLOrderConnection,
-        args: {
-          search: {
-            type: GraphQLString
-          },
-          ...connectionArgs
-        },
-        resolve: (obj, {search, ...args}) => {
-          let query = {where:{status: {$in: ['order complete', 'deleted', 'canceled']}}};
-          if (search) {
-            query.where.id = {$like: `%${search}%`};
-          }
-
-          return modelConnection(Orders, query, args);
-        }
-      },
       cloth: {
         type: GraphQLCloth,
         args: {
@@ -173,16 +77,124 @@ export default function (nodeInterface, {
           return Items.findById(localId);
         }
       },
+      users: {
+        type: GraphQLUserConnection,
+        args: {
+          search: {
+            type: GraphQLString
+          },
+          ...connectionArgs
+        },
+        resolve: (obj, {search, ...args}) =>
+          modelConnection(Users, search?{where:{$or:[
+              {first_name: {$like: `%${search}%`}},
+              {last_name: {$like: `%${search}%`}},
+              {email: {$like: `%${search}%`}},
+              {contact_no: {$like: `%${search}%`}}
+            ]}}:{}, args)
+      },
+      workers: {
+        type: GraphQLWorkerConnection,
+        args: {
+          search: {
+            type: GraphQLString
+          },
+          ...connectionArgs
+        },
+        resolve: (obj, {search, ...args}) =>
+          modelConnection(Workers, search?{where:{$or:[
+              {first_name: {$like: `%${search}%`}},
+              {last_name: {$like: `%${search}%`}},
+              {email: {$like: `%${search}%`}},
+              {contact_no: {$like: `%${search}%`}}
+            ]}}:{}, args)
+      },
+      admins: {
+        type: GraphQLAdminConnection,
+        args: {
+          search: {
+            type: GraphQLString
+          },
+          ...connectionArgs
+        },
+        resolve: (obj, {search, ...args}) =>
+          modelConnection(Admins, search?{where:{$or:[
+              {first_name: {$like: `%${search}%`}},
+              {last_name: {$like: `%${search}%`}},
+              {email: {$like: `%${search}%`}},
+              {contact_no: {$like: `%${search}%`}}
+            ]}}:{}, args)
+      },
+      orders: {
+        type: GraphQLOrderConnection,
+        args: {
+          userId: {
+            type: GraphQLString
+          },
+          search: {
+            type: GraphQLString
+          },
+          statusIds: {
+            type: new GraphQLList(GraphQLString)
+          },
+          afterDate: {
+            type: GraphQLString
+          },
+          beforeDate: {
+            type: GraphQLString
+          },
+          ...connectionArgs
+        },
+        resolve: (obj, {userId, search, statusIds, afterDate, beforeDate, ...args}) => {
+          let where = {order_status_id:{$notIn:[8, 9]}};
+          if (userId) {
+            const {id: localUseriId} = fromGlobalId(userId);
+            where.user_id = localUseriId;
+          }
+          if (search) {
+            where.id = {$like: `%${search}%`};
+          }
+          if (statusIds&&statusIds.length > 0) {
+            where.order_status_id['$in'] = statusIds;
+          }
+          if (afterDate) {
+            where.pickup_date = {'$gte': formatTime(afterDate)};
+          }
+          if (beforeDate) {
+            if (!where.pickup_date) {
+              where.pickup_date = {};
+            }
+            where.pickup_date['$lt'] = formatTime(beforeDate);
+          }
+
+          return modelConnection(Order, {where}, args);
+        }
+      },
+      histories: {
+        type: GraphQLOrderConnection,
+        args: {
+          search: {
+            type: GraphQLString
+          },
+          ...connectionArgs
+        },
+        resolve: (obj, {search, ...args}) => {
+          let query = {where:{order_status_id: {$in: [8, 9]}}};
+          if (search) {
+            query.where.id = {$like: `%${search}%`};
+          }
+
+          return modelConnection(Orders, query, args);
+        }
+      },
       clothes: {
         type: GraphQLClothConnection,
         args: {
           search: {
-            type: GraphQLString,
-            description: 'search order by order id'
+            type: GraphQLString
           },
           categoryId: {
-            type: GraphQLString,
-            description: 'category'
+            type: GraphQLString
           },
           ...connectionArgs
         },
@@ -218,14 +230,6 @@ export default function (nodeInterface, {
             ]}
           }:{}, args)
       },
-      timeSlotTemplates: {
-        type: GraphQLTimeSlotTemplateConnection,
-        args: {
-          ...connectionArgs
-        },
-        resolve: (obj, args) =>
-          modelConnection(DefaultDistrictTimeSlots, {order: 'start'}, args)
-      },
       timeSlots: {
         type: GraphQLTimeSlotConnection,
         args: {
@@ -235,59 +239,51 @@ export default function (nodeInterface, {
           ...connectionArgs
         },
         resolve: (obj, {date, ...args}) => {
-          date = formatToDay(date);
-          return DefaultDistrictTimeSlots.findAll({where:{date}})
-            .then(timeSlots => {
-              if (timeSlots && timeSlots.length > 0) {
-                return connectionFromArray(timeSlots, args);
-              } else {
-                return TimeSlotTemplate.findAll()
-                  .then(templates => {
-                    const newSlots = templates.map(template => ({
-                      start: template.start,
-                      end: template.end,
-                      limit: template.limit,
-                      date,
-                      enabled: true
-                    }));
-
-                    return TimeSlot.bulkCreate(newSlots);
-                  })
-                  .then(() => modelConnection(TimeSlot, {where:{date}}, args));
-              }
-            });
+          date = formatTime(date, 8);
+          return modelConnection(OrderSlots, {where:{date}}, args);
         }
       },
       factories: {
         type: GraphQLFactoryConnection,
         args: {
           search: {
-            type: GraphQLString,
-            description: 'search'
+            type: GraphQLString
           },
           ...connectionArgs
         },
         resolve: (obj, {search, ...args}) =>
-          modelConnection(Factory, search?{where:{
+          modelConnection(Factories, search?{where:{
             $or: [
               {name: {$like: `%${search}%`}},
               {address: {$like: `%${search}%`}},
-              {contact: {$like: `%${search}%`}},
-              {contactName: {$like: `%${search}%`}}
+              {contact_no: {$like: `%${search}%`}},
+              {contact_name: {$like: `%${search}%`}}
             ]
+          }}:{}, args)
+      },
+      vouchers: {
+        type: GraphQLVoucherConnection,
+        args: {
+          search: {
+            type: GraphQLString
+          },
+          ...connectionArgs
+        },
+        resolve: (obj, {search, ...args}) =>
+          modelConnection(Vouchers, search?{where:{
+            title: {$like: `%${search}%`}
           }}:{}, args)
       },
       promoCodes: {
         type: GraphQLPromoCodeConnection,
         args: {
           search: {
-            type: GraphQLString,
-            description: 'search code'
+            type: GraphQLString
           },
           ...connectionArgs
         },
         resolve: (obj, {search, ...args}) =>
-          modelConnection(PromoCode, search?{where:{
+          modelConnection(PromoCodes, search?{where:{
             code: {$like: `%${search}%`}
           }}:{}, args)
       },
@@ -295,36 +291,31 @@ export default function (nodeInterface, {
         type: GraphQLBannerConnection,
         args: {
           search: {
-            type: GraphQLString,
-            description: 'search banner'
+            type: GraphQLString
           },
           ...connectionArgs
         },
         resolve: (obj, {search, ...args}) =>
-          modelConnection(Banner, search?{where:{
+          modelConnection(PromotionBanners, search?{where:{
             title: {$like: `%${search}%`}
-          }, order: 'position'}:{order: 'position'}, args)
+          }, order: 'banner_order'}:{order: 'banner_order'}, args)
       },
       feedbacks: {
         type: GraphQLFeedbackConnection,
         args: {
           search: {
-            type: GraphQLString,
-            description: 'search feedback'
+            type: GraphQLString
           },
           ...connectionArgs
         },
         resolve: (obj, {search, ...args}) =>
-          modelConnection(Feedback, search?{where:{
+          modelConnection(UserFeedbacks, search?{where:{
             comment: {$like: `%${search}%`}
           }}:{}, args)
       },
       orderStatus: {
-        type: new GraphQLList(GraphQLString),
-        resolve: (obj) => ['pending worker', 'worker found', 'awaiting pick up/driver on the way',
-          'picked up', 'picked up failed', 'laundry in process', 'laundry complete',
-          'awaiting drop off/driver on the way', 'dropped off', 'drop off failed',
-          'order complete', 'deleted', 'canceled', 'awaiting loading', 'on the way']
+        type: new GraphQLList(GraphQLOrderStatus),
+        resolve: (obj) => OrderStatuses.findAll()
       }
     },
     interfaces: [nodeInterface]
