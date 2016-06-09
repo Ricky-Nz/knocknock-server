@@ -1,6 +1,6 @@
-import { UserCredits } from '../service/database';
+import { PromoCodes } from '../service/database';
 
-UserCredits.findAll()
+PromoCodes.findAll()
 	.then(address => console.log(address.map(({dataValues}) => dataValues)));
 
 

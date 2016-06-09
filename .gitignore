@@ -44,8 +44,7 @@ gcloud-cert.json
 uploads/
 schema/schema.graphql
 schema/schema.json
-
-
+*.json
 
 
 ################################################

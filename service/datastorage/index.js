@@ -3,7 +3,7 @@ import path from 'path';
 
 const gcs = gcloud.storage({
 	projectId: 'knocknock-976',
-	keyFilename: path.join(__dirname, '..', 'gcloud-cert.json')
+	keyFilename: path.join(__dirname, 'gcloud-cert.json')
 });
 
 export function uploadFile (bucket, filePath) {

@@ -146,7 +146,7 @@ const updatePromoCode = mutationWithClientMutationId({
 	outputFields: {
 		promoCode: {
 			type: GraphQLPromoCode,
-			resolve: ({localId}) => PromoCode.findById(localId)
+			resolve: ({localId}) => PromoCodes.findById(localId)
 		}
 	},
 	mutateAndGetPayload: ({id, enabled, name, start, end, perUserLimit, limit, promoType,
