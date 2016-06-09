@@ -83,7 +83,9 @@ const createPromoCode = mutationWithClientMutationId({
 	mutateAndGetPayload: ({enabled, name, start, end, perUserLimit, limit, promoType,
 		discountPercent, flatDiscount, multipleUse, mobileOnly, firstTimeUser}) =>
 		PromoCodes.create({
+			status: enabled?1:0,
 			name,
+			remarks: description,
 			start_date: start,
 			end_date: end,
 			per_user_limit: perUserLimit,
@@ -149,11 +151,13 @@ const updatePromoCode = mutationWithClientMutationId({
 			resolve: ({localId}) => PromoCodes.findById(localId)
 		}
 	},
-	mutateAndGetPayload: ({id, enabled, name, start, end, perUserLimit, limit, promoType,
+	mutateAndGetPayload: ({id, enabled, name, description, start, end, perUserLimit, limit, promoType,
 		discountPercent, flatDiscount, multipleUse, mobileOnly, firstTimeUser}) => {
 		const {id: localId} = fromGlobalId(id);
 		return PromoCodes.update({
+			status: enabled?1:0,
 			name,
+			remarks: description,
 			start_date: start,
 			end_date: end,
 			per_user_limit: perUserLimit,

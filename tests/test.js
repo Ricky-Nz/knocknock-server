@@ -1,7 +1,7 @@
 import { PromoCodes } from '../service/database';
 
 PromoCodes.findAll()
-	.then(address => console.log(address.map(({dataValues}) => dataValues)));
+	.then(address => console.log(address.map(({dataValues}) => dataValues.status)));
 
 
 // admins	postgres		

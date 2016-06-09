@@ -283,10 +283,15 @@ export default function (nodeInterface, {
           },
           ...connectionArgs
         },
-        resolve: (obj, {search, ...args}) =>
-          modelConnection(Vouchers, search?{where:{
-            title: {$like: `%${search}%`}
-          }}:{}, args)
+        resolve: (obj, {search, ...args}) => {
+          const order = 'created_on DESC';
+          const where = {};
+          if (search) {
+            where.title = {$like: `%${search}%`};
+          }
+
+          return modelConnection(Vouchers, {where, order}, args);
+        }
       },
       promoCodes: {
         type: GraphQLPromoCodeConnection,
@@ -296,10 +301,15 @@ export default function (nodeInterface, {
           },
           ...connectionArgs
         },
-        resolve: (obj, {search, ...args}) =>
-          modelConnection(PromoCodes, search?{where:{
-            code: {$like: `%${search}%`}
-          }}:{}, args)
+        resolve: (obj, {search, ...args}) => {
+          const order = 'created_at DESC';
+          const where = {};
+          if (search) {
+            where.name = {$like: `%${search}%`};
+          }
+
+          return modelConnection(PromoCodes, {where, order}, args);
+        }
       },
       banners: {
         type: GraphQLBannerConnection,
@@ -309,10 +319,19 @@ export default function (nodeInterface, {
           },
           ...connectionArgs
         },
-        resolve: (obj, {search, ...args}) =>
-          modelConnection(PromotionBanners, search?{where:{
-            title: {$like: `%${search}%`}
-          }, order: 'banner_order'}:{order: 'banner_order'}, args)
+        resolve: (obj, {search, ...args}) => {
+          const where = {};
+          const order = [
+            ['is_enabled', 'DESC'],
+            ['banner_order']
+          ];
+
+          if (search) {
+            where.banner_title = {$like: `%${search}%`};
+          }
+
+          return modelConnection(PromotionBanners, {where, order}, args);
+        }
       },
       feedbacks: {
         type: GraphQLFeedbackConnection,
@@ -322,10 +341,15 @@ export default function (nodeInterface, {
           },
           ...connectionArgs
         },
-        resolve: (obj, {search, ...args}) =>
-          modelConnection(UserFeedbacks, search?{where:{
-            comment: {$like: `%${search}%`}
-          }}:{}, args)
+        resolve: (obj, {search, ...args}) => {
+          const order = 'created DESC';
+          const where = {};
+          if (search) {
+            where.comment = {$like: `%${search}%`};
+          }
+
+          return modelConnection(UserFeedbacks, {where, order}, args);
+        }
       },
       orderStatus: {
         type: new GraphQLList(GraphQLOrderStatus),
