@@ -1,6 +1,6 @@
 import { GraphQLObjectType, GraphQLList, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
-import { connectionDefinitions, globalIdField, connectionArgs } from 'graphql-relay';
-import { Users, Workers, Admins, Items, SubCategories, OrderSlots,
+import { connectionDefinitions, globalIdField, fromGlobalId, connectionArgs } from 'graphql-relay';
+import { Users, Orders, Workers, Admins, Items, SubCategories, OrderSlots, UserCredits,
   OrderStatuses, UserFeedbacks, PromotionBanners, PromoCodes, Factories, Vouchers } from '../../service/database';
 import { modelConnection, formatTime } from '../utils';
 
@@ -16,14 +16,15 @@ export default function (nodeInterface, {
   GraphQLOrderConnection,
   GraphQLTransactionConnection,
   GraphQLClothConnection,
-  GraphQLClothCategoryConnection,
+  GraphQLCategoryConnection,
   GraphQLTimeSlotTemplateConnection,
   GraphQLTimeSlotConnection,
   GraphQLFactoryConnection,
   GraphQLPromoCodeConnection,
   GraphQLVoucherConnection,
   GraphQLBannerConnection,
-  GraphQLFeedbackConnection
+  GraphQLFeedbackConnection,
+  GraphQLCreditRecordConnection
 }) {
   const nodeType = new GraphQLObjectType({
     name: 'Viewer',
@@ -167,7 +168,7 @@ export default function (nodeInterface, {
             where.pickup_date['$lt'] = formatTime(beforeDate);
           }
 
-          return modelConnection(Order, {where}, args);
+          return modelConnection(Orders, {where}, args);
         }
       },
       histories: {
@@ -179,13 +180,26 @@ export default function (nodeInterface, {
           ...connectionArgs
         },
         resolve: (obj, {search, ...args}) => {
-          let query = {where:{order_status_id: {$in: [8, 9]}}};
+          let where = {order_status_id: {$in: [8, 9]}};
           if (search) {
-            query.where.id = {$like: `%${search}%`};
+            where.id = {$like: `%${search}%`};
           }
 
-          return modelConnection(Orders, query, args);
+          return modelConnection(Orders, {where}, args);
         }
+      },
+      creditRecords: {
+        type: GraphQLCreditRecordConnection,
+        args: {
+          search: {
+            type: GraphQLString
+          },
+          ...connectionArgs
+        },
+        resolve: (obj, {search, ...args}) =>
+          modelConnection(UserCredits, search?{where:{$or:[
+              {paypal_ref_no: {$like: `%${search}%`}}
+            ]}, order: 'created_on DESC'}:{order: 'created_on DESC'}, args)
       },
       clothes: {
         type: GraphQLClothConnection,
@@ -199,23 +213,23 @@ export default function (nodeInterface, {
           ...connectionArgs
         },
         resolve: (obj, {search, categoryId, ...args}) => {
-          let query = {where:{}};
+          let where = {};
           if (search) {
-            query.where['$or'] = [
+            where['$or'] = [
               {name_ch: {$like: `%${search}%`}},
               {name_en: {$like: `%${search}%`}}
             ];
           }
           if (categoryId) {
             const {id: localCategoryId} = fromGlobalId(categoryId);
-            query.where.sub_category_id = localCategoryId;
+            where.sub_category_id = localCategoryId;
           }
 
-          return modelConnection(Items, query, args);
+          return modelConnection(Items, {where}, args);
         }
       },
       categories: {
-        type: GraphQLClothCategoryConnection,
+        type: GraphQLCategoryConnection,
         args: {
           search: {
             type: GraphQLString

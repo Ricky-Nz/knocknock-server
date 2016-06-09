@@ -320,6 +320,30 @@ type CreateWorkerPayload {
   clientMutationId: String!
 }
 
+type CreditRecord implements Node {
+  id: ID!
+  amount: Float
+  paymentRefNo: String
+  topUp: Boolean
+  createdAt: String
+  paymentMode: String
+  status: Int
+  approvedAt: String
+  approvedBy: String
+  description: Boolean
+  user: UserRef
+}
+
+type CreditRecordConnection {
+  pageInfo: PageInfo!
+  edges: [CreditRecordEdge]
+}
+
+type CreditRecordEdge {
+  node: CreditRecord
+  cursor: String!
+}
+
 input DeleteAddressInput {
   id: String!
   clientMutationId: String!
@@ -832,6 +856,14 @@ type UserEdge {
   cursor: String!
 }
 
+type UserRef {
+  userId: String!
+  firstName: String
+  lastName: String
+  email: String
+  avatarUrl: String
+}
+
 type Viewer implements Node {
   id: ID!
   user(id: String!): User
@@ -843,6 +875,7 @@ type Viewer implements Node {
   admins(search: String, after: String, first: Int, before: String, last: Int): AdminConnection
   orders(userId: String, search: String, statusIds: [String], afterDate: String, beforeDate: String, after: String, first: Int, before: String, last: Int): OrderConnection
   histories(search: String, after: String, first: Int, before: String, last: Int): OrderConnection
+  creditRecords(search: String, after: String, first: Int, before: String, last: Int): CreditRecordConnection
   clothes(search: String, categoryId: String, after: String, first: Int, before: String, last: Int): ClothConnection
   categories(search: String, after: String, first: Int, before: String, last: Int): CategoryConnection
   timeSlots(date: String!, after: String, first: Int, before: String, last: Int): TimeSlotConnection

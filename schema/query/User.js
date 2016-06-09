@@ -1,5 +1,5 @@
 import { GraphQLObjectType, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
-import { connectionDefinitions, globalIdField, connectionArgs } from 'graphql-relay';
+import { connectionDefinitions, globalIdField, connectionArgs, fromGlobalId } from 'graphql-relay';
 import { Orders, UserAddresses, UserVouchers } from '../../service/database';
 import { modelConnection } from '../utils';
 

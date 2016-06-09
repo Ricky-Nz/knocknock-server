@@ -1,6 +1,6 @@
 import { GraphQLString, GraphQLNonNull } from 'graphql';
-import { mutationWithClientMutationId, offsetToCursor } from 'graphql-relay';
-import { GraphQLClothCategory, GraphQLClothCategoryEdge, GraphQLViewer } from '../query';
+import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'graphql-relay';
+import { GraphQLCategory, GraphQLCategoryEdge, GraphQLViewer } from '../query';
 import { SubCategories } from '../../service/database';
 
 // id			
@@ -24,7 +24,7 @@ const createCategory = mutationWithClientMutationId({
 	},
 	outputFields: {
 		categoryEdge: {
-			type: GraphQLClothCategoryEdge,
+			type: GraphQLCategoryEdge,
 			resolve: (newCategory) => ({
 				cursor: offsetToCursor(0),
 				node: newCategory
@@ -58,7 +58,7 @@ const updateCategory = mutationWithClientMutationId({
 	},
 	outputFields: {
 		category: {
-			type: GraphQLClothCategory,
+			type: GraphQLCategory,
 			resolve: ({localId}) => SubCategories.findById(localId)
 		}
 	},

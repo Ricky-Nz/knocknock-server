@@ -1,5 +1,5 @@
-import { GraphQLObjectType } from 'graphql';
-import { nodeDefinitions } from 'graphql-relay';
+import { GraphQLObjectType, GraphQLNonNull, GraphQLString } from 'graphql';
+import { nodeDefinitions, fromGlobalId, toGlobalId } from 'graphql-relay';
 import { Users, Admins, Workers, UserAddresses, Items, SubCategories,
   Vouchers, Orders, OrderDetails, OrderTransactions, OrderSlots, DistrictTimeSlots,
   Factories, PromoCodes, PromoionBanners, UserFeedbacks, OrderStatuses } from '../../service/database';
@@ -22,6 +22,7 @@ import voucherQuery from './Voucher';
 import assignedVoucherQuery from './AssignedVoucher';
 import workerQuery from './Worker';
 import orderStatusQuery from './OrderStatus';
+import creditRecordQuery from './CreditRecord';
 
 class Viewer {}
 
@@ -116,6 +117,38 @@ const { nodeInterface, nodeField } = nodeDefinitions(
   }
 );
 
+const GraphQLUserRef = new GraphQLObjectType({
+  name: 'UserRef',
+  fields: {
+    userId: {
+      type: new GraphQLNonNull(GraphQLString),
+      resolve: (obj) => toGlobalId('User', obj.id)
+    },
+    firstName: {
+      type: GraphQLString,
+      resolve: (obj) => obj.first_name
+    },
+    lastName: {
+      type: GraphQLString,
+      resolve: (obj) => obj.last_name
+    },
+    email: {
+      type: GraphQLString,
+      resolve: (obj) => obj.email
+    },
+    avatarUrl: {
+      type: GraphQLString,
+      resolve: (obj) => obj.profile_image_url_small
+    }
+  }
+});
+
+export const {
+  nodeType: GraphQLCreditRecord,
+  connectionType: GraphQLCreditRecordConnection,
+  edgeType: GraphQLCreditRecordEdge
+} = creditRecordQuery(nodeInterface, {GraphQLUserRef});
+
 export const {
   nodeType: GraphQLOrderStatus,
   connectionType: GraphQLStatusConnection,
@@ -165,9 +198,9 @@ export const {
 } = transactionQuery(nodeInterface);
 
 export const {
-  nodeType: GraphQLClothCategory,
-  connectionType: GraphQLClothCategoryConnection,
-  edgeType: GraphQLClothCategoryEdge
+  nodeType: GraphQLCategory,
+  connectionType: GraphQLCategoryConnection,
+  edgeType: GraphQLCategoryEdge
 } = categoryQuery(nodeInterface);
 
 export const {
@@ -247,14 +280,15 @@ export const {
   GraphQLOrderConnection,
   GraphQLTransactionConnection,
   GraphQLClothConnection,
-  GraphQLClothCategoryConnection,
+  GraphQLCategoryConnection,
   GraphQLTimeSlotTemplateConnection,
   GraphQLTimeSlotConnection,
   GraphQLFactoryConnection,
   GraphQLPromoCodeConnection,
   GraphQLVoucherConnection,
   GraphQLBannerConnection,
-  GraphQLFeedbackConnection
+  GraphQLFeedbackConnection,
+  GraphQLCreditRecordConnection
 });
 
 export default new GraphQLObjectType({

@@ -1,6 +1,7 @@
 import { GraphQLObjectType, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField, toGlobalId } from 'graphql-relay';
 import { Users } from '../../service/database';
+import { toDisplayDate } from '../utils';
 
    // { id: 1,
    //   user_id: 922,
@@ -27,7 +28,7 @@ export default function (nodeInterface, {GraphQLUser}) {
       },
       createdAt: {
         type: GraphQLString,
-        resolve: (obj) => obj.created
+        resolve: (obj) => toDisplayDate(obj.created)
       },
       user: {
         type: GraphQLUser,

@@ -1,5 +1,5 @@
 import { GraphQLNonNull, GraphQLString, GraphQLFloat, GraphQLBoolean } from 'graphql';
-import { mutationWithClientMutationId, offsetToCursor } from 'graphql-relay';
+import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'graphql-relay';
 import { GraphQLCloth, GraphQLClothEdge, GraphQLViewer } from '../query';
 import { processFileUpload } from '../utils';
 import { deleteFile } from '../../service/datastorage';

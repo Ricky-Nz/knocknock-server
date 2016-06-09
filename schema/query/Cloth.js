@@ -29,47 +29,47 @@ export default function (nodeInterface) {
 	  	id: globalIdField('Cloth'),
 			categoryId: {
 				type: new GraphQLNonNull(GraphQLString),
-				reslove: (obj) => toGlobalId('Category', obj.sub_category_id)
+				resolve: (obj) => toGlobalId('Category', obj.sub_category_id)
 			},
 			nameEn: {
 				type: new GraphQLNonNull(GraphQLString),
-				reslove: (obj) => obj.name_en
+				resolve: (obj) => obj.name_en
 			},
 			nameCn: {
 				type: new GraphQLNonNull(GraphQLString),
-				reslove: (obj) => obj.name_ch
+				resolve: (obj) => obj.name_ch
 			},
 			washPrice: {
 				type: GraphQLFloat,
-				reslove: (obj) => obj.wash_iron_price
+				resolve: (obj) => obj.wash_iron_price
 			},
 			dryCleanPrice: {
 				type: GraphQLFloat,
-				reslove: (obj) => obj.dry_clean_price
+				resolve: (obj) => obj.dry_clean_price
 			},
 			ironPrice: {
 				type: GraphQLFloat,
-				reslove: (obj) => obj.iron_price
+				resolve: (obj) => obj.iron_price
 			},
 			washPriceDiscount: {
 				type: GraphQLFloat,
-				reslove: (obj) => obj.discount_wash_iron_price
+				resolve: (obj) => obj.discount_wash_iron_price
 			},
 			dryCleanPriceDiscount: {
 				type: GraphQLFloat,
-				reslove: (obj) => obj.discount_dry_clean_price
+				resolve: (obj) => obj.discount_dry_clean_price
 			},
 			ironPriceDiscount: {
 				type: GraphQLFloat,
-				reslove: (obj) => obj.discount_iron_price
+				resolve: (obj) => obj.discount_iron_price
 			},
 			special: {
 				type: GraphQLBoolean,
-				reslove: (obj) => obj.special_item
+				resolve: (obj) => obj.special_item
 			},
 			imageUrl: {
 				type: GraphQLString,
-				reslove: (obj) => obj.image_url
+				resolve: (obj) => obj.image_url
 			}
 	  },
 	  interfaces: [nodeInterface]

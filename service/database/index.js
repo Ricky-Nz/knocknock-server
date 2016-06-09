@@ -17,3 +17,5 @@ export { default as Users } from './Users';
 export { default as Vouchers } from './Vouchers';
 export { default as Workers } from './Workers';
 export { default as UserVouchers } from './UserVouchers';
+export { default as UserCredits } from './UserCredits';
+export { default as UserCreditTransactions } from './UserCreditTransactions';
