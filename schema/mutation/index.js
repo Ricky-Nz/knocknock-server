@@ -9,7 +9,6 @@ import FeedbackMutation from './FeedbackMutation';
 import OrderMutation from './OrderMutation';
 import PromoCodeMutation from './PromoCodeMutation';
 import TimeSlotMutation from './TimeSlotMutation';
-import TimeSlotTemplateMutation from './TimeSlotTemplateMutation';
 import UserMutation from './UserMutation';
 import VoucherMutation from './VoucherMutation';
 import WorkerMutation from './WorkerMutation';
@@ -27,7 +26,6 @@ export default new GraphQLObjectType({
     ...OrderMutation,
     ...PromoCodeMutation,
     ...TimeSlotMutation,
-    ...TimeSlotTemplateMutation,
     ...UserMutation,
     ...VoucherMutation,
     ...WorkerMutation

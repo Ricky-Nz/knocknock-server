@@ -2,6 +2,7 @@ import { GraphQLObjectType, GraphQLList, GraphQLBoolean, GraphQLNonNull, GraphQL
 import { connectionDefinitions, globalIdField, fromGlobalId, connectionArgs } from 'graphql-relay';
 import { Users, Orders, Workers, Admins, Items, SubCategories, OrderSlots, UserCredits,
   OrderStatuses, UserFeedbacks, PromotionBanners, PromoCodes, Factories, Vouchers } from '../../service/database';
+import { getAddressByPostalCode } from '../../service/location';
 import { modelConnection, formatTime } from '../utils';
 
 export default function (nodeInterface, {
@@ -354,6 +355,15 @@ export default function (nodeInterface, {
       orderStatus: {
         type: new GraphQLList(GraphQLOrderStatus),
         resolve: (obj) => OrderStatuses.findAll()
+      },
+      address: {
+        type: new GraphQLNonNull(GraphQLString),
+        args: {
+          postalCode: {
+            type: new GraphQLNonNull(GraphQLString)
+          }
+        },
+        resolve: (obj, {postalCode}) => getAddressByPostalCode(postalCode)
       }
     },
     interfaces: [nodeInterface]

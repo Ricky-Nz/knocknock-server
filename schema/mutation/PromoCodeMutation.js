@@ -2,6 +2,7 @@ import { GraphQLString, GraphQLNonNull, GraphQLBoolean, GraphQLInt, GraphQLFloat
 import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'graphql-relay';
 import { GraphQLViewer, GraphQLPromoCodeEdge, GraphQLPromoCode } from '../query';
 import { PromoCodes } from '../../service/database';
+import { updateField } from '../utils';
 
 // id			
 // name			
@@ -155,19 +156,21 @@ const updatePromoCode = mutationWithClientMutationId({
 		discountPercent, flatDiscount, multipleUse, mobileOnly, firstTimeUser}) => {
 		const {id: localId} = fromGlobalId(id);
 		return PromoCodes.update({
-			status: enabled?1:0,
-			name,
-			remarks: description,
-			start_date: start,
-			end_date: end,
-			per_user_limit: perUserLimit,
-			limit,
-			promo_type: promoType,
-			discount_percent: discountPercent,
-			flat_discount: flatDiscount,
-			allow_multiple_use: multipleUse,
-			only_app: mobileOnly,
-			firsttime_user: firstTimeUser
+			...(enabled!==undefined)&&{
+				status: enabled?1:0
+			},
+			...updateField('name', name),
+			...updateField('remarks', description),
+			...updateField('start_date', start),
+			...updateField('end_date', end),
+			...updateField('per_user_limit', perUserLimit),
+			...updateField('limit', limit),
+			...updateField('promo_type', promoType),
+			...updateField('discount_percent', discountPercent),
+			...updateField('flat_discount', flatDiscount),
+			...updateField('allow_multiple_use', multipleUse),
+			...updateField('only_app', mobileOnly),
+			...updateField('firsttime_user', firstTimeUser)
 		}, {where: {id: localId}}).then(() => ({localId}));
 	}
 });

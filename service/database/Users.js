@@ -1,5 +1,6 @@
 import sequelize from './connection';
 import { STRING, ENUM, DATE, INTEGER, BOOLEAN, FLOAT } from 'sequelize';
+import bcrypt from 'bcrypt';
 
 export default sequelize.define('users', {
 	first_name: {
@@ -116,4 +117,16 @@ export default sequelize.define('users', {
 	plus_account: {
 		type: STRING
 	}
-}, {timestamps: false});
+}, {
+	timestamps: false,
+	hooks: {
+		beforeCreate: (user, options) => {
+			user.encrypted_password = bcrypt.hashSync(user.encrypted_password, 10);
+		},
+		beforeUpdate: (user, options) => {
+			if (user.encrypted_password) {
+				user.encrypted_password = bcrypt.hashSync(user.encrypted_password, 10);
+			}
+		}
+	}
+});

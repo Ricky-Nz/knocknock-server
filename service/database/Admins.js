@@ -1,5 +1,6 @@
 import sequelize from './connection';
 import { STRING, FLOAT, DATE, BOOLEAN, INTEGER } from 'sequelize';
+import bcrypt from 'bcrypt';
 
 export default sequelize.define('admins', {
 	first_name: {
@@ -33,4 +34,16 @@ export default sequelize.define('admins', {
 	reset_password_sent_at: {
 		type: DATE
 	}
-}, {timestamps: false});
+}, {
+	timestamps: false,
+	hooks: {
+		beforeCreate: (admin, options) => {
+			admin.encrypted_password = bcrypt.hashSync(admin.encrypted_password, 10);
+		},
+		beforeUpdate: (admin, options) => {
+			if (admin.encrypted_password) {
+				admin.encrypted_password = bcrypt.hashSync(admin.encrypted_password, 10);
+			}
+		}
+	}
+});

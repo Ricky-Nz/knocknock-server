@@ -2,6 +2,7 @@ import { GraphQLString, GraphQLNonNull } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'graphql-relay';
 import { GraphQLCategory, GraphQLCategoryEdge, GraphQLViewer } from '../query';
 import { SubCategories } from '../../service/database';
+import { updateField } from '../utils';
 
 // id			
 // category_id			
@@ -65,8 +66,8 @@ const updateCategory = mutationWithClientMutationId({
 	mutateAndGetPayload: ({id, nameEn, nameCn}) => {
 		const {id: localId} = fromGlobalId(id);
 		return SubCategories.update({
-			name_en: nameEn,
-			name_ch: nameCn
+			...updateField('name_en', nameEn),
+			...updateField('name_ch', nameCn)
 		}, {where:{id:localId}}).then(() => ({localId}));
 	}
 });

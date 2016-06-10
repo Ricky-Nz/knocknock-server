@@ -2,7 +2,7 @@ import { GraphQLNonNull, GraphQLString, GraphQLBoolean, GraphQLInt } from 'graph
 import { mutationWithClientMutationId, fromGlobalId, offsetToCursor } from 'graphql-relay';
 import { GraphQLBanner, GraphQLBannerEdge, GraphQLViewer } from '../query';
 import { PromotionBanners } from '../../service/database';
-import { processFileUpload } from '../utils';
+import { processFileUpload, updateField } from '../utils';
 import { deleteFile } from '../../service/datastorage';
 
    // { id: 3,
@@ -53,7 +53,7 @@ const createBanner = mutationWithClientMutationId({
 	mutateAndGetPayload: ({enabled, title, link, position}, context, {rootValue}) =>
 		processFileUpload('knocknock-banner', rootValue.request.file)
 			.then(upload => {
-				if (!upload) throw('Upload file failed')
+				if (!upload) throw('Upload file failed');
 
 				return PromotionBanners.create({
 					is_enabled: enabled,
@@ -97,10 +97,10 @@ const updateBanner = mutationWithClientMutationId({
 
 		return processFileUpload('knocknock-banner', rootValue.request.file)
 			.then(upload => PromotionBanners.update({
-				is_enabled: enabled,
-				banner_title: title,
-				banner_link: link,
-				banner_order: position,
+				...updateField('is_enabled', enabled),
+				...updateField('banner_title', title),
+				...updateField('banner_link', link),
+				...updateField('banner_order', position),
 				...upload&&{
 					banner_image_url: upload.imageUrl
 				}

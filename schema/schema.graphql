@@ -224,7 +224,7 @@ input CreateOrderInput {
   userId: String!
   express: Boolean
   note: String
-  status: String
+  statusId: Int
   pickupDate: String!
   pickupTime: String!
   pickupAddress: String!
@@ -258,18 +258,6 @@ input CreatePromoCodeInput {
 
 type CreatePromoCodePayload {
   promoCodeEdge: PromoCodeEdge
-  viewer: Viewer
-  clientMutationId: String!
-}
-
-input CreateTimeSlotTemplateInput {
-  time: String!
-  limit: Int!
-  clientMutationId: String!
-}
-
-type CreateTimeSlotTemplatePayload {
-  timeSlotTemplateEdge: TimeSlotTemplateEdge
   viewer: Viewer
   clientMutationId: String!
 }
@@ -421,12 +409,12 @@ type DeletePromoCodePayload {
   clientMutationId: String!
 }
 
-input DeleteTimeSlotTemplateInput {
+input DeleteVoucherInput {
   id: String!
   clientMutationId: String!
 }
 
-type DeleteTimeSlotTemplatePayload {
+type DeleteVoucherPayload {
   deletedId: String!
   viewer: Viewer
   clientMutationId: String!
@@ -507,12 +495,11 @@ type Mutation {
   updatePromoCode(input: UpdatePromoCodeInput!): UpdatePromoCodePayload
   deletePromoCode(input: DeletePromoCodeInput!): DeletePromoCodePayload
   updateTimeSlot(input: UpdateTimeSlotInput!): UpdateTimeSlotPayload
-  createTimeSlotTemplate(input: CreateTimeSlotTemplateInput!): CreateTimeSlotTemplatePayload
-  updateTimeSlotTemplate(input: UpdateTimeSlotTemplateInput!): UpdateTimeSlotTemplatePayload
-  deleteTimeSlotTemplate(input: DeleteTimeSlotTemplateInput!): DeleteTimeSlotTemplatePayload
   createUser(input: CreateUserInput!): CreateUserPayload
   updateUser(input: UpdateUserInput!): UpdateUserPayload
   createVoucher(input: CreateVoucherInput!): CreateVoucherPayload
+  updateVoucher(input: UpdateVoucherInput!): UpdateVoucherPayload
+  deleteVoucher(input: DeleteVoucherInput!): DeleteVoucherPayload
   createWorker(input: CreateWorkerInput!): CreateWorkerPayload
   updateWorker(input: UpdateWorkerInput!): UpdateWorkerPayload
   deleteWorker(input: DeleteWorkerInput!): DeleteWorkerPayload
@@ -635,17 +622,6 @@ type TimeSlotEdge {
   cursor: String!
 }
 
-type TimeSlotTemplate implements Node {
-  id: ID!
-  time: String
-  limit: Int
-}
-
-type TimeSlotTemplateEdge {
-  node: TimeSlotTemplate
-  cursor: String!
-}
-
 input UpdateAddressInput {
   id: String!
   postalCode: String
@@ -738,7 +714,7 @@ input UpdateOrderInput {
   id: String!
   express: Boolean
   note: String
-  status: String
+  statusId: Int
   pickupDate: String
   pickupTime: String
   pickupAddress: String
@@ -780,7 +756,6 @@ input UpdateTimeSlotInput {
   date: String!
   time: String
   quantity: Int
-  enabled: Boolean
   clientMutationId: String!
 }
 
@@ -789,21 +764,9 @@ type UpdateTimeSlotPayload {
   clientMutationId: String!
 }
 
-input UpdateTimeSlotTemplateInput {
-  id: String!
-  time: String
-  limit: Int
-  clientMutationId: String!
-}
-
-type UpdateTimeSlotTemplatePayload {
-  timeSlotTemplate: TimeSlotTemplate
-  clientMutationId: String!
-}
-
 input UpdateUserInput {
   id: String!
-  password: String!
+  password: String
   firstName: String
   lastName: String
   contact: String
@@ -813,6 +776,20 @@ input UpdateUserInput {
 
 type UpdateUserPayload {
   user: User
+  clientMutationId: String!
+}
+
+input UpdateVoucherInput {
+  id: String!
+  title: String
+  value: Float
+  expireOn: String
+  enabled: Boolean
+  clientMutationId: String!
+}
+
+type UpdateVoucherPayload {
+  voucher: Voucher
   clientMutationId: String!
 }
 
@@ -885,6 +862,7 @@ type Viewer implements Node {
   banners(search: String, after: String, first: Int, before: String, last: Int): BannerConnection
   feedbacks(search: String, after: String, first: Int, before: String, last: Int): FeedbackConnection
   orderStatus: [OrderStatus]
+  address(postalCode: String!): String!
 }
 
 type Voucher implements Node {

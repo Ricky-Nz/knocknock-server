@@ -2,6 +2,7 @@ import { GraphQLInputObjectType, GraphQLNonNull, GraphQLBoolean, GraphQLInt, Gra
 import { mutationWithClientMutationId, fromGlobalId, toGlobalId, offsetToCursor } from 'graphql-relay';
 import { GraphQLOrder, GraphQLOrderEdge, GraphQLUser } from '../query';
 import { Users, Orders, OrderDetails, Items } from '../../service/database';
+import { updateField } from '../utils';
 
 // id      
 // pickup_worker_id      
@@ -87,7 +88,7 @@ const GraphQLOrderItemInput = new GraphQLInputObjectType({
 	}
 });
 
-function prepareOrderItems(orderItems) {
+function prepareOrderItems(localOrderId, orderItems) {
 	const clothIds = orderItems.map(item => {
 		const {id} = fromGlobalId(item.productId);
 		return id;
@@ -113,7 +114,7 @@ function prepareOrderItems(orderItems) {
 				}
 
 				return {
-					order_id: order.id,
+					order_id: localOrderId,
 					item_id: localClothId,
 					quantity,
 					laundry_type: washType,
@@ -135,8 +136,8 @@ const createOrder = mutationWithClientMutationId({
     note: {
       type: GraphQLString
     },
-    status: {
-      type: GraphQLString
+    statusId: {
+      type: GraphQLInt
     },
     pickupDate: {
       type: new GraphQLNonNull(GraphQLString)
@@ -167,14 +168,20 @@ const createOrder = mutationWithClientMutationId({
 			resolve: (order) => Users.findById(order.user_id)
 		}
 	},
-	mutateAndGetPayload: ({userId, express, note, status, pickupDate,
+	mutateAndGetPayload: ({userId, express, note, statusId, pickupDate,
 		pickupTime, pickupAddress, pickupWorkerId, orderItems}) => {
 		const {id: localUserId} = fromGlobalId(userId);
+
+		if (pickupWorkerId) {
+			const {id: localWorkerId} = fromGlobalId(pickupWorkerId);
+			pickupWorkerId = localWorkerId;
+		}
+
 		return Orders.create({
 				user_id: localUserId,
 				express_order: express,
 				description: note,
-				order_status_id: status,
+				order_status_id: statusId,
 				pickup_date: pickupDate,
 				pickup_time: pickupTime,
 				pickup_address: pickupAddress,
@@ -184,7 +191,7 @@ const createOrder = mutationWithClientMutationId({
 				if (!orderItems || orderItems.length === 0) {
 					return order;
 				} else {
-					return prepareOrderItems(orderItems)
+					return prepareOrderItems(order.id, orderItems)
 						.then(items => OrderDetails.bulkCreate(items))
 						.then(() => order);
 				}
@@ -204,8 +211,8 @@ const updateOrder = mutationWithClientMutationId({
     note: {
       type: GraphQLString
     },
-    status: {
-      type: GraphQLString
+    statusId: {
+      type: GraphQLInt
     },
     pickupDate: {
       type: GraphQLString
@@ -229,22 +236,28 @@ const updateOrder = mutationWithClientMutationId({
 			resolve: ({localId}) => Orders.findById(localId)
 		}
 	},
-	mutateAndGetPayload: ({id, express, note, status, pickupDate, pickupTime, pickupAddress, pickupWorkerId, orderItems}) => {
+	mutateAndGetPayload: ({id, express, note, statusId, pickupDate, pickupTime, pickupAddress, pickupWorkerId, orderItems}) => {
 		const {id: localId} = fromGlobalId(id);
+		
+		if (pickupWorkerId) {
+			const {id: localWorkerId} = fromGlobalId(pickupWorkerId);
+			pickupWorkerId = localWorkerId;
+		}
+		
 		return Order.update({
-			express_order: express,
-			description: note,
-			order_status_id: status,
-			pickup_date: pickupDate,
-			pickup_time: pickupTime,
-			pickup_address: pickupAddress,
-			pickup_worker_id: pickupWorkerId
+			...updateField('express_order', express),
+			...updateField('description', note),
+			...updateField('order_status_id', statusId),
+			...updateField('pickup_date', pickupDate),
+			...updateField('pickup_time', pickupTime),
+			...updateField('pickup_address', pickupAddress),
+			...updateField('pickup_worker_id', pickupWorkerId)
 		}, {where:{id: localId}}).then(() => {
 			if (orderItems) {
 				OrderDetails.destory({where:{order_id: localId}})
 					.then(() => {
 						if (orderItems.length > 0) {
-							return prepareOrderItems(orderItems)
+							return prepareOrderItems(localId, orderItems)
 								.then(items => OrderDetails.bulkCreate(items))
 								.then(() => ({localId}));
 						} else {

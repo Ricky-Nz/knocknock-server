@@ -1,7 +1,7 @@
 import { GraphQLNonNull, GraphQLString, GraphQLFloat, GraphQLBoolean } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'graphql-relay';
 import { GraphQLCloth, GraphQLClothEdge, GraphQLViewer } from '../query';
-import { processFileUpload } from '../utils';
+import { processFileUpload, updateField } from '../utils';
 import { deleteFile } from '../../service/datastorage';
 import { Items } from '../../service/database';
 
@@ -79,8 +79,10 @@ const createCloth = mutationWithClientMutationId({
 			.then(upload => {
 				if (!upload) throw 'Upload file failed';
 
+				const {id: localCategoryId} = fromGlobalId(categoryId);
+
 				return Items.create({
-					sub_category_id: categoryId,
+					sub_category_id: localCategoryId,
 					name_en: nameEn,
 					name_ch: nameCn,
 					wash_iron_price: washPrice,
@@ -143,18 +145,23 @@ const updateCloth = mutationWithClientMutationId({
 		washPriceDiscount, dryCleanPriceDiscount, ironPriceDiscount, special}, context, {rootValue}) => {
 		const {id: localId} = fromGlobalId(id);
 
+		if (categoryId) {
+			const {id: localCategoryId} = fromGlobalId(categoryId);
+			categoryId = localCategoryId;
+		}
+
 		return processFileUpload('knocknock-laundry', rootValue.request.file)
 			.then(upload => Items.update({
-				sub_category_id: categoryId,
-				name_en: nameEn,
-				name_ch: nameCn,
-				wash_iron_price: washPrice,
-				dry_clean_price: dryCleanPrice,
-				iron_price: ironPrice,
-				discount_wash_iron_price: washPriceDiscount,
-				discount_dry_clean_price: dryCleanPriceDiscount,
-				discount_iron_price: ironPriceDiscount,
-				special_item: special,
+				...updateField('sub_category_id', categoryId),
+				...updateField('name_en', nameEn),
+				...updateField('name_ch', nameCn),
+				...updateField('wash_iron_price', washPrice),
+				...updateField('dry_clean_price', dryCleanPrice),
+				...updateField('iron_price', ironPrice),
+				...updateField('discount_wash_iron_price', washPriceDiscount),
+				...updateField('discount_dry_clean_price', dryCleanPriceDiscount),
+				...updateField('discount_iron_price', ironPriceDiscount),
+				...updateField('special_item', special),
 				...upload&&{
 					image_url: upload.imageUrl
 				}

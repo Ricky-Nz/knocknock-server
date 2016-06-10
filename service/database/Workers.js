@@ -1,5 +1,6 @@
 import sequelize from './connection';
 import { STRING, FLOAT, DOUBLE, DATE, BOOLEAN, INTEGER } from 'sequelize';
+import bcrypt from 'bcrypt';
 
 export default sequelize.define('workers', {
 	first_name: {
@@ -76,4 +77,16 @@ export default sequelize.define('workers', {
 	sort_order: {
 		type: INTEGER
 	}
-}, {timestamps: false});
+}, {
+	timestamps: false,
+	hooks: {
+		beforeCreate: (worker, options) => {
+			worker.encrypted_password = bcrypt.hashSync(worker.encrypted_password, 10);
+		},
+		beforeUpdate: (worker, options) => {
+			if (worker.encrypted_password) {
+				worker.encrypted_password = bcrypt.hashSync(worker.encrypted_password, 10);
+			}
+		}
+	}
+});

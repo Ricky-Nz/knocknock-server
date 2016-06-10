@@ -2,6 +2,7 @@ import { GraphQLString, GraphQLNonNull } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'graphql-relay';
 import { GraphQLViewer, GraphQLFactory, GraphQLFactoryEdge } from '../query';
 import { Factories } from '../../service/database';
+import { updateField } from '../utils';
 
 // id			
 // name			
@@ -87,11 +88,11 @@ const updateFactory = mutationWithClientMutationId({
 	mutateAndGetPayload: ({id, name, address, postalCode, contact, contactName}) => {
 		const {id: localId} = fromGlobalId(id);
 		return Factories.update({
-			name,
-			address,
-			postal_code: postalCode,
-			contact_no: contact,
-			contact_name: contactName
+			...updateField('name', name),
+			...updateField('address', address),
+			...updateField('postal_code', postalCode),
+			...updateField('contact_no', contact),
+			...updateField('contact_name', contactName)
 		}, {where: {id: localId}}).then(() => ({localId}));
 	}
 });

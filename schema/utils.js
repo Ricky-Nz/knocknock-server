@@ -7,6 +7,12 @@ import { connectionFromPromisedArraySlice, cursorToOffset, fromGlobalId } from '
 import { DBOrder } from '../service/database';
 import Chance from 'chance';
 
+export function updateField(fieldName, value) {
+  return (value!==undefined)&&{
+    [fieldName]: value
+  };
+}
+
 export function generateCode(argument) {
   var chance = new Chance();
   return chance.string({pool: 'poiuytrewqasdfghjklmnbvcxz1234567890', length: 12});

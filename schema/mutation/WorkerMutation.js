@@ -2,7 +2,7 @@ import { GraphQLNonNull, GraphQLString, GraphQLBoolean } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'graphql-relay';
 import { GraphQLWorkerEdge, GraphQLWorker, GraphQLViewer } from '../query';
 import { Workers } from '../../service/database';
-import { processFileUpload } from '../utils';
+import { processFileUpload, updateField } from '../utils';
 import { deleteFile } from '../../service/datastorage';
 
 // id			
@@ -113,11 +113,13 @@ const updateWorker = mutationWithClientMutationId({
 			.then(upload => {
 				const {id: localId} = fromGlobalId(id);
 				return Workers.update({
-						encrypted_password: password,
-						first_name: firstName,
-						last_name: lastName,
-						contact_no: contact,
-						disabled: !enabled,
+						...updateField('encrypted_password', password),
+						...updateField('first_name', firstName),
+						...updateField('last_name', lastName),
+						...updateField('contact_no', contact),
+						...(enabled!==undefined)&&{
+							disabled: !enabled
+						},
 						...upload&&{
 							profile_image_url_small: upload.imageUrl
 						}

@@ -2,6 +2,7 @@ import { GraphQLString, GraphQLNonNull } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'graphql-relay';
 import { GraphQLUser, GraphQLAddress, GraphQLAddressEdge } from '../query';
 import { UserAddresses, Users } from '../../service/database';
+import { updateField } from '../utils';
 
 // id			
 // user_id			
@@ -80,9 +81,9 @@ const updateAddress = mutationWithClientMutationId({
 	mutateAndGetPayload: ({id, postalCode, address, contact}) => {
 		const {id: dbId } = fromGlobalId(id);
 		return UserAddresses.update({
-				postal_code: postalCode,
-				address: address,
-				contact_no: contact
+				...updateField('postal_code', postalCode),
+				...updateField('address', address),
+				...updateField('contact_no', contact)
 			}, {where:{id:dbId}})
 		.then(() => ({dbId}));
 	}

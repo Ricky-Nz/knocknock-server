@@ -2,6 +2,7 @@ import { GraphQLNonNull, GraphQLString } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'graphql-relay';
 import { GraphQLAdminEdge, GraphQLAdmin, GraphQLViewer } from '../query';
 import { Admins } from '../../service/database';
+import { updateField } from '../utils';
 
 // id			
 // first_name			
@@ -86,10 +87,10 @@ const updateAdmin = mutationWithClientMutationId({
 	mutateAndGetPayload: ({id, password, firstName, lastName, contact}) => {
 		const {id: localId} = fromGlobalId(id);
 		return Admins.update({
-				first_name: firstName,
-				last_name: lastName,
-				contact_no: contact,
-				encrypted_password: password 
+				...updateField('first_name', firstName),
+				...updateField('last_name', lastName),
+				...updateField('contact_no', contact),
+				...updateField('encrypted_password', password)
 			}, {where:{id: localId}}).then(() => ({localId}));
 	}
 });

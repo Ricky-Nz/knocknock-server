@@ -35,13 +35,16 @@ const createFeedback = mutationWithClientMutationId({
 			resolve: () => ({})
 		}
 	},
-	mutateAndGetPayload: ({userId, rating, comment}) => 
-		UserFeedbacks.create({
-			user_id: userId,
+	mutateAndGetPayload: ({userId, rating, comment}) => {
+		const {id: localId} = fromGlobalId(userId);
+
+		return UserFeedbacks.create({
+			user_id: localId,
 			rating,
 			comment,
 			created: new Date()
-		})
+		});
+	}
 });
 
 export default {

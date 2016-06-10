@@ -2,6 +2,7 @@ import { GraphQLString, GraphQLNonNull, GraphQLInt, GraphQLBoolean } from 'graph
 import { mutationWithClientMutationId, fromGlobalId } from 'graphql-relay';
 import { GraphQLTimeSlot } from '../query';
 import { OrderSlots } from '../../service/database';
+import { updateField } from '../utils';
 
 // id			
 // date			
@@ -23,9 +24,6 @@ const updateTimeSlot = mutationWithClientMutationId({
 		},
 		quantity: {
 			type: GraphQLInt
-		},
-		enabled: {
-			type: GraphQLBoolean
 		}
 	},
 	outputFields: {
@@ -37,9 +35,9 @@ const updateTimeSlot = mutationWithClientMutationId({
 	mutateAndGetPayload: ({id, date, time, quantity, enabled}) => {
 		const {id: localId} = fromGlobalId(id);
 		return OrderSlots.update({
-			date,
-			time,
-			quantity
+			...updateField('date', date),
+			...updateField('time', time),
+			...updateField('quantity', quantity)
 		}, {where: {id: localId}}).then(() => ({localId}));
 	}
 });
