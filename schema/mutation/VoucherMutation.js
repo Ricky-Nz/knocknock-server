@@ -46,7 +46,8 @@ const createVoucher = mutationWithClientMutationId({
 			title,
 			value,
 			expire_on: expireOn,
-			disabled: !enabled
+			disabled: !enabled,
+			created_on: new Date().toString()
 		})
 });
 

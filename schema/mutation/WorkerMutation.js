@@ -146,7 +146,7 @@ const deleteWorker = mutationWithClientMutationId({
 	},
 	mutateAndGetPayload: ({id}) => {
 		const {id: localId} = fromGlobalId(id);
-		return Workers.destory({where:{id: localId}})
+		return Workers.destroy({where:{id: localId}})
 			.then(() => ({id}));
 	}
 });

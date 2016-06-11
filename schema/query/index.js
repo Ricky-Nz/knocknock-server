@@ -273,6 +273,7 @@ export const {
   GraphQLWorker,
   GraphQLAdmin,
   GraphQLCloth,
+  GraphQLVoucher,
   GraphQLOrderStatus,
   GraphQLUserConnection,
   GraphQLWorkerConnection,

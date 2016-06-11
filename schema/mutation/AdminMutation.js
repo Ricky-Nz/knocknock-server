@@ -55,7 +55,7 @@ const createAdmin = mutationWithClientMutationId({
 			first_name: firstName,
 			last_name: lastName,
 			contact_no: contact,
-			created_on: new Date()
+			created_on: new Date().toString()
 		})
 });
 

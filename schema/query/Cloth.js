@@ -51,21 +51,41 @@ export default function (nodeInterface) {
 				type: GraphQLFloat,
 				resolve: (obj) => obj.iron_price
 			},
-			washPriceDiscount: {
+			discountWashPrice: {
 				type: GraphQLFloat,
 				resolve: (obj) => obj.discount_wash_iron_price
 			},
-			dryCleanPriceDiscount: {
+			discountDryCleanPrice: {
 				type: GraphQLFloat,
 				resolve: (obj) => obj.discount_dry_clean_price
 			},
-			ironPriceDiscount: {
+			discountIronPrice: {
 				type: GraphQLFloat,
 				resolve: (obj) => obj.discount_iron_price
+			},
+			enableWashPriceDiscount: {
+				type: GraphQLBoolean,
+				resolve: (obj) => obj.have_discount_wash_iron_price
+			},
+			enableDryCleanPriceDiscount: {
+				type: GraphQLBoolean,
+				resolve: (obj) => obj.have_discount_dry_clean_price
+			},
+			enableIronPriceDiscount: {
+				type: GraphQLBoolean,
+				resolve: (obj) => obj.have_discount_iron_price
 			},
 			special: {
 				type: GraphQLBoolean,
 				resolve: (obj) => obj.special_item
+			},
+			hideFromUser: {
+				type: GraphQLBoolean,
+				resolve: (obj) => obj.hide_from_user
+			},
+			enabled: {
+				type: GraphQLBoolean,
+				resolve: (obj) => !obj.disabled
 			},
 			imageUrl: {
 				type: GraphQLString,

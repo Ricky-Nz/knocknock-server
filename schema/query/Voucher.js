@@ -1,5 +1,6 @@
 import { GraphQLObjectType, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField } from 'graphql-relay';
+import { toDisplayDate } from '../utils';
 
   // { id: 855,
   //   title: 'KnocKnocK Voucher',
@@ -20,6 +21,10 @@ export default function (nodeInterface) {
 			value: {
 				type: GraphQLFloat,
 				resolve: (obj) => obj.value
+			},
+			displayExpireOn: {
+				type: GraphQLString,
+				resolve: (obj) => toDisplayDate(obj.expire_on)
 			},
 			expireOn: {
 				type: GraphQLString,

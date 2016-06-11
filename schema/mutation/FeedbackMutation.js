@@ -42,7 +42,7 @@ const createFeedback = mutationWithClientMutationId({
 			user_id: localId,
 			rating,
 			comment,
-			created: new Date()
+			created: new Date().toString()
 		});
 	}
 });

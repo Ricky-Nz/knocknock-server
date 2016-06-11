@@ -10,6 +10,7 @@ export default function (nodeInterface, {
   GraphQLWorker,
   GraphQLAdmin,
   GraphQLCloth,
+  GraphQLVoucher,
   GraphQLOrderStatus,
   GraphQLUserConnection,
   GraphQLWorkerConnection,
@@ -79,6 +80,18 @@ export default function (nodeInterface, {
           return Items.findById(localId);
         }
       },
+      voucher: {
+        type: GraphQLVoucher,
+        args: {
+          id: {
+            type: new GraphQLNonNull(GraphQLString)
+          }
+        },
+        resolve: (obj, {id}) => {
+          const {id: localId} = fromGlobalId(id);
+          return Vouchers.findById(localId);
+        }
+      },
       users: {
         type: GraphQLUserConnection,
         args: {
@@ -119,13 +132,18 @@ export default function (nodeInterface, {
           },
           ...connectionArgs
         },
-        resolve: (obj, {search, ...args}) =>
-          modelConnection(Admins, search?{where:{$or:[
+        resolve: (obj, {search, ...args}) => {
+          let where = {}
+          if (search) {
+            where['$or'] = [
               {first_name: {$like: `%${search}%`}},
               {last_name: {$like: `%${search}%`}},
               {email: {$like: `%${search}%`}},
               {contact_no: {$like: `%${search}%`}}
-            ]}}:{}, args)
+            ];
+          }
+          return modelConnection(Admins, {where, order: 'created_on DESC'}, args);
+        }
       },
       orders: {
         type: GraphQLOrderConnection,
@@ -226,7 +244,7 @@ export default function (nodeInterface, {
             where.sub_category_id = localCategoryId;
           }
 
-          return modelConnection(Items, {where}, args);
+          return modelConnection(Items, {where, order: 'created_on DESC'}, args);
         }
       },
       categories: {
@@ -237,13 +255,17 @@ export default function (nodeInterface, {
           },
           ...connectionArgs
         },
-        resolve: (obj, {search, ...args}) =>
-          modelConnection(SubCategories, search?{
-            where: {$or: [
+        resolve: (obj, {search, ...args}) => {
+          let where = {};
+          if (search) {
+            where['$or'] = [
               {name_ch: {$like: `%${search}%`}},
-              {name_en: {$like: `%${search}%`}},
-            ]}
-          }:{}, args)
+              {name_en: {$like: `%${search}%`}}
+            ];
+          }
+
+          return modelConnection(SubCategories, {where, order: 'created_on DESC'}, args);
+        }
       },
       timeSlots: {
         type: GraphQLTimeSlotConnection,
@@ -266,15 +288,18 @@ export default function (nodeInterface, {
           },
           ...connectionArgs
         },
-        resolve: (obj, {search, ...args}) =>
-          modelConnection(Factories, search?{where:{
-            $or: [
+        resolve: (obj, {search, ...args}) => {
+          let where = {};
+          if (search) {
+            where['$or'] = [
               {name: {$like: `%${search}%`}},
-              {address: {$like: `%${search}%`}},
               {contact_no: {$like: `%${search}%`}},
               {contact_name: {$like: `%${search}%`}}
-            ]
-          }}:{}, args)
+            ];
+          }
+
+          return modelConnection(Factories, {where, order: 'created_on DESC'}, args);
+        }
       },
       vouchers: {
         type: GraphQLVoucherConnection,

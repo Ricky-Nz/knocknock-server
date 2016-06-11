@@ -40,7 +40,7 @@ const createTimeSlotTemplate = mutationWithClientMutationId({
 		DistrictTimeSlots.create({
 			time,
 			max_pickup: limit,
-			created: new Date()
+			created: new Date().toString()
 		})
 });
 

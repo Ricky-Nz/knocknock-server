@@ -40,7 +40,7 @@ const createCategory = mutationWithClientMutationId({
 		SubCategories.create({
 			name_ch: nameCn,
 			name_en: nameEn,
-			created_on: new Date()
+			created_on: new Date().toString()
 		})
 });
 

@@ -26,39 +26,60 @@ import { Items } from '../../service/database';
 // hide_from_user			
 // description
 
-const createCloth = mutationWithClientMutationId({
-	name: 'CreateCloth',
-	inputFields: {
+function clothFields(update) {
+	return {
 		categoryId: {
-			type: new GraphQLNonNull(GraphQLString)
+			type: update ? GraphQLString : new GraphQLNonNull(GraphQLString)
 		},
 		nameEn: {
-			type: new GraphQLNonNull(GraphQLString)
+			type: update ? GraphQLString : new GraphQLNonNull(GraphQLString)
 		},
 		nameCn: {
-			type: new GraphQLNonNull(GraphQLString)
+			type: update ? GraphQLString : new GraphQLNonNull(GraphQLString)
 		},
 		washPrice: {
-			type: new GraphQLNonNull(GraphQLFloat)
+			type: GraphQLFloat
 		},
 		dryCleanPrice: {
-			type: new GraphQLNonNull(GraphQLFloat)
+			type: GraphQLFloat
 		},
 		ironPrice: {
-			type: new GraphQLNonNull(GraphQLFloat)
+			type: GraphQLFloat
 		},
-		washPriceDiscount: {
-			type: new GraphQLNonNull(GraphQLFloat)
+		discountWashPrice: {
+			type: GraphQLFloat
 		},
-		dryCleanPriceDiscount: {
-			type: new GraphQLNonNull(GraphQLFloat)
+		discountDryCleanPrice: {
+			type: GraphQLFloat
 		},
-		ironPriceDiscount: {
-			type: new GraphQLNonNull(GraphQLFloat)
+		discountIronPrice: {
+			type: GraphQLFloat
+		},
+		enableWashPriceDiscount: {
+			type: GraphQLBoolean
+		},
+		enableDryCleanPriceDiscount: {
+			type: GraphQLBoolean
+		},
+		enableIronPriceDiscount: {
+			type: GraphQLBoolean
 		},
 		special: {
 			type: GraphQLBoolean
+		},
+		hideFromUser: {
+			type: GraphQLBoolean
+		},
+		enabled: {
+			type: GraphQLBoolean
 		}
+	};
+}
+
+const createCloth = mutationWithClientMutationId({
+	name: 'CreateCloth',
+	inputFields: {
+		...clothFields()
 	},
 	outputFields: {
 		clothEdge: {
@@ -74,8 +95,9 @@ const createCloth = mutationWithClientMutationId({
 		}
 	},
 	mutateAndGetPayload: ({categoryId, nameEn, nameCn, washPrice, dryCleanPrice, ironPrice,
-		washPriceDiscount, dryCleanPriceDiscount, ironPriceDiscount, special}, context, {rootValue}) =>
-		processFileUpload('knocknock-laundry', rootValue.request.file)
+		discountWashPrice, discountDryCleanPrice, discountIronPrice, enableWashPriceDiscount,
+		enableDryCleanPriceDiscount, enableIronPriceDiscount, special, hideFromUser, enabled}, context,
+		{rootValue}) => processFileUpload('knocknock-laundry', rootValue.request.file)
 			.then(upload => {
 				if (!upload) throw 'Upload file failed';
 
@@ -88,11 +110,19 @@ const createCloth = mutationWithClientMutationId({
 					wash_iron_price: washPrice,
 					dry_clean_price: dryCleanPrice,
 					iron_price: ironPrice,
-					discount_wash_iron_price: washPriceDiscount,
-					discount_dry_clean_price: dryCleanPriceDiscount,
-					discount_iron_price: ironPriceDiscount,
+					discount_wash_iron_price: discountWashPrice,
+					discount_dry_clean_price: discountDryCleanPrice,
+					discount_iron_price: discountIronPrice,
+					have_discount_wash_iron_price: enableWashPriceDiscount,
+					have_discount_dry_clean_price: enableDryCleanPriceDiscount,
+					have_discount_iron_price: enableIronPriceDiscount,
 					special_item: special,
-					image_url: upload.imageUrl
+					hide_from_user: hideFromUser,
+					...(enabled!==undefined)&&{
+						disabled: !enabled
+					},
+					image_url: upload.imageUrl,
+					created_on: new Date().toString()
 				});
 			})
 });
@@ -104,36 +134,7 @@ const updateCloth = mutationWithClientMutationId({
 			type: new GraphQLNonNull(GraphQLString),
 			description: 'cloth id'
 		},
-		categoryId: {
-			type: GraphQLString
-		},
-		nameEn: {
-			type: GraphQLString
-		},
-		nameCn: {
-			type: GraphQLString
-		},
-		washPrice: {
-			type: GraphQLFloat
-		},
-		dryCleanPrice: {
-			type: GraphQLFloat
-		},
-		ironPrice: {
-			type: GraphQLFloat
-		},
-		washPriceDiscount: {
-			type: GraphQLFloat
-		},
-		dryCleanPriceDiscount: {
-			type: GraphQLFloat
-		},
-		ironPriceDiscount: {
-			type: GraphQLFloat
-		},
-		special: {
-			type: GraphQLBoolean
-		}
+		...clothFields(true)
 	},
 	outputFields: {
 		cloth: {
@@ -142,7 +143,8 @@ const updateCloth = mutationWithClientMutationId({
 		}
 	},
 	mutateAndGetPayload: ({id, categoryId, nameEn, nameCn, washPrice, dryCleanPrice, ironPrice,
-		washPriceDiscount, dryCleanPriceDiscount, ironPriceDiscount, special}, context, {rootValue}) => {
+		discountWashPrice, discountDryCleanPrice, discountIronPrice, enableWashPriceDiscount,
+		enableDryCleanPriceDiscount, enableIronPriceDiscount, special, hideFromUser, enabled}, context, {rootValue}) => {
 		const {id: localId} = fromGlobalId(id);
 
 		if (categoryId) {
@@ -158,10 +160,17 @@ const updateCloth = mutationWithClientMutationId({
 				...updateField('wash_iron_price', washPrice),
 				...updateField('dry_clean_price', dryCleanPrice),
 				...updateField('iron_price', ironPrice),
-				...updateField('discount_wash_iron_price', washPriceDiscount),
-				...updateField('discount_dry_clean_price', dryCleanPriceDiscount),
-				...updateField('discount_iron_price', ironPriceDiscount),
+				...updateField('discount_wash_iron_price', discountWashPrice),
+				...updateField('discount_dry_clean_price', discountDryCleanPrice),
+				...updateField('discount_iron_price', discountIronPrice),
+				...updateField('have_discount_wash_iron_price', enableWashPriceDiscount),
+				...updateField('have_discount_dry_clean_price', enableDryCleanPriceDiscount),
+				...updateField('have_discount_iron_price', enableIronPriceDiscount),
 				...updateField('special_item', special),
+				...updateField('hide_from_user', hideFromUser),
+				...(enabled!==undefined)&&{
+					disabled: !enabled
+				},
 				...upload&&{
 					image_url: upload.imageUrl
 				}

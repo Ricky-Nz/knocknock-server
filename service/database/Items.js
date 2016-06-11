@@ -45,11 +45,11 @@ export default sequelize.define('items', {
 		type: STRING
 	},
 	created_on: {
-		type: STRING,
+		type: DATE,
 		allowNull: false
 	},
 	disabled: {
-		type: DATE
+		type: BOOLEAN
 	},
 	item_order: {
 		type: INTEGER

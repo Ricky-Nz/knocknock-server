@@ -100,10 +100,15 @@ type Cloth implements Node {
   washPrice: Float
   dryCleanPrice: Float
   ironPrice: Float
-  washPriceDiscount: Float
-  dryCleanPriceDiscount: Float
-  ironPriceDiscount: Float
+  discountWashPrice: Float
+  discountDryCleanPrice: Float
+  discountIronPrice: Float
+  enableWashPriceDiscount: Boolean
+  enableDryCleanPriceDiscount: Boolean
+  enableIronPriceDiscount: Boolean
   special: Boolean
+  hideFromUser: Boolean
+  enabled: Boolean
   imageUrl: String
 }
 
@@ -176,13 +181,18 @@ input CreateClothInput {
   categoryId: String!
   nameEn: String!
   nameCn: String!
-  washPrice: Float!
-  dryCleanPrice: Float!
-  ironPrice: Float!
-  washPriceDiscount: Float!
-  dryCleanPriceDiscount: Float!
-  ironPriceDiscount: Float!
+  washPrice: Float
+  dryCleanPrice: Float
+  ironPrice: Float
+  discountWashPrice: Float
+  discountDryCleanPrice: Float
+  discountIronPrice: Float
+  enableWashPriceDiscount: Boolean
+  enableDryCleanPriceDiscount: Boolean
+  enableIronPriceDiscount: Boolean
   special: Boolean
+  hideFromUser: Boolean
+  enabled: Boolean
   clientMutationId: String!
 }
 
@@ -683,10 +693,15 @@ input UpdateClothInput {
   washPrice: Float
   dryCleanPrice: Float
   ironPrice: Float
-  washPriceDiscount: Float
-  dryCleanPriceDiscount: Float
-  ironPriceDiscount: Float
+  discountWashPrice: Float
+  discountDryCleanPrice: Float
+  discountIronPrice: Float
+  enableWashPriceDiscount: Boolean
+  enableDryCleanPriceDiscount: Boolean
+  enableIronPriceDiscount: Boolean
   special: Boolean
+  hideFromUser: Boolean
+  enabled: Boolean
   clientMutationId: String!
 }
 
@@ -847,6 +862,7 @@ type Viewer implements Node {
   worker(id: String!): Worker
   admin(id: String!): Admin
   cloth(id: String!): Cloth
+  voucher(id: String!): Voucher
   users(search: String, after: String, first: Int, before: String, last: Int): UserConnection
   workers(search: String, after: String, first: Int, before: String, last: Int): WorkerConnection
   admins(search: String, after: String, first: Int, before: String, last: Int): AdminConnection
@@ -869,6 +885,7 @@ type Voucher implements Node {
   id: ID!
   title: String
   value: Float
+  displayExpireOn: String
   expireOn: String
   enabled: Boolean
   createdAt: String

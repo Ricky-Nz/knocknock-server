@@ -61,7 +61,7 @@ const createBanner = mutationWithClientMutationId({
 					banner_link: link,
 					banner_order: position,
 					banner_image_url: upload.imageUrl,
-					created: new Date()
+					created: new Date().toString()
 				});
 			})
 });

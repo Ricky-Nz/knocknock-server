@@ -1,4 +1,4 @@
-import { getAddressByPostalCode } from '../service/location';
+import { UserCredits } from '../service/database';
 
-getAddressByPostalCode('048616')
-	.then(result => console.log(result));
+UserCredits.findAll()
+	.then(result => result.map(({dataValues}) => console.log(dataValues.status)));

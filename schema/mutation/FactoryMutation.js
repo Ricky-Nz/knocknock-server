@@ -53,7 +53,8 @@ const createFactory = mutationWithClientMutationId({
 			address,
 			postal_code: postalCode,
 			contact_no: contact,
-			contact_name: contactName
+			contact_name: contactName,
+			created_on: new Date().toString()
 		})
 });
 
