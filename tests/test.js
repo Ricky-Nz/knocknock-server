@@ -1,4 +1,4 @@
-import { UserCredits } from '../service/database';
+import { Orders } from '../service/database';
 
-UserCredits.findAll()
-	.then(result => result.map(({dataValues}) => console.log(dataValues.status)));
+Orders.findAll()
+	.then(result => result.map(({dataValues}) => console.log(dataValues.id)));

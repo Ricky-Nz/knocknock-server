@@ -1,6 +1,6 @@
-import { GraphQLObjectType, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
+import { GraphQLObjectType, GraphQLBoolean, GraphQLInt, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField, connectionArgs, fromGlobalId } from 'graphql-relay';
-import { Orders, UserAddresses, UserVouchers } from '../../service/database';
+import { Orders, UserAddresses, UserVouchers, UserCredits } from '../../service/database';
 import { modelConnection } from '../utils';
 
   // { id: 3812,
@@ -47,6 +47,7 @@ export default function (nodeInterface, {
   GraphQLAddressConnection,
   GraphQLAssignedVoucherConnection,
   GraphQLTransactionConnection,
+  GraphQLCreditRecordConnection,
   GraphQLOrderConnection,
   GraphQLOrder
 }) {
@@ -70,6 +71,14 @@ export default function (nodeInterface, {
         type: GraphQLString,
         resolve: (obj) => obj.contact_no
       },
+      credit: {
+        type: GraphQLFloat,
+        resolve: (obj) => obj.credit
+      },
+      points: {
+        type: GraphQLInt,
+        resolve: (obj) => obj.points
+      },
       enabled: {
         type: GraphQLBoolean,
         resolve: (obj) => !obj.disabled
@@ -89,6 +98,18 @@ export default function (nodeInterface, {
         },
         resolve: (user, args) =>
           modelConnection(UserAddresses, {where:{user_id: user.id}}, args)
+      },
+      order: {
+        type: GraphQLOrder,
+        args: {
+          id: {
+            type: new GraphQLNonNull(GraphQLString)
+          }
+        },
+        resolve: (user, {id}) => {
+          const {id: localId} = fromGlobalId(id);
+          return Orders.findOne({user_id: user.id, id: localId});
+        }
       },
       vouchers: {
         type: GraphQLAssignedVoucherConnection,
@@ -112,19 +133,7 @@ export default function (nodeInterface, {
             where.title = {$like: `%${search}%`};
           }
 
-          return modelConnection(UserVouchers, {where}, args);
-        }
-      },
-      order: {
-        type: GraphQLOrder,
-        args: {
-          id: {
-            type: new GraphQLNonNull(GraphQLString)
-          }
-        },
-        resolve: (user, {id}) => {
-          const {id: localId} = fromGlobalId(id);
-          return Orders.findOne({user_id: user.id, id: localId});
+          return modelConnection(UserVouchers, {where, order: 'created_on DESC'}, args);
         }
       },
       orders: {
@@ -142,6 +151,25 @@ export default function (nodeInterface, {
           }
 
           return modelConnection(Orders, {where}, args);
+        }
+      },
+      creditRecords: {
+        type: GraphQLCreditRecordConnection,
+        args: {
+          search: {
+            type: GraphQLString
+          },
+          ...connectionArgs
+        },
+        resolve: (obj, {search, ...args}) => {
+          const where = {user_id: obj.id};
+          if (search) {
+            where['$or'] = [
+              {paypal_ref_no: {$like: `%${search}%`}}
+            ];
+          }
+
+          return modelConnection(UserCredits, {where, order: 'created_on DESC'}, args);
         }
       }
     },

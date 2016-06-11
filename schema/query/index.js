@@ -244,6 +244,7 @@ export const {
   GraphQLAddressConnection,
   GraphQLAssignedVoucherConnection,
   GraphQLTransactionConnection,
+  GraphQLCreditRecordConnection,
   GraphQLOrderConnection,
   GraphQLOrder
 });

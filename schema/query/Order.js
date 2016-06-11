@@ -1,7 +1,7 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField, connectionArgs, toGlobalId } from 'graphql-relay';
 import { Users, OrderStatuses, OrderDetails } from '../../service/database';
-import { modelConnection } from '../utils';
+import { modelConnection, toDisplayDate } from '../utils';
 
    // { id: 826,
    //   pickup_worker_id: 11,
@@ -70,6 +70,10 @@ export default function (nodeInterface, {GraphQLOrderItemConnection, GraphQLOrde
     name: 'Order',
     fields: {
       id: globalIdField('Order'),
+      displayId: {
+        type: GraphQLInt,
+        resolve: (obj) => obj.id
+      },
       userId: {
         type: GraphQLString,
         resolve: (obj) => toGlobalId('User', obj.user_id)
@@ -89,6 +93,10 @@ export default function (nodeInterface, {GraphQLOrderItemConnection, GraphQLOrde
       pickupDate: {
         type: GraphQLString,
         resolve: (obj) => obj.pickup_date
+      },
+      displayPickupDate: {
+        type: GraphQLString,
+        resolve: (obj) => toDisplayDate(obj.pickup_date)
       },
       pickupTime: {
         type: GraphQLString,

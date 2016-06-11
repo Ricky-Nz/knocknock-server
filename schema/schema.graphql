@@ -521,11 +521,13 @@ interface Node {
 
 type Order implements Node {
   id: ID!
+  displayId: Int
   userId: String
   express: Boolean
   note: String
   status: OrderStatus
   pickupDate: String
+  displayPickupDate: String
   pickupTime: String
   pickupAddress: String
   pickupWorkerId: String
@@ -829,13 +831,16 @@ type User implements Node {
   firstName: String
   lastName: String
   contact: String
+  credit: Float
+  points: Int
   enabled: Boolean
   avatarUrl: String
   isVerified: Boolean
   addresses(after: String, first: Int, before: String, last: Int): AddressConnection
-  vouchers(all: Boolean, search: String, after: String, first: Int, before: String, last: Int): AssignedVoucherConnection
   order(id: String!): Order
+  vouchers(all: Boolean, search: String, after: String, first: Int, before: String, last: Int): AssignedVoucherConnection
   orders(search: String, after: String, first: Int, before: String, last: Int): OrderConnection
+  creditRecords(search: String, after: String, first: Int, before: String, last: Int): CreditRecordConnection
 }
 
 type UserConnection {

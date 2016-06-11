@@ -172,11 +172,14 @@ export default function (nodeInterface, {
             where.user_id = localUseriId;
           }
           if (search) {
-            where.id = {$like: `%${search}%`};
+            where.id = search;
           }
-          if (statusIds&&statusIds.length > 0) {
-            where.order_status_id['$in'] = statusIds;
-          }
+
+          where.order_status_id['$in'] = (statusIds||[]).map(id => {
+            const {id: localId} = fromGlobalId(id);
+            return localId;
+          });
+
           if (afterDate) {
             where.pickup_date = {'$gte': formatTime(afterDate)};
           }
@@ -187,7 +190,7 @@ export default function (nodeInterface, {
             where.pickup_date['$lt'] = formatTime(beforeDate);
           }
 
-          return modelConnection(Orders, {where}, args);
+          return modelConnection(Orders, {where, order: 'id DESC'}, args);
         }
       },
       histories: {
@@ -201,10 +204,10 @@ export default function (nodeInterface, {
         resolve: (obj, {search, ...args}) => {
           let where = {order_status_id: {$in: [8, 9]}};
           if (search) {
-            where.id = {$like: `%${search}%`};
+            where.id = search;
           }
 
-          return modelConnection(Orders, {where}, args);
+          return modelConnection(Orders, {where, order: 'id DESC'}, args);
         }
       },
       creditRecords: {
