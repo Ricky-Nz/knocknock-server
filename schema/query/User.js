@@ -108,7 +108,7 @@ export default function (nodeInterface, {
         },
         resolve: (user, {id}) => {
           const {id: localId} = fromGlobalId(id);
-          return Orders.findOne({user_id: user.id, id: localId});
+          return Orders.findById(localId);
         }
       },
       vouchers: {

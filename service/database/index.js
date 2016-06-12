@@ -19,3 +19,4 @@ export { default as Workers } from './Workers';
 export { default as UserVouchers } from './UserVouchers';
 export { default as UserCredits } from './UserCredits';
 export { default as UserCreditTransactions } from './UserCreditTransactions';
+export { default as LaundryTypes } from './LaundryTypes';

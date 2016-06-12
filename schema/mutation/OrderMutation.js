@@ -102,13 +102,13 @@ function prepareOrderItems(localOrderId, orderItems) {
 				
 				let itemPrice;
 				switch(washType) {
-					case 'Wash&Iron':
+					case 'wash':
 						itemPrice = cloth.washPrice;
 						break;
-					case 'Dry Clean':
+					case 'dry':
 						itemPrice = cloth.dryCleanPrice;
 						break;
-					case 'Iron':
+					case 'iron':
 						itemPrice = cloth.ironPrice;
 						break;
 				}
@@ -137,7 +137,7 @@ const createOrder = mutationWithClientMutationId({
       type: GraphQLString
     },
     statusId: {
-      type: GraphQLInt
+      type: GraphQLString
     },
     pickupDate: {
       type: new GraphQLNonNull(GraphQLString)
@@ -176,6 +176,10 @@ const createOrder = mutationWithClientMutationId({
 			const {id: localWorkerId} = fromGlobalId(pickupWorkerId);
 			pickupWorkerId = localWorkerId;
 		}
+		if (statusId) {
+			const {id: localStatusId} = fromGlobalId(statusId);
+			statusId = localStatusId;
+		}
 
 		return Orders.create({
 				user_id: localUserId,
@@ -212,7 +216,7 @@ const updateOrder = mutationWithClientMutationId({
       type: GraphQLString
     },
     statusId: {
-      type: GraphQLInt
+      type: GraphQLString
     },
     pickupDate: {
       type: GraphQLString
@@ -243,8 +247,12 @@ const updateOrder = mutationWithClientMutationId({
 			const {id: localWorkerId} = fromGlobalId(pickupWorkerId);
 			pickupWorkerId = localWorkerId;
 		}
+		if (statusId) {
+			const {id: localStatusId} = fromGlobalId(statusId);
+			statusId = localStatusId;
+		}
 		
-		return Order.update({
+		return Orders.update({
 			...updateField('express_order', express),
 			...updateField('description', note),
 			...updateField('order_status_id', statusId),
@@ -254,16 +262,17 @@ const updateOrder = mutationWithClientMutationId({
 			...updateField('pickup_worker_id', pickupWorkerId)
 		}, {where:{id: localId}}).then(() => {
 			if (orderItems) {
-				OrderDetails.destory({where:{order_id: localId}})
+				return OrderDetails.destroy({where:{order_id: localId}})
 					.then(() => {
 						if (orderItems.length > 0) {
 							return prepareOrderItems(localId, orderItems)
 								.then(items => OrderDetails.bulkCreate(items))
-								.then(() => ({localId}));
+								.then(() => localId);
 						} else {
-							return {localId};
+							return localId;
 						}
 					})
+					.then(localId => ({localId}));
 			} else {
 				return {localId};
 			}

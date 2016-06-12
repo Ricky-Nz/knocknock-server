@@ -225,7 +225,7 @@ export const {
   nodeType: GraphQLOrderItem,
   connectionType: GraphQLOrderItemConnection,
   edgeType: GraphQLOrderItemEdge
-} = orderItemQuery(nodeInterface);
+} = orderItemQuery(nodeInterface, {GraphQLCloth});
 
 export const {
   nodeType: GraphQLOrder,

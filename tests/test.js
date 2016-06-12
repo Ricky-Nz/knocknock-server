@@ -1,4 +1,4 @@
-import { Orders } from '../service/database';
+import { LaundryTypes } from '../service/database';
 
-Orders.findAll()
-	.then(result => result.map(({dataValues}) => console.log(dataValues.id)));
+LaundryTypes.findAll()
+	.then(result => result.map(({dataValues}) => console.log(dataValues)));

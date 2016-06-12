@@ -234,7 +234,7 @@ input CreateOrderInput {
   userId: String!
   express: Boolean
   note: String
-  statusId: Int
+  statusId: String
   pickupDate: String!
   pickupTime: String!
   pickupAddress: String!
@@ -553,6 +553,7 @@ type OrderItem implements Node {
   washType: String
   quantity: Int
   price: Int
+  cloth: Cloth
 }
 
 type OrderItemConnection {
@@ -731,7 +732,7 @@ input UpdateOrderInput {
   id: String!
   express: Boolean
   note: String
-  statusId: Int
+  statusId: String
   pickupDate: String
   pickupTime: String
   pickupAddress: String
