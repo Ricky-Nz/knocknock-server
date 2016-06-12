@@ -2174,12 +2174,36 @@
               "deprecationReason": null
             },
             {
+              "name": "factoryId",
+              "description": null,
+              "args": [],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "totalPrice",
               "description": null,
               "args": [],
               "type": {
                 "kind": "SCALAR",
-                "name": "Int",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "toPayPrice",
+              "description": null,
+              "args": [],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -2476,7 +2500,7 @@
               "args": [],
               "type": {
                 "kind": "SCALAR",
-                "name": "Int",
+                "name": "Float",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -8488,6 +8512,16 @@
               "defaultValue": null
             },
             {
+              "name": "factoryId",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "orderItems",
               "description": null,
               "type": {
@@ -8710,6 +8744,26 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "factoryId",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "toPayPrice",
+              "description": null,
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
                 "ofType": null
               },
               "defaultValue": null

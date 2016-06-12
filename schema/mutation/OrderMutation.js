@@ -1,4 +1,4 @@
-import { GraphQLInputObjectType, GraphQLNonNull, GraphQLBoolean, GraphQLInt, GraphQLList, GraphQLString } from 'graphql';
+import { GraphQLInputObjectType, GraphQLNonNull, GraphQLBoolean, GraphQLFloat, GraphQLInt, GraphQLList, GraphQLString } from 'graphql';
 import { mutationWithClientMutationId, fromGlobalId, toGlobalId, offsetToCursor } from 'graphql-relay';
 import { GraphQLOrder, GraphQLOrderEdge, GraphQLUser } from '../query';
 import { Users, Orders, OrderDetails, Items } from '../../service/database';
@@ -96,20 +96,32 @@ function prepareOrderItems(localOrderId, orderItems) {
 
 	return Items.findAll({where:{id:{$in:clothIds}}})
 		.then(clothes => {
-			return orderItems.map(({productId, quantity, washType}) => {
+			const items =  orderItems.map(({productId, quantity, washType}) => {
 				const {id: localClothId} = fromGlobalId(productId);
 				const cloth = clothes.find(cloth => cloth.id == localClothId);
-				
+
 				let itemPrice;
 				switch(washType) {
 					case 'wash':
-						itemPrice = cloth.washPrice;
+						if (cloth.have_discount_wash_iron_price) {
+							itemPrice = cloth.discount_wash_iron_price;
+						} else {
+							itemPrice = cloth.wash_iron_price;
+						}
 						break;
 					case 'dry':
-						itemPrice = cloth.dryCleanPrice;
+						if (cloth.have_discount_dry_clean_price) {
+							itemPrice = cloth.discount_dry_clean_price;
+						} else {
+							itemPrice = cloth.dry_clean_price;
+						}
 						break;
 					case 'iron':
-						itemPrice = cloth.ironPrice;
+						if (cloth.have_discount_iron_price) {
+							itemPrice = cloth.discount_iron_price;
+						} else {
+							itemPrice = cloth.iron_price;
+						}
 						break;
 				}
 
@@ -121,6 +133,15 @@ function prepareOrderItems(localOrderId, orderItems) {
 					price: itemPrice
 				};
 			});
+
+			let totalPrice = 0;
+			for (const index in items) {
+				const item = items[index];
+				totalPrice += (parseInt(item.quantity) * parseFloat(item.price));
+			}
+
+			return Orders.update({total_price: totalPrice}, {where:{id:localOrderId}})
+				.then(() => items);
 		});
 }
 
@@ -151,6 +172,9 @@ const createOrder = mutationWithClientMutationId({
     pickupWorkerId: {
       type: GraphQLString
     },
+    factoryId: {
+    	type: GraphQLString
+    },
 		orderItems: {
 			type: new GraphQLList(GraphQLOrderItemInput)
 		}
@@ -169,7 +193,7 @@ const createOrder = mutationWithClientMutationId({
 		}
 	},
 	mutateAndGetPayload: ({userId, express, note, statusId, pickupDate,
-		pickupTime, pickupAddress, pickupWorkerId, orderItems}) => {
+		pickupTime, pickupAddress, pickupWorkerId, factoryId, orderItems}) => {
 		const {id: localUserId} = fromGlobalId(userId);
 
 		if (pickupWorkerId) {
@@ -180,6 +204,10 @@ const createOrder = mutationWithClientMutationId({
 			const {id: localStatusId} = fromGlobalId(statusId);
 			statusId = localStatusId;
 		}
+		if (factoryId) {
+			const {id: localFactoryId} = fromGlobalId(factoryId);
+			factoryId = localFactoryId;
+		}
 
 		return Orders.create({
 				user_id: localUserId,
@@ -189,7 +217,8 @@ const createOrder = mutationWithClientMutationId({
 				pickup_date: pickupDate,
 				pickup_time: pickupTime,
 				pickup_address: pickupAddress,
-				pickup_worker_id: pickupWorkerId
+				pickup_worker_id: pickupWorkerId,
+				factory_id: factoryId
 			})
 			.then(order => {
 				if (!orderItems || orderItems.length === 0) {
@@ -230,6 +259,12 @@ const updateOrder = mutationWithClientMutationId({
     pickupWorkerId: {
       type: GraphQLString
     },
+    factoryId: {
+    	type: GraphQLString
+    },
+    toPayPrice: {
+    	type: GraphQLFloat
+    },
 		orderItems: {
 			type: new GraphQLList(GraphQLOrderItemInput)
 		}
@@ -240,7 +275,8 @@ const updateOrder = mutationWithClientMutationId({
 			resolve: ({localId}) => Orders.findById(localId)
 		}
 	},
-	mutateAndGetPayload: ({id, express, note, statusId, pickupDate, pickupTime, pickupAddress, pickupWorkerId, orderItems}) => {
+	mutateAndGetPayload: ({id, express, note, statusId, pickupDate,
+		pickupTime, pickupAddress, pickupWorkerId, factoryId, toPayPrice, orderItems}) => {
 		const {id: localId} = fromGlobalId(id);
 		
 		if (pickupWorkerId) {
@@ -251,7 +287,11 @@ const updateOrder = mutationWithClientMutationId({
 			const {id: localStatusId} = fromGlobalId(statusId);
 			statusId = localStatusId;
 		}
-		
+		if (factoryId) {
+			const {id: localFactoryId} = fromGlobalId(factoryId);
+			factoryId = localFactoryId;
+		}
+
 		return Orders.update({
 			...updateField('express_order', express),
 			...updateField('description', note),
@@ -259,7 +299,9 @@ const updateOrder = mutationWithClientMutationId({
 			...updateField('pickup_date', pickupDate),
 			...updateField('pickup_time', pickupTime),
 			...updateField('pickup_address', pickupAddress),
-			...updateField('pickup_worker_id', pickupWorkerId)
+			...updateField('pickup_worker_id', pickupWorkerId),
+			...updateField('factory_id', factoryId),
+			...updateField('to_pay_price', toPayPrice)
 		}, {where:{id: localId}}).then(() => {
 			if (orderItems) {
 				return OrderDetails.destroy({where:{order_id: localId}})

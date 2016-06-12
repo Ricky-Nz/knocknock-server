@@ -31,7 +31,7 @@ export default function (nodeInterface, {GraphQLCloth}) {
 				resolve: (obj) => obj.quantity
 			},
 			price: {
-				type: GraphQLInt,
+				type: GraphQLFloat,
 				resolve: (obj) => obj.price
 			},
 			cloth: {

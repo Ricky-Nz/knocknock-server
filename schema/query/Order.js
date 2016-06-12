@@ -110,9 +110,17 @@ export default function (nodeInterface, {GraphQLOrderItemConnection, GraphQLOrde
         type: GraphQLString,
         resolve: (obj) => toGlobalId('Worker', obj.pickup_worker_id)
       },
+      factoryId: {
+        type: GraphQLString,
+        resolve: (obj) => toGlobalId('Factory', obj.factory_id)
+      },
       totalPrice: {
-        type: GraphQLInt,
+        type: GraphQLFloat,
         resolve: (obj) => obj.total_price
+      },
+      toPayPrice: {
+        type: GraphQLFloat,
+        resolve: (obj) => obj.to_pay_price
       },
       userAvatar: {
         type: GraphQLString,

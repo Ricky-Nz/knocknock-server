@@ -239,6 +239,7 @@ input CreateOrderInput {
   pickupTime: String!
   pickupAddress: String!
   pickupWorkerId: String
+  factoryId: String
   orderItems: [OrderItemInput]
   clientMutationId: String!
 }
@@ -531,7 +532,9 @@ type Order implements Node {
   pickupTime: String
   pickupAddress: String
   pickupWorkerId: String
-  totalPrice: Int
+  factoryId: String
+  totalPrice: Float
+  toPayPrice: Float
   userAvatar: String
   orderItems(after: String, first: Int, before: String, last: Int): OrderItemConnection
 }
@@ -552,7 +555,7 @@ type OrderItem implements Node {
   productId: String
   washType: String
   quantity: Int
-  price: Int
+  price: Float
   cloth: Cloth
 }
 
@@ -737,6 +740,8 @@ input UpdateOrderInput {
   pickupTime: String
   pickupAddress: String
   pickupWorkerId: String
+  factoryId: String
+  toPayPrice: Float
   orderItems: [OrderItemInput]
   clientMutationId: String!
 }
