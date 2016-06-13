@@ -15,7 +15,7 @@ export default {
 	},
 	rds: {
 		reset: false,
-		host: 'devdb.cktsz52qq75y.ap-southeast-1.rds.amazonaws.com',
+		host: 'test.cktsz52qq75y.ap-southeast-1.rds.amazonaws.com',
 		type: 'postgres',
 		username: 'postgres',
 		password: '0293248094',

@@ -18,6 +18,7 @@ import timeSlotTemplateQuery from './TimeSlotTemplate';
 import transactionQuery from './Transaction';
 import userQuery from './User';
 import viewerQuery from './Viewer';
+import appQuery from './App';
 import voucherQuery from './Voucher';
 import assignedVoucherQuery from './AssignedVoucher';
 import workerQuery from './Worker';
@@ -25,6 +26,7 @@ import orderStatusQuery from './OrderStatus';
 import creditRecordQuery from './CreditRecord';
 
 class Viewer {}
+class App {}
 
 const { nodeInterface, nodeField } = nodeDefinitions(
   (globalId) => {
@@ -32,6 +34,8 @@ const { nodeInterface, nodeField } = nodeDefinitions(
 
     if (type === 'Viewer') {
       return new Viewer();
+    } else if (type === 'App') {
+      return new App();
     } else if (type === 'User') {
       return Users.findById(id);
     } else if (type === 'Admin') {
@@ -75,6 +79,8 @@ const { nodeInterface, nodeField } = nodeDefinitions(
   (obj) => {
   	if (obj instanceof Viewer) {
     	return GraphQLViewer;
+    } else if (obj instanceof App) {
+      return GraphQLApp;
     } else if (obj instanceof Users) {
   		return GraphQLUser;
   	} else if (obj instanceof Admins) {
@@ -293,6 +299,13 @@ export const {
   GraphQLCreditRecordConnection
 });
 
+export const {
+  nodeType: GraphQLApp
+} = appQuery(nodeInterface, {
+  GraphQLBanner,
+  GraphQLOrderConnection
+});
+
 export default new GraphQLObjectType({
   name: 'Query',
   description: 'Query root',
@@ -300,6 +313,10 @@ export default new GraphQLObjectType({
     viewer: {
       type: GraphQLViewer,
       resolve: () => new Viewer()
+    },
+    app: {
+      type: GraphQLApp,
+      resolve: () => new App()
     },
     node: nodeField
   }

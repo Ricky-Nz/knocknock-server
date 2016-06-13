@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import path from 'path';
 import fs from 'fs';
+import bcrypt from 'bcrypt';
 import moment from 'moment';
 import { uploadFile } from '../service/datastorage';
 import { connectionFromPromisedArraySlice, cursorToOffset, fromGlobalId } from 'graphql-relay';
@@ -84,13 +85,30 @@ export function modelConnection(dbClass, query, args) {
     });
 }
 
-export function verifyToken(token) {
+export function verifyPassword(password, encryptedPassword) {
   return new Promise((resolve, reject) => {
-    jwt.verify(token, 'knocknockserver-secret-token', function(err, userId) {
+    bcrypt.compare(password, encryptedPassword, (err, res) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(res);
+      }
+    });
+  });
+}
+
+export function generateToken(userId) {
+  return jwt.sign({ id: userId }, 'knocknockserver-secret-token');
+}
+
+export function verifyToken(token) {
+  console.log(token);
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, 'knocknockserver-secret-token', function(err, payload) {
       if (err) {
         reject('invalid token!');
       } else {
-        resolve(userId);
+        resolve(payload.id);
       }
     });
   });
