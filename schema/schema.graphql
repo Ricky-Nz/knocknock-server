@@ -490,7 +490,15 @@ type LoginUser implements Node {
   id: ID!
   orders(after: String, first: Int, before: String, last: Int): OrderConnection
   histories(after: String, first: Int, before: String, last: Int): OrderConnection
+  toPayOrders(after: String, first: Int, before: String, last: Int): OrderConnection
   banners: [Banner]
+  categories: [Category]
+  clothes(categoryId: String!): [Cloth]
+  creditRecords(after: String, first: Int, before: String, last: Int): CreditRecordConnection
+  vouchers(after: String, first: Int, before: String, last: Int): AssignedVoucherConnection
+  toPayCount: Int!
+  credits: String!
+  voucherCount: Int!
 }
 
 type Mutation {

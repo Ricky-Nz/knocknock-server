@@ -24,9 +24,11 @@ import assignedVoucherQuery from './AssignedVoucher';
 import workerQuery from './Worker';
 import orderStatusQuery from './OrderStatus';
 import creditRecordQuery from './CreditRecord';
+import loginUserQuery from './LoginUser';
 
 class Viewer {}
 class App {}
+class LoginUser {}
 
 const { nodeInterface, nodeField } = nodeDefinitions(
   (globalId) => {
@@ -36,6 +38,10 @@ const { nodeInterface, nodeField } = nodeDefinitions(
       return new Viewer();
     } else if (type === 'App') {
       return new App();
+    } else if (type === 'LoginUser') {
+      let loginUser = new LoginUser();
+      loginUser.id = id;
+      return loginUser;
     } else if (type === 'User') {
       return Users.findById(id);
     } else if (type === 'Admin') {
@@ -81,6 +87,8 @@ const { nodeInterface, nodeField } = nodeDefinitions(
     	return GraphQLViewer;
     } else if (obj instanceof App) {
       return GraphQLApp;
+    } else if (obj instanceof LoginUser) {
+      return GraphQLLoginUser;
     } else if (obj instanceof Users) {
   		return GraphQLUser;
   	} else if (obj instanceof Admins) {
@@ -300,10 +308,20 @@ export const {
 });
 
 export const {
+  nodeType: GraphQLLoginUser
+} = loginUserQuery(nodeInterface, {
+  GraphQLBanner,
+  GraphQLCloth,
+  GraphQLCategory,
+  GraphQLOrderConnection,
+  GraphQLCreditRecordConnection,
+  GraphQLAssignedVoucherConnection
+});
+
+export const {
   nodeType: GraphQLApp
 } = appQuery(nodeInterface, {
-  GraphQLBanner,
-  GraphQLOrderConnection
+  GraphQLLoginUser
 });
 
 export default new GraphQLObjectType({

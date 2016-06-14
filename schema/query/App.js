@@ -3,41 +3,7 @@ import { connectionDefinitions, globalIdField, connectionArgs, toGlobalId } from
 import { PromotionBanners, Users, Orders } from '../../service/database';
 import { modelConnection, verifyPassword, verifyToken, generateToken } from '../utils';
 
-export default function (nodeInterface, {
-	GraphQLBanner,
-	GraphQLOrderConnection
-}) {
-	const GraphQLLoginUser = new GraphQLObjectType({
-		name: 'LoginUser',
-		fields: {
-			id: globalIdField('LoginUser', () => 'LoginUser'),
-	  	orders: {
-	  		type: GraphQLOrderConnection,
-	  		args: {
-	  			...connectionArgs
-	  		},
-	  		resolve: (user, {token, ...args}) =>
-	  			modelConnection(Orders, {where:
-	  					{$and:{order_status_id:{$notIn:[8, 9]}, user_id: user.id}}, order: 'id DESC'}, args)
-	  	},
-	  	histories: {
-	  		type: GraphQLOrderConnection,
-	  		args: {
-	  			...connectionArgs
-	  		},
-	  		resolve: (user, {token, ...args}) =>
-	  			modelConnection(Orders, {where:
-	  					{$and:{order_status_id:{$in:[8, 9]}, user_id: user.id}}, order: 'id DESC'}, args)
-	  	},
-      banners: {
-        type: new GraphQLList(GraphQLBanner),
-        resolve: (user) =>
-        	PromotionBanners.findAll({where:{is_enabled:true}, order: 'banner_order', limit: 5})
-      }
-		},
-		interfaces: [nodeInterface]
-	});
-
+export default function (nodeInterface, {GraphQLLoginUser}) {
 	const nodeType = new GraphQLObjectType({
 	  name: 'App',
 	  fields: {

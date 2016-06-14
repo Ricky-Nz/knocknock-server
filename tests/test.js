@@ -1,4 +1,4 @@
-import { OrderStatuses } from '../service/database';
+import { UserCredits } from '../service/database';
 
-OrderStatuses.findAll()
+UserCredits.findAll({order: 'created_on'})
 	.then(result => result.map(({dataValues}) => console.log(dataValues)));
