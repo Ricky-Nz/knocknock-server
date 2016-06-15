@@ -1,7 +1,7 @@
 {
   "apps" : [{
     "name"        : "arcstudio",
-    "script"      : "./server.js",
+    "script"      : "./web.js",
     "exec_interpreter" : "babel-node",
     "exec_mode"        : "fork"
   }]
