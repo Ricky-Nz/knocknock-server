@@ -51,6 +51,7 @@ const createAddress = mutationWithClientMutationId({
 			user_id: dbUserId,
 			postal_code: postalCode,
 			address: address,
+			name: address,
 			contact_no: contact
 		})
 	}
