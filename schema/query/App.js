@@ -3,7 +3,7 @@ import { connectionDefinitions, globalIdField, connectionArgs, toGlobalId } from
 import { PromotionBanners, Users, Orders } from '../../service/database';
 import { modelConnection, verifyPassword, verifyToken, generateToken } from '../utils';
 
-export default function (nodeInterface, {GraphQLLoginUser}) {
+export default function (nodeInterface, {GraphQLLoginUser, buildLoginUserObject}) {
 	const nodeType = new GraphQLObjectType({
 	  name: 'App',
 	  fields: {
@@ -40,7 +40,8 @@ export default function (nodeInterface, {GraphQLLoginUser}) {
 	  				type: new GraphQLNonNull(GraphQLString)
 	  			}
 	  		},
-	  		resolve: (user, {token}) => verifyToken(token).then(id => ({id}))
+	  		resolve: (user, {token}) => verifyToken(token)
+	  			.then(id => buildLoginUserObject(id))
 	  	}
 	  },
 	  interfaces: [nodeInterface]

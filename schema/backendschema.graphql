@@ -39,12 +39,6 @@ type AdminEdge {
   cursor: String!
 }
 
-type App implements Node {
-  id: ID!
-  token(username: String!, password: String!): String!
-  loginUser(token: String!): LoginUser
-}
-
 type AssignedVoucher implements Node {
   id: ID!
   userId: String!
@@ -486,21 +480,6 @@ type FeedbackEdge {
   cursor: String!
 }
 
-type LoginUser implements Node {
-  id: ID!
-  orders(after: String, first: Int, before: String, last: Int): OrderConnection
-  histories(after: String, first: Int, before: String, last: Int): OrderConnection
-  toPayOrders(after: String, first: Int, before: String, last: Int): OrderConnection
-  banners: [Banner]
-  categories: [Category]
-  clothes(categoryId: String!): [Cloth]
-  creditRecords(after: String, first: Int, before: String, last: Int): CreditRecordConnection
-  vouchers(after: String, first: Int, before: String, last: Int): AssignedVoucherConnection
-  toPayCount: Int!
-  credits: String!
-  voucherCount: Int!
-}
-
 type Mutation {
   createAddress(input: CreateAddressInput!): CreateAddressPayload
   updateAddress(input: UpdateAddressInput!): UpdateAddressPayload
@@ -638,7 +617,6 @@ type PromoCodeEdge {
 
 type Query {
   viewer: Viewer
-  app: App
   node(id: ID!): Node
 }
 

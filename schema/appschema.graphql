@@ -1,0 +1,234 @@
+schema {
+  query: Query
+}
+
+type Address implements Node {
+  id: ID!
+  userId: String
+  postalCode: String
+  address: String
+  contact: String
+}
+
+type AddressConnection {
+  pageInfo: PageInfo!
+  edges: [AddressEdge]
+}
+
+type AddressEdge {
+  node: Address
+  cursor: String!
+}
+
+type App implements Node {
+  id: ID!
+  token(username: String!, password: String!): String!
+  loginUser(token: String!): LoginUser
+}
+
+type AssignedVoucher implements Node {
+  id: ID!
+  userId: String!
+  used: Boolean
+  createdAt: String
+  voucher: Voucher
+}
+
+type AssignedVoucherConnection {
+  pageInfo: PageInfo!
+  edges: [AssignedVoucherEdge]
+}
+
+type AssignedVoucherEdge {
+  node: AssignedVoucher
+  cursor: String!
+}
+
+type Banner implements Node {
+  id: ID!
+  enabled: Boolean
+  title: String
+  link: String
+  position: Int
+  imageUrl: String
+}
+
+type Category implements Node {
+  id: ID!
+  nameCn: String!
+  nameEn: String!
+}
+
+type Cloth implements Node {
+  id: ID!
+  categoryId: String!
+  nameEn: String!
+  nameCn: String!
+  washPrice: Float
+  dryCleanPrice: Float
+  ironPrice: Float
+  discountWashPrice: Float
+  discountDryCleanPrice: Float
+  discountIronPrice: Float
+  enableWashPriceDiscount: Boolean
+  enableDryCleanPriceDiscount: Boolean
+  enableIronPriceDiscount: Boolean
+  special: Boolean
+  hideFromUser: Boolean
+  enabled: Boolean
+  imageUrl: String
+}
+
+type CreditCard implements Node {
+  id: ID!
+  brand: String
+  name: String
+  asteriskNumber: String
+  expireOn: String
+}
+
+type CreditCardConnection {
+  pageInfo: PageInfo!
+  edges: [CreditCardEdge]
+}
+
+type CreditCardEdge {
+  node: CreditCard
+  cursor: String!
+}
+
+type CreditRecord implements Node {
+  id: ID!
+  amount: Float
+  paymentRefNo: String
+  topUp: Boolean
+  createdAt: String
+  paymentMode: String
+  status: Int
+  approvedAt: String
+  approvedBy: String
+  description: Boolean
+  user: UserRef
+}
+
+type CreditRecordConnection {
+  pageInfo: PageInfo!
+  edges: [CreditRecordEdge]
+}
+
+type CreditRecordEdge {
+  node: CreditRecord
+  cursor: String!
+}
+
+type LoginUser implements Node {
+  id: ID!
+  orders(after: String, first: Int, before: String, last: Int): OrderConnection
+  histories(after: String, first: Int, before: String, last: Int): OrderConnection
+  toPayOrders(after: String, first: Int, before: String, last: Int): OrderConnection
+  banners: [Banner]
+  categories: [Category]
+  clothes(categoryId: String!): [Cloth]
+  creditRecords(after: String, first: Int, before: String, last: Int): CreditRecordConnection
+  creditCards(after: String, first: Int, before: String, last: Int): CreditCardConnection
+  vouchers(after: String, first: Int, before: String, last: Int): AssignedVoucherConnection
+  addresses(after: String, first: Int, before: String, last: Int): AddressConnection
+  toPayCount: Int!
+  voucherCount: Int!
+  credits: String
+  firstName: String
+  lastName: String
+  email: String
+  contact: String
+  plusAccount: String
+  avatarUrl: String
+}
+
+interface Node {
+  id: ID!
+}
+
+type Order implements Node {
+  id: ID!
+  displayId: Int
+  userId: String
+  express: Boolean
+  note: String
+  status: OrderStatus
+  pickupDate: String
+  displayPickupDate: String
+  pickupTime: String
+  pickupAddress: String
+  pickupWorkerId: String
+  factoryId: String
+  totalPrice: Float
+  toPayPrice: Float
+  userAvatar: String
+  orderItems(after: String, first: Int, before: String, last: Int): OrderItemConnection
+}
+
+type OrderConnection {
+  pageInfo: PageInfo!
+  edges: [OrderEdge]
+}
+
+type OrderEdge {
+  node: Order
+  cursor: String!
+}
+
+type OrderItem implements Node {
+  id: ID!
+  orederId: String
+  productId: String
+  washType: String
+  quantity: Int
+  price: Float
+  cloth: Cloth
+}
+
+type OrderItemConnection {
+  pageInfo: PageInfo!
+  edges: [OrderItemEdge]
+}
+
+type OrderItemEdge {
+  node: OrderItem
+  cursor: String!
+}
+
+type OrderStatus implements Node {
+  id: ID!
+  status: String
+  stage: Int
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+type Query {
+  app: App
+  node(id: ID!): Node
+}
+
+type UserRef {
+  userId: String!
+  firstName: String
+  lastName: String
+  email: String
+  avatarUrl: String
+}
+
+type Voucher implements Node {
+  id: ID!
+  title: String
+  value: Float
+  displayExpireOn: String
+  expireOn: String
+  enabled: Boolean
+  createdAt: String
+}

@@ -1,4 +1,13 @@
-import { UserCredits } from '../service/database';
+// import { UserCreditCards } from '../service/database';
 
-UserCredits.findAll({order: 'created_on'})
-	.then(result => result.map(({dataValues}) => console.log(dataValues)));
+// UserCreditCards.findAll()
+// 	.then(result => result.map(({dataValues}) => console.log(dataValues)));
+
+class Test {
+
+}
+
+let test = new Test();
+test = 
+
+console.log(test instanceof Test);

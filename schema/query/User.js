@@ -97,7 +97,7 @@ export default function (nodeInterface, {
           ...connectionArgs
         },
         resolve: (user, args) =>
-          modelConnection(UserAddresses, {where:{user_id: user.id}}, args)
+          modelConnection(UserAddresses, {where:{user_id: user.id}, order: 'created_on DESC'}, args)
       },
       order: {
         type: GraphQLOrder,

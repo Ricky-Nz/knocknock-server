@@ -2,7 +2,7 @@
 import express from 'express';
 import graphqlHTTP from 'express-graphql';
 import multer  from 'multer';
-import schema from './schema';
+import { AppSchema } from './schema';
 import path from 'path';
 
 const PORT = process.env.PORT||3000;
@@ -17,7 +17,7 @@ express()
 	.options('/graphql', (req, res) => res.json(true))
 	.use('/graphql', storage.single('file'))
   .use('/graphql', graphqlHTTP(req => ({
-  	schema,
+  	schema: AppSchema,
   	pretty: true,
   	graphiql: true,
   	rootValue: { request: req }

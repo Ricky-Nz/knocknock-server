@@ -2,7 +2,8 @@ import { GraphQLObjectType, GraphQLNonNull, GraphQLString } from 'graphql';
 import { nodeDefinitions, fromGlobalId, toGlobalId } from 'graphql-relay';
 import { Users, Admins, Workers, UserAddresses, Items, SubCategories,
   Vouchers, Orders, OrderDetails, OrderTransactions, OrderSlots, DistrictTimeSlots,
-  Factories, PromoCodes, PromoionBanners, UserFeedbacks, OrderStatuses } from '../../service/database';
+  Factories, PromoCodes, PromoionBanners, UserFeedbacks, OrderStatuses,
+  UserCredits, UserCreditCards } from '../../service/database';
 import addressQuery from './Address';
 import adminQuery from './Admin';
 import bannerQuery from './Banner';
@@ -25,10 +26,22 @@ import workerQuery from './Worker';
 import orderStatusQuery from './OrderStatus';
 import creditRecordQuery from './CreditRecord';
 import loginUserQuery from './LoginUser';
+import creditCardQuery from './CreditCard';
 
 class Viewer {}
 class App {}
 class LoginUser {}
+
+export function buildLoginUserObject(userId) {
+  return Users.findById(userId)
+    .then(user => {
+      let loginUser = new LoginUser();
+      for (const key in user.dataValues) {
+        loginUser[key] = user[key];
+      }
+      return loginUser;
+    });
+}
 
 const { nodeInterface, nodeField } = nodeDefinitions(
   (globalId) => {
@@ -39,9 +52,7 @@ const { nodeInterface, nodeField } = nodeDefinitions(
     } else if (type === 'App') {
       return new App();
     } else if (type === 'LoginUser') {
-      let loginUser = new LoginUser();
-      loginUser.id = id;
-      return loginUser;
+      return buildLoginUserObject(id);
     } else if (type === 'User') {
       return Users.findById(id);
     } else if (type === 'Admin') {
@@ -78,6 +89,10 @@ const { nodeInterface, nodeField } = nodeDefinitions(
       return UserFeedbacks.findById(id);
     } else if (type === 'OrderStatus') {
       return OrderStatuses.findById(id);
+    } else if (type === 'CreditRecord') {
+      return UserCredits.findById(id);
+    } else if (type === 'CreditCard') {
+      return UserCreditCards.findById(id);
     } else {
       return null;
     }
@@ -125,6 +140,10 @@ const { nodeInterface, nodeField } = nodeDefinitions(
       return GraphQLFeedback;
     } else if (obj instanceof OrderStatuses) {
       return GraphQLOrderStatus;
+    } else if (obj instanceof UserCredits) {
+      return GraphQLCreditRecord;
+    } else if (obj instanceof UserCreditCards) {
+      return GraphQLCreditCard;
     } else {
   		return null;
   	}
@@ -162,6 +181,12 @@ export const {
   connectionType: GraphQLCreditRecordConnection,
   edgeType: GraphQLCreditRecordEdge
 } = creditRecordQuery(nodeInterface, {GraphQLUserRef});
+
+export const {
+  nodeType: GraphQLCreditCard,
+  connectionType: GraphQLCreditCardConnection,
+  edgeType: GraphQLCreditCardEdge
+} = creditCardQuery(nodeInterface);
 
 export const {
   nodeType: GraphQLOrderStatus,
@@ -314,6 +339,8 @@ export const {
   GraphQLCloth,
   GraphQLCategory,
   GraphQLOrderConnection,
+  GraphQLAddressConnection,
+  GraphQLCreditCardConnection,
   GraphQLCreditRecordConnection,
   GraphQLAssignedVoucherConnection
 });
@@ -321,20 +348,27 @@ export const {
 export const {
   nodeType: GraphQLApp
 } = appQuery(nodeInterface, {
-  GraphQLLoginUser
+  GraphQLLoginUser,
+  buildLoginUserObject
 });
 
-export default new GraphQLObjectType({
+export const appRootQuery = new GraphQLObjectType({
   name: 'Query',
-  description: 'Query root',
+  fields: {
+    app: {
+      type: GraphQLApp,
+      resolve: () => new App()
+    },
+    node: nodeField
+  }
+});
+
+export const backendRootQuery = new GraphQLObjectType({
+  name: 'Query',
   fields: {
     viewer: {
       type: GraphQLViewer,
       resolve: () => new Viewer()
-    },
-    app: {
-      type: GraphQLApp,
-      resolve: () => new App()
     },
     node: nodeField
   }

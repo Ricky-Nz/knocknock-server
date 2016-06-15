@@ -4,7 +4,8 @@
   "repository": "facebook/relay-starter-kit",
   "version": "0.1.0",
   "scripts": {
-    "start": "babel-node ./server.js",
+    "app": "babel-node ./app.js",
+    "backend": "babel-node ./backend.js",
     "update-schema": "babel-node ./build/updateSchema.js"
   },
   "dependencies": {
