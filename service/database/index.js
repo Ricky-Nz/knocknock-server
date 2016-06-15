@@ -21,3 +21,5 @@ export { default as UserCredits } from './UserCredits';
 export { default as UserCreditCards } from './UserCreditCards';
 export { default as UserCreditTransactions } from './UserCreditTransactions';
 export { default as LaundryTypes } from './LaundryTypes';
+export { default as BlockedDates } from './BlockedDates';
+export { default as BlockedTimes } from './BlockedTimes';

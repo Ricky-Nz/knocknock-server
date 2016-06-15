@@ -8,6 +8,11 @@ import { connectionFromPromisedArraySlice, cursorToOffset, fromGlobalId } from '
 import { DBOrder } from '../service/database';
 import Chance from 'chance';
 
+export function indentDate(str, max) {
+  str = str.toString();
+  return str.length < max ? pad("0" + str, max) : str;
+}
+
 export function updateField(fieldName, value) {
   return (value!==undefined)&&{
     [fieldName]: value

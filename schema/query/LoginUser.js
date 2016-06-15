@@ -1,7 +1,8 @@
 import { GraphQLObjectType, GraphQLList, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField, connectionArgs, fromGlobalId, toGlobalId } from 'graphql-relay';
-import { PromotionBanners, Users, Orders, UserCredits, UserAddresses, UserCreditCards, UserVouchers, SubCategories, Items } from '../../service/database';
-import { modelConnection, verifyPassword, verifyToken, generateToken } from '../utils';
+import { PromotionBanners, Users, Orders, UserCredits, UserAddresses, UserCreditCards, UserVouchers,
+  SubCategories, Items, BlockedDates, BlockedTimes } from '../../service/database';
+import { modelConnection, verifyPassword, verifyToken, generateToken, indentDate } from '../utils';
 
   // { id: 3812,
   //   first_name: 'li fan',
@@ -161,6 +162,36 @@ export default function (nodeInterface, {
             user_id: user.id,
             used: false
           }}})
+      },
+      pickupBlockDates: {
+        type: new GraphQLList(GraphQLString),
+        args: {
+          year: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          month: {
+            type: new GraphQLNonNull(GraphQLInt)
+          }
+        },
+        resolve: (user, {year, month}) =>
+          BlockedDates.findAll({where:{$and:{
+            is_pickup: true,
+            block_fullday: true,
+            date: {$like:`${year}-${indentDate(month)}%`}
+          }}, attributes:['date', 'id']}).then(dates => dates.map(date => `${date.date}$${date.id}`))
+      },
+      pickupTimes: {
+        type: new GraphQLList(GraphQLString),
+        args: {
+          dateId: {
+            type: new GraphQLNonNull(GraphQLString)
+          }
+        },
+        resolve: (user, {dateId}) =>
+          BlockedTimes.findAll({where:{$and:{
+            blocked_date_id: dateId
+          }}, attributes:['start_time', 'end_time', 'blocked_fullday']})
+            .then(dates => dates.map(time => `${time.start_time}$${time.end_time}$${time.blocked_fullday}`))
       },
       credits: {
       	type: GraphQLString,
