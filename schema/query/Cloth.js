@@ -1,5 +1,6 @@
 import { GraphQLObjectType, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField, toGlobalId } from 'graphql-relay';
+import { toPrice } from '../utils';
 
    // { id: 18,
    //   sub_category_id: 3,
@@ -90,6 +91,35 @@ export default function (nodeInterface) {
 			imageUrl: {
 				type: GraphQLString,
 				resolve: (obj) => obj.image_url
+			},
+
+			name: {
+				type: new GraphQLNonNull(GraphQLString),
+				resolve: (obj) => obj.name_en
+			},
+			wash: {
+				type: GraphQLString,
+				resolve: (obj) => toPrice(obj.wash_iron_price)
+			},
+			dry: {
+				type: GraphQLString,
+				resolve: (obj) => toPrice(obj.dry_clean_price)
+			},
+			iron: {
+				type: GraphQLString,
+				resolve: (obj) => toPrice(obj.iron_price)
+			},
+			washD: {
+				type: GraphQLString,
+				resolve: (obj) => obj.have_discount_wash_iron_price?toPrice(obj.discount_wash_iron_price):null
+			},
+			dryD: {
+				type: GraphQLString,
+				resolve: (obj) => obj.have_discount_dry_clean_price?toPrice(obj.discount_dry_clean_price):null
+			},
+			ironD: {
+				type: GraphQLString,
+				resolve: (obj) => obj.have_discount_iron_price?toPrice(obj.discount_iron_price):null
 			}
 	  },
 	  interfaces: [nodeInterface]

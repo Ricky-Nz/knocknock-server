@@ -110,6 +110,13 @@ type Cloth implements Node {
   hideFromUser: Boolean
   enabled: Boolean
   imageUrl: String
+  name: String!
+  wash: String
+  dry: String
+  iron: String
+  washD: String
+  dryD: String
+  ironD: String
 }
 
 type ClothConnection {

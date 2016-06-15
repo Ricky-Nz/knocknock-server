@@ -77,6 +77,13 @@ type Cloth implements Node {
   hideFromUser: Boolean
   enabled: Boolean
   imageUrl: String
+  name: String!
+  wash: String
+  dry: String
+  iron: String
+  washD: String
+  dryD: String
+  ironD: String
 }
 
 type CreditCard implements Node {
@@ -128,13 +135,15 @@ type LoginUser implements Node {
   toPayOrders(after: String, first: Int, before: String, last: Int): OrderConnection
   banners: [Banner]
   categories: [Category]
-  clothes(categoryId: String!): [Cloth]
+  clothes(categoryId: String, clothIds: [String]): [Cloth]
   creditRecords(after: String, first: Int, before: String, last: Int): CreditRecordConnection
   creditCards(after: String, first: Int, before: String, last: Int): CreditCardConnection
   vouchers(after: String, first: Int, before: String, last: Int): AssignedVoucherConnection
   addresses(after: String, first: Int, before: String, last: Int): AddressConnection
   toPayCount: Int!
   voucherCount: Int!
+  pickupBlockDates(year: Int!, month: Int!): [String]
+  pickupTimes(dateId: String!): [String]
   credits: String
   firstName: String
   lastName: String

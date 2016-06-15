@@ -104,16 +104,29 @@ export default function (nodeInterface, {
       	type: new GraphQLList(GraphQLCloth),
       	args: {
       		categoryId: {
-      			type: new GraphQLNonNull(GraphQLString)
-      		}
+      			type: GraphQLString
+      		},
+          clothIds: {
+            type: new GraphQLList(GraphQLString)
+          }
       	},
-      	resolve: (user, {categoryId}) => {
-      		const {id: localId} = fromGlobalId(categoryId);
-      		return Items.findAll({where:{$and:{
-		      		disabled: false,
-		      		hide_from_user: false,
-		      		sub_category_id: localId
-		      	}}, order: 'item_order'});
+      	resolve: (user, {categoryId, clothIds}) => {
+          if (categoryId) {
+            const {id: localId} = fromGlobalId(categoryId);
+            return Items.findAll({where:{$and:{
+                disabled: false,
+                hide_from_user: false,
+                sub_category_id: localId
+              }}, order: 'item_order'});
+          } else if (clothIds) {
+            const localIds = clothIds.map(id => {
+              const {id: localId} = fromGlobalId(id);
+              return localId;
+            });
+            return Items.findAll({where:{id:{$in:localIds}}, order: 'item_order'});
+          } else {
+            return null;
+          }
       	}
       },
       creditRecords: {

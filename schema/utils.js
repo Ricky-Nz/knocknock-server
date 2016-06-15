@@ -8,6 +8,10 @@ import { connectionFromPromisedArraySlice, cursorToOffset, fromGlobalId } from '
 import { DBOrder } from '../service/database';
 import Chance from 'chance';
 
+export function toPrice(price) {
+  return price?parseFloat(price).toFixed(2):null;
+}
+
 export function indentDate(str, max) {
   str = str.toString();
   return str.length < max ? pad("0" + str, max) : str;
