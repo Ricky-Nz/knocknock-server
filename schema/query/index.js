@@ -19,7 +19,6 @@ import timeSlotTemplateQuery from './TimeSlotTemplate';
 import transactionQuery from './Transaction';
 import userQuery from './User';
 import viewerQuery from './Viewer';
-import appQuery from './App';
 import voucherQuery from './Voucher';
 import assignedVoucherQuery from './AssignedVoucher';
 import workerQuery from './Worker';
@@ -29,10 +28,9 @@ import loginUserQuery from './LoginUser';
 import creditCardQuery from './CreditCard';
 
 class Viewer {}
-class App {}
 class LoginUser {}
 
-export function buildLoginUserObject(userId) {
+function buildLoginUserObject(userId) {
   return Users.findById(userId)
     .then(user => {
       let loginUser = new LoginUser();
@@ -49,8 +47,6 @@ const { nodeInterface, nodeField } = nodeDefinitions(
 
     if (type === 'Viewer') {
       return new Viewer();
-    } else if (type === 'App') {
-      return new App();
     } else if (type === 'LoginUser') {
       return buildLoginUserObject(id);
     } else if (type === 'User') {
@@ -100,8 +96,6 @@ const { nodeInterface, nodeField } = nodeDefinitions(
   (obj) => {
   	if (obj instanceof Viewer) {
     	return GraphQLViewer;
-    } else if (obj instanceof App) {
-      return GraphQLApp;
     } else if (obj instanceof LoginUser) {
       return GraphQLLoginUser;
     } else if (obj instanceof Users) {
@@ -345,19 +339,12 @@ export const {
   GraphQLAssignedVoucherConnection
 });
 
-export const {
-  nodeType: GraphQLApp
-} = appQuery(nodeInterface, {
-  GraphQLLoginUser,
-  buildLoginUserObject
-});
-
 export const appRootQuery = new GraphQLObjectType({
   name: 'Query',
   fields: {
-    app: {
-      type: GraphQLApp,
-      resolve: () => new App()
+    user: {
+      type: GraphQLLoginUser,
+      resolve: (obj, args, {userId}) => buildLoginUserObject(userId)
     },
     node: nodeField
   }

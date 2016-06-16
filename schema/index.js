@@ -7,6 +7,6 @@ import backendMutation from './backendmutation';
 // takes an `id` argument and returns the User with that ID.
 // Note that the `query` is a GraphQLObjectType, just like User.
 // The `user` field, however, is a userType, which we defined above.
-export const AppSchema = new GraphQLSchema({ query: appRootQuery });
+export const AppSchema = new GraphQLSchema({ query: appRootQuery, mutation: appMutation });
 
 export const BackendSchema = new GraphQLSchema({ query: backendRootQuery, mutation: backendMutation });

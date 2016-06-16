@@ -1,5 +1,6 @@
 schema {
   query: Query
+  mutation: Mutation
 }
 
 type Address implements Node {
@@ -18,12 +19,6 @@ type AddressConnection {
 type AddressEdge {
   node: Address
   cursor: String!
-}
-
-type App implements Node {
-  id: ID!
-  token(username: String!, password: String!): String!
-  loginUser(token: String!): LoginUser
 }
 
 type AssignedVoucher implements Node {
@@ -86,6 +81,19 @@ type Cloth implements Node {
   ironD: String
 }
 
+input CreateAddressInput {
+  postalCode: String!
+  address: String!
+  contact: String!
+  clientMutationId: String!
+}
+
+type CreateAddressPayload {
+  addressEdge: AddressEdge
+  user: LoginUser
+  clientMutationId: String!
+}
+
 type CreditCard implements Node {
   id: ID!
   brand: String
@@ -128,6 +136,17 @@ type CreditRecordEdge {
   cursor: String!
 }
 
+input DeleteAddressInput {
+  id: String!
+  clientMutationId: String!
+}
+
+type DeleteAddressPayload {
+  deletedId: String!
+  user: LoginUser
+  clientMutationId: String!
+}
+
 type LoginUser implements Node {
   id: ID!
   orders(after: String, first: Int, before: String, last: Int): OrderConnection
@@ -151,6 +170,13 @@ type LoginUser implements Node {
   contact: String
   plusAccount: String
   avatarUrl: String
+}
+
+type Mutation {
+  updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
+  createAddress(input: CreateAddressInput!): CreateAddressPayload
+  updateAddress(input: UpdateAddressInput!): UpdateAddressPayload
+  deleteAddress(input: DeleteAddressInput!): DeleteAddressPayload
 }
 
 interface Node {
@@ -220,8 +246,34 @@ type PageInfo {
 }
 
 type Query {
-  app: App
+  user: LoginUser
   node(id: ID!): Node
+}
+
+input UpdateAddressInput {
+  id: String!
+  postalCode: String
+  address: String
+  contact: String
+  clientMutationId: String!
+}
+
+type UpdateAddressPayload {
+  address: Address
+  clientMutationId: String!
+}
+
+input UpdateProfileInput {
+  newPassword: String
+  firstName: String
+  lastName: String
+  plusAccount: String
+  clientMutationId: String!
+}
+
+type UpdateProfilePayload {
+  user: LoginUser
+  clientMutationId: String!
 }
 
 type UserRef {

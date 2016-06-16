@@ -1,4 +1,3 @@
-import jwt from 'jsonwebtoken';
 import path from 'path';
 import fs from 'fs';
 import bcrypt from 'bcrypt';
@@ -101,23 +100,6 @@ export function verifyPassword(password, encryptedPassword) {
         reject(err);
       } else {
         resolve(res);
-      }
-    });
-  });
-}
-
-export function generateToken(userId) {
-  return jwt.sign({ id: userId }, 'knocknockserver-secret-token');
-}
-
-export function verifyToken(token) {
-  console.log(token);
-  return new Promise((resolve, reject) => {
-    jwt.verify(token, 'knocknockserver-secret-token', function(err, payload) {
-      if (err) {
-        reject('invalid token!');
-      } else {
-        resolve(payload.id);
       }
     });
   });

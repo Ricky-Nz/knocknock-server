@@ -2,7 +2,7 @@ import { GraphQLObjectType, GraphQLList, GraphQLInt, GraphQLBoolean, GraphQLNonN
 import { connectionDefinitions, globalIdField, connectionArgs, fromGlobalId, toGlobalId } from 'graphql-relay';
 import { PromotionBanners, Users, Orders, UserCredits, UserAddresses, UserCreditCards, UserVouchers,
   SubCategories, Items, BlockedDates, BlockedTimes } from '../../service/database';
-import { modelConnection, verifyPassword, verifyToken, generateToken, indentDate } from '../utils';
+import { modelConnection, verifyPassword, indentDate } from '../utils';
 
   // { id: 3812,
   //   first_name: 'li fan',
