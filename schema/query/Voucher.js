@@ -30,6 +30,10 @@ export default function (nodeInterface) {
 				type: GraphQLString,
 				resolve: (obj) => obj.expire_on
 			},
+			expired: {
+				type: GraphQLBoolean,
+				resolve: (obj) => obj.expire_on < new Date()
+			},
 			enabled: {
 				type: GraphQLBoolean,
 				resolve: (obj) => !obj.disabled

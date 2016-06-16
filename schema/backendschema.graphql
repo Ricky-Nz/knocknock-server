@@ -914,6 +914,7 @@ type Voucher implements Node {
   value: Float
   displayExpireOn: String
   expireOn: String
+  expired: Boolean
   enabled: Boolean
   createdAt: String
 }
