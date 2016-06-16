@@ -1,6 +1,6 @@
 import { GraphQLObjectType, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField, connectionArgs, toGlobalId } from 'graphql-relay';
-import { Users, OrderStatuses, OrderDetails } from '../../service/database';
+import { Users, OrderStatuses, OrderDetails, PromoCodes, Vouchers, UserVouchers } from '../../service/database';
 import { modelConnection, toDisplayDate } from '../utils';
 
    // { id: 826,
@@ -65,7 +65,12 @@ import { modelConnection, toDisplayDate } from '../utils';
    //   pickup_address_name: null,
    //   drop_off_address_name: null },
 
-export default function (nodeInterface, {GraphQLOrderItemConnection, GraphQLOrderStatus}) {
+export default function (nodeInterface, {
+  GraphQLOrderItemConnection,
+  GraphQLOrderStatus,
+  GraphQLPromoCode,
+  GraphQLVoucher
+}) {
   const nodeType = new GraphQLObjectType({
     name: 'Order',
     fields: {
@@ -82,6 +87,22 @@ export default function (nodeInterface, {GraphQLOrderItemConnection, GraphQLOrde
         type: GraphQLBoolean,
         resolve: (obj) => obj.express_order
       },
+      paid: {
+        type: GraphQLBoolean,
+        resolve: (obj) => obj.paid
+      },
+      paymentMode: {
+        type: GraphQLString,
+        resolve: (obj) => obj.payment_mode
+      },
+      promoCode: {
+        type: GraphQLPromoCode,
+        resolve: (obj) => obj.promo_code_id?PromoCodes.findById(obj.promo_code_id):null
+      },
+      voucher: {
+        type: GraphQLVoucher,
+        resolve: (obj) => obj.voucher_id?Vouchers.findById(obj.voucher_id):null
+      },
       note: {
         type: GraphQLString,
         resolve: (obj) => obj.description
@@ -96,11 +117,31 @@ export default function (nodeInterface, {GraphQLOrderItemConnection, GraphQLOrde
       },
       displayPickupDate: {
         type: GraphQLString,
-        resolve: (obj) => toDisplayDate(obj.pickup_date)
+        resolve: (obj) => `${toDisplayDate(obj.pickup_date)} ${obj.pickup_time}`
+      },
+      displayDropOffDate: {
+        type: GraphQLString,
+        resolve: (obj) => `${toDisplayDate(obj.drop_off_date)} ${obj.drop_off_time}`
       },
       pickupTime: {
         type: GraphQLString,
         resolve: (obj) => obj.pickup_time
+      },
+      pickupContact: {
+        type: GraphQLString,
+        resolve: (obj) => obj.pickup_contact_no
+      },
+      dropOffContact: {
+        type: GraphQLString,
+        resolve: (obj) => obj.drop_off_contact_no
+      },
+      displayPickupAddress: {
+        type: GraphQLString,
+        resolve: (obj) => `${obj.pickup_address||''}, ${obj.pickup_unit_number||''} ${obj.pickup_postal_code||''}`
+      },
+      displayDropOffAddress: {
+        type: GraphQLString,
+        resolve: (obj) => `${obj.drop_off_address||''}, ${obj.drop_off_unit_number||''} ${obj.drop_off_postal_code||''}`
       },
       pickupAddress: {
         type: GraphQLString,

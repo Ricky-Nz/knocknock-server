@@ -170,6 +170,7 @@ type LoginUser implements Node {
   contact: String
   plusAccount: String
   avatarUrl: String
+  order(id: String!): Order
 }
 
 type Mutation {
@@ -188,11 +189,20 @@ type Order implements Node {
   displayId: Int
   userId: String
   express: Boolean
+  paid: Boolean
+  paymentMode: String
+  promoCode: PromoCode
+  voucher: Voucher
   note: String
   status: OrderStatus
   pickupDate: String
   displayPickupDate: String
+  displayDropOffDate: String
   pickupTime: String
+  pickupContact: String
+  dropOffContact: String
+  displayPickupAddress: String
+  displayDropOffAddress: String
   pickupAddress: String
   pickupWorkerId: String
   factoryId: String
@@ -243,6 +253,23 @@ type PageInfo {
   hasPreviousPage: Boolean!
   startCursor: String
   endCursor: String
+}
+
+type PromoCode implements Node {
+  id: ID!
+  enabled: Boolean
+  name: String
+  description: String
+  start: String
+  end: String
+  perUserLimit: Int
+  limit: Int
+  promoType: String
+  flatDiscount: Float
+  discountPercent: Float
+  multipleUse: Boolean
+  mobileOnly: Boolean
+  firstTimeUser: Boolean
 }
 
 type Query {

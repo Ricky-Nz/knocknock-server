@@ -34,6 +34,7 @@ var jsonParser = bodyParser.json()
 
 // create application/x-www-form-urlencoded parser
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
+//{expires: new Date(Date.now() + 900000)}
 
 express()
   .use(cookieParser())
@@ -59,6 +60,7 @@ express()
   })
 	.use('/graphql', storage.single('file'))
   .use('/graphql', (req, res, next) => {
+    console.log(req.cookies.token);
     verifyToken(req.cookies.token)
       .then(userId => {
         req.userId = userId;

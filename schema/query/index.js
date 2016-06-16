@@ -266,7 +266,9 @@ export const {
   edgeType: GraphQLOrderEdge
 } = orderQuery(nodeInterface, {
   GraphQLOrderItemConnection,
-  GraphQLOrderStatus
+  GraphQLVoucher,
+  GraphQLOrderStatus,
+  GraphQLPromoCode
 });
 
 export const {
@@ -331,6 +333,7 @@ export const {
 } = loginUserQuery(nodeInterface, {
   GraphQLBanner,
   GraphQLCloth,
+  GraphQLOrder,
   GraphQLCategory,
   GraphQLOrderConnection,
   GraphQLAddressConnection,

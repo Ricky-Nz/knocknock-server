@@ -47,6 +47,7 @@ import { modelConnection, verifyPassword, indentDate } from '../utils';
 export default function (nodeInterface, {
 	GraphQLBanner,
 	GraphQLCloth,
+  GraphQLOrder,
 	GraphQLCategory,
   GraphQLAddressConnection,
 	GraphQLOrderConnection,
@@ -233,6 +234,21 @@ export default function (nodeInterface, {
       avatarUrl: {
         type: GraphQLString,
         resolve: (user) => user.profile_image_url_small
+      },
+      order: {
+        type: GraphQLOrder,
+        args: {
+          id: {
+            type: new GraphQLNonNull(GraphQLString)
+          }
+        },
+        resolve: (user, {id}) => {
+          const {id: localId} = fromGlobalId(id);
+          return Orders.findOne({where:{$and:{
+              user_id: user.id,
+              id: localId
+            }}});
+        }
       }
 		},
 		interfaces: [nodeInterface]
