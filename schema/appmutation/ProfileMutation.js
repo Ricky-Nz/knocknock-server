@@ -67,7 +67,7 @@ const updateProfile = mutationWithClientMutationId({
 			resolve: ({localId}) => Users.findById(localId)
 		}
 	},
-	mutateAndGetPayload: ({token, newPassword, firstName, lastName, plusAccount}, {userId}, {rootValue}) =>
+	mutateAndGetPayload: ({newPassword, firstName, lastName, plusAccount}, {userId}, {rootValue}) =>
 		processFileUpload('knocknock-avatar', rootValue.request.file)
 			.then(upload => {
 				return Users.update({

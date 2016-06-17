@@ -1,7 +1,7 @@
 import request from 'request';
 
 export function getAddressByPostalCode(postalCode) {
-	return new Promise(function (resolve, reject) {
+	return new Promise(function (resolve) {
 		request({
 			uri: 'http://maps.apps-bus.com/api/Places/SearchPlace',
 			qs: {
@@ -10,8 +10,8 @@ export function getAddressByPostalCode(postalCode) {
 			},
 			json: true
 		}, (err, res, body) => {
-			if (!body) {
-				return reject('place not found');
+			if (!body||!body.Data[0]) {
+				return resolve(null);
 			}
 
 			const x = body.Data[0].XCoordinate;
@@ -27,7 +27,7 @@ export function getAddressByPostalCode(postalCode) {
 				json: true
 			}, (err, res, body) => {
 				if (!body || !body.GeocodeInfo) {
-					return reject('place not found');
+					return resolve(null);
 				}
 
 				for(const index in body.GeocodeInfo) {
@@ -37,7 +37,7 @@ export function getAddressByPostalCode(postalCode) {
 					}
 				}
 
-				return reject('place not found');
+				return resolve(null);
 			});
 		});
 	});

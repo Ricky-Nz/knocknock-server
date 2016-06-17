@@ -3,6 +3,7 @@ import { connectionDefinitions, globalIdField, connectionArgs, fromGlobalId, toG
 import { PromotionBanners, Users, Orders, UserCredits, UserAddresses, UserCreditCards, UserVouchers,
   SubCategories, Items, BlockedDates, BlockedTimes } from '../../service/database';
 import { modelConnection, verifyPassword, indentDate } from '../utils';
+import { getAddressByPostalCode } from '../../service/location';
 
   // { id: 3812,
   //   first_name: 'li fan',
@@ -249,6 +250,15 @@ export default function (nodeInterface, {
               id: localId
             }}});
         }
+      },
+      address: {
+        type: GraphQLString,
+        args: {
+          postalCode: {
+            type: GraphQLString
+          }
+        },
+        resolve: (obj, {postalCode}) => postalCode?getAddressByPostalCode(postalCode):null
       }
 		},
 		interfaces: [nodeInterface]

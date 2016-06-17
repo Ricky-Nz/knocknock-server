@@ -171,6 +171,7 @@ type LoginUser implements Node {
   plusAccount: String
   avatarUrl: String
   order(id: String!): Order
+  address(postalCode: String): String
 }
 
 type Mutation {

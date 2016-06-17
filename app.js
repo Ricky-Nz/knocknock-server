@@ -3,7 +3,6 @@ import express from 'express';
 import graphqlHTTP from 'express-graphql';
 import multer  from 'multer';
 import bodyParser from 'body-parser';
-import cookieParser from 'cookie-parser';
 import { AppSchema } from './schema';
 import path from 'path';
 import jwt from 'jsonwebtoken';
@@ -37,31 +36,20 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 //{expires: new Date(Date.now() + 900000)}
 
 express()
-  .use(cookieParser())
-	.use((req, res, next) => {
-	  res.header("Access-Control-Allow-Origin", "*");
-	  res.header("Access-Control-Allow-Headers", "Authorization, Origin, X-Requested-With, Content-Type, Accept");
-	  next();
-	})
-	.options('*', (req, res) => res.json(true))
   .post('/login', urlencodedParser, jsonParser, ({body}, res) => {
     Users.findOne({where:{contact_no:body.username}})
     .then(user => {
       if (!user) return res.json({error: 'username or password not corrrect1'});
 
       return verifyPassword(body.password, user.encrypted_password)
-        .then(() => {
-          res.cookie('token', generateToken(user.id));
-          res.json({});
-        })
+        .then(() => res.json({token: generateToken(user.id)}))
         .catch(() => res.json({error: 'username or password not corrrect2'}))
     })
     .catch((error) => res.json({error: error}))
   })
 	.use('/graphql', storage.single('file'))
   .use('/graphql', (req, res, next) => {
-    console.log(req.cookies.token);
-    verifyToken(req.cookies.token)
+    verifyToken(req.headers.authorization)
       .then(userId => {
         req.userId = userId;
         next();

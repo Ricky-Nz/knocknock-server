@@ -2,7 +2,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { AppSchema, BackendSchema } from '../server/schema';
+import { AppSchema, BackendSchema } from './schema';
 import { graphql }  from 'graphql';
 import { introspectionQuery, printSchema } from 'graphql/utilities';
 
