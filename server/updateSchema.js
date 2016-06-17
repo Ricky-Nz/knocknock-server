@@ -2,7 +2,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { AppSchema, BackendSchema } from '../schema';
+import { AppSchema, BackendSchema } from '../server/schema';
 import { graphql }  from 'graphql';
 import { introspectionQuery, printSchema } from 'graphql/utilities';
 
@@ -16,7 +16,7 @@ import { introspectionQuery, printSchema } from 'graphql/utilities';
     );
   } else {
     fs.writeFileSync(
-      path.join(__dirname, '../schema/appschema.json'),
+      path.join(__dirname, 'appschema.json'),
       JSON.stringify(result, null, 2)
     );
   }
@@ -24,7 +24,7 @@ import { introspectionQuery, printSchema } from 'graphql/utilities';
 
 // Save user readable type system shorthand of schema
 fs.writeFileSync(
-  path.join(__dirname, '../schema/appschema.graphql'),
+  path.join(__dirname, 'appschema.graphql'),
   printSchema(AppSchema)
 );
 
@@ -38,7 +38,7 @@ fs.writeFileSync(
     );
   } else {
     fs.writeFileSync(
-      path.join(__dirname, '../schema/backendschema.json'),
+      path.join(__dirname, 'backendschema.json'),
       JSON.stringify(result, null, 2)
     );
   }
@@ -46,6 +46,6 @@ fs.writeFileSync(
 
 // Save user readable type system shorthand of schema
 fs.writeFileSync(
-  path.join(__dirname, '../schema/backendschema.graphql'),
+  path.join(__dirname, 'backendschema.graphql'),
   printSchema(BackendSchema)
 );
