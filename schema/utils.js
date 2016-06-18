@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import moment from 'moment';
 import { uploadFile } from '../service/datastorage';
 import { connectionFromPromisedArraySlice, cursorToOffset, fromGlobalId } from 'graphql-relay';
-import { DBOrder } from '../service/database';
+import { DBOrder, Items, Orders } from '../service/database';
 import Chance from 'chance';
 
 export function toPrice(price) {
@@ -124,3 +124,59 @@ export function processFileUpload(bucket, file) {
 	});
 }
 
+export function prepareOrderItems(localOrderId, orderItems) {
+  const clothIds = orderItems.map(item => {
+    const {id} = fromGlobalId(item.productId);
+    return id;
+  });
+
+  return Items.findAll({where:{id:{$in:clothIds}}})
+    .then(clothes => {
+      const items =  orderItems.map(({productId, quantity, washType}) => {
+        const {id: localClothId} = fromGlobalId(productId);
+        const cloth = clothes.find(cloth => cloth.id == localClothId);
+
+        let itemPrice;
+        switch(washType) {
+          case 'wash':
+            if (cloth.have_discount_wash_iron_price) {
+              itemPrice = cloth.discount_wash_iron_price;
+            } else {
+              itemPrice = cloth.wash_iron_price;
+            }
+            break;
+          case 'dry':
+            if (cloth.have_discount_dry_clean_price) {
+              itemPrice = cloth.discount_dry_clean_price;
+            } else {
+              itemPrice = cloth.dry_clean_price;
+            }
+            break;
+          case 'iron':
+            if (cloth.have_discount_iron_price) {
+              itemPrice = cloth.discount_iron_price;
+            } else {
+              itemPrice = cloth.iron_price;
+            }
+            break;
+        }
+
+        return {
+          order_id: localOrderId,
+          item_id: localClothId,
+          quantity,
+          laundry_type: washType,
+          price: itemPrice
+        };
+      });
+
+      let totalPrice = 0;
+      for (const index in items) {
+        const item = items[index];
+        totalPrice += (parseInt(item.quantity) * parseFloat(item.price));
+      }
+
+      return Orders.update({total_price: totalPrice}, {where:{id:localOrderId}})
+        .then(() => items);
+    });
+}

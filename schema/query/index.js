@@ -1,4 +1,4 @@
-import { GraphQLObjectType, GraphQLNonNull, GraphQLString } from 'graphql';
+import { GraphQLObjectType, GraphQLNonNull, GraphQLInt, GraphQLString, GraphQLInputObjectType } from 'graphql';
 import { nodeDefinitions, fromGlobalId, toGlobalId } from 'graphql-relay';
 import { Users, Admins, Workers, UserAddresses, Items, SubCategories,
   Vouchers, Orders, OrderDetails, OrderTransactions, OrderSlots, DistrictTimeSlots,
@@ -29,6 +29,21 @@ import creditCardQuery from './CreditCard';
 
 class Viewer {}
 class LoginUser {}
+
+export const GraphQLOrderItemInput = new GraphQLInputObjectType({
+  name: 'OrderItemInput',
+  fields: {
+    productId: {
+      type: new GraphQLNonNull(GraphQLString)
+    },
+    quantity: {
+      type: new GraphQLNonNull(GraphQLInt)
+    },
+    washType: {
+      type: new GraphQLNonNull(GraphQLString)
+    }
+  }
+});
 
 function buildLoginUserObject(userId) {
   return Users.findById(userId)
@@ -335,6 +350,7 @@ export const {
   GraphQLCloth,
   GraphQLOrder,
   GraphQLCategory,
+  GraphQLTimeSlot,
   GraphQLOrderConnection,
   GraphQLAddressConnection,
   GraphQLCreditCardConnection,

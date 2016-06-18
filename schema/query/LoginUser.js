@@ -1,8 +1,8 @@
 import { GraphQLObjectType, GraphQLList, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField, connectionArgs, fromGlobalId, toGlobalId } from 'graphql-relay';
 import { PromotionBanners, Users, Orders, UserCredits, UserAddresses, UserCreditCards, UserVouchers,
-  SubCategories, Items, BlockedDates, BlockedTimes } from '../../service/database';
-import { modelConnection, verifyPassword, indentDate } from '../utils';
+  SubCategories, Items, BlockedDates, BlockedTimes, OrderSlots } from '../../service/database';
+import { modelConnection, verifyPassword, indentDate, formatTime } from '../utils';
 import { getAddressByPostalCode } from '../../service/location';
 
   // { id: 3812,
@@ -50,6 +50,7 @@ export default function (nodeInterface, {
 	GraphQLCloth,
   GraphQLOrder,
 	GraphQLCategory,
+  GraphQLTimeSlot,
   GraphQLAddressConnection,
 	GraphQLOrderConnection,
 	GraphQLCreditCardConnection,
@@ -105,6 +106,9 @@ export default function (nodeInterface, {
       clothes: {
       	type: new GraphQLList(GraphQLCloth),
       	args: {
+          search: {
+            type: GraphQLString
+          },
       		categoryId: {
       			type: GraphQLString
       		},
@@ -112,8 +116,13 @@ export default function (nodeInterface, {
             type: new GraphQLList(GraphQLString)
           }
       	},
-      	resolve: (user, {categoryId, clothIds}) => {
-          if (categoryId) {
+      	resolve: (user, {search, categoryId, clothIds}) => {
+          if (search) {
+            return Items.findAll({where:{$or:{
+              name_en: {$like: `%${search}%`},
+              name_ch: {$like: `%${search}%`}
+            }}, order: 'item_order', limit: 10});
+          } else if (categoryId) {
             const {id: localId} = fromGlobalId(categoryId);
             return Items.findAll({where:{$and:{
                 disabled: false,
@@ -259,6 +268,18 @@ export default function (nodeInterface, {
           }
         },
         resolve: (obj, {postalCode}) => postalCode?getAddressByPostalCode(postalCode):null
+      },
+      timeSlots: {
+        type: new GraphQLList(GraphQLTimeSlot),
+        args: {
+          date: {
+            type: new GraphQLNonNull(GraphQLString)
+          }
+        },
+        resolve: (obj, {date}) => {
+          date = formatTime(date, 8);
+          return OrderSlots.findAll({where:{date}});
+        }
       }
 		},
 		interfaces: [nodeInterface]

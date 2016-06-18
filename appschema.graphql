@@ -48,6 +48,17 @@ type Banner implements Node {
   imageUrl: String
 }
 
+input CancelOrderInput {
+  id: String!
+  clientMutationId: String!
+}
+
+type CancelOrderPayload {
+  deletedId: String!
+  user: LoginUser
+  clientMutationId: String!
+}
+
 type Category implements Node {
   id: ID!
   nameCn: String!
@@ -90,6 +101,24 @@ input CreateAddressInput {
 
 type CreateAddressPayload {
   addressEdge: AddressEdge
+  user: LoginUser
+  clientMutationId: String!
+}
+
+input CreateOrderInput {
+  express: Boolean
+  note: String
+  pickupDate: String!
+  pickupTime: String!
+  pickupAddress: String!
+  pickupPostalCode: String!
+  pickupContactNo: String!
+  orderItems: [OrderItemInput]
+  clientMutationId: String!
+}
+
+type CreateOrderPayload {
+  orderEdge: OrderEdge
   user: LoginUser
   clientMutationId: String!
 }
@@ -154,7 +183,7 @@ type LoginUser implements Node {
   toPayOrders(after: String, first: Int, before: String, last: Int): OrderConnection
   banners: [Banner]
   categories: [Category]
-  clothes(categoryId: String, clothIds: [String]): [Cloth]
+  clothes(search: String, categoryId: String, clothIds: [String]): [Cloth]
   creditRecords(after: String, first: Int, before: String, last: Int): CreditRecordConnection
   creditCards(after: String, first: Int, before: String, last: Int): CreditCardConnection
   vouchers(after: String, first: Int, before: String, last: Int): AssignedVoucherConnection
@@ -172,6 +201,7 @@ type LoginUser implements Node {
   avatarUrl: String
   order(id: String!): Order
   address(postalCode: String): String
+  timeSlots(date: String!): [TimeSlot]
 }
 
 type Mutation {
@@ -179,6 +209,8 @@ type Mutation {
   createAddress(input: CreateAddressInput!): CreateAddressPayload
   updateAddress(input: UpdateAddressInput!): UpdateAddressPayload
   deleteAddress(input: DeleteAddressInput!): DeleteAddressPayload
+  cancelOrder(input: CancelOrderInput!): CancelOrderPayload
+  createOrder(input: CreateOrderInput!): CreateOrderPayload
 }
 
 interface Node {
@@ -243,6 +275,12 @@ type OrderItemEdge {
   cursor: String!
 }
 
+input OrderItemInput {
+  productId: String!
+  quantity: Int!
+  washType: String!
+}
+
 type OrderStatus implements Node {
   id: ID!
   status: String
@@ -276,6 +314,14 @@ type PromoCode implements Node {
 type Query {
   user: LoginUser
   node(id: ID!): Node
+}
+
+type TimeSlot implements Node {
+  id: ID!
+  date: String
+  time: String
+  quantity: Int
+  enabled: Boolean
 }
 
 input UpdateAddressInput {

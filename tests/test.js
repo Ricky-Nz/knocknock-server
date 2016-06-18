@@ -1,4 +1,4 @@
-import { BlockedTimes } from '../service/database';
+import { OrderStatuses } from '../service/database';
 
-BlockedTimes.findAll()
+OrderStatuses.findAll()
 	.then(result => result.map(({dataValues}) => console.log(dataValues)));

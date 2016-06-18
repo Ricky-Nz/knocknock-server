@@ -1,8 +1,8 @@
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLBoolean, GraphQLFloat, GraphQLInt, GraphQLList, GraphQLString } from 'graphql';
 import { mutationWithClientMutationId, fromGlobalId, toGlobalId, offsetToCursor } from 'graphql-relay';
-import { GraphQLOrder, GraphQLOrderEdge, GraphQLUser } from '../query';
+import { GraphQLOrder, GraphQLOrderEdge, GraphQLUser, GraphQLOrderItemInput } from '../query';
 import { Users, Orders, OrderDetails, Items } from '../../service/database';
-import { updateField } from '../utils';
+import { updateField, prepareOrderItems } from '../utils';
 
 // id      
 // pickup_worker_id      
@@ -72,78 +72,6 @@ import { updateField } from '../utils';
 // quantity			
 // laundry_type			
 // price
-
-const GraphQLOrderItemInput = new GraphQLInputObjectType({
-	name: 'OrderItemInput',
-	fields: {
-		productId: {
-			type: new GraphQLNonNull(GraphQLString)
-		},
-		quantity: {
-			type: new GraphQLNonNull(GraphQLInt)
-		},
-		washType: {
-			type: new GraphQLNonNull(GraphQLString)
-		}
-	}
-});
-
-function prepareOrderItems(localOrderId, orderItems) {
-	const clothIds = orderItems.map(item => {
-		const {id} = fromGlobalId(item.productId);
-		return id;
-	});
-
-	return Items.findAll({where:{id:{$in:clothIds}}})
-		.then(clothes => {
-			const items =  orderItems.map(({productId, quantity, washType}) => {
-				const {id: localClothId} = fromGlobalId(productId);
-				const cloth = clothes.find(cloth => cloth.id == localClothId);
-
-				let itemPrice;
-				switch(washType) {
-					case 'wash':
-						if (cloth.have_discount_wash_iron_price) {
-							itemPrice = cloth.discount_wash_iron_price;
-						} else {
-							itemPrice = cloth.wash_iron_price;
-						}
-						break;
-					case 'dry':
-						if (cloth.have_discount_dry_clean_price) {
-							itemPrice = cloth.discount_dry_clean_price;
-						} else {
-							itemPrice = cloth.dry_clean_price;
-						}
-						break;
-					case 'iron':
-						if (cloth.have_discount_iron_price) {
-							itemPrice = cloth.discount_iron_price;
-						} else {
-							itemPrice = cloth.iron_price;
-						}
-						break;
-				}
-
-				return {
-					order_id: localOrderId,
-					item_id: localClothId,
-					quantity,
-					laundry_type: washType,
-					price: itemPrice
-				};
-			});
-
-			let totalPrice = 0;
-			for (const index in items) {
-				const item = items[index];
-				totalPrice += (parseInt(item.quantity) * parseFloat(item.price));
-			}
-
-			return Orders.update({total_price: totalPrice}, {where:{id:localOrderId}})
-				.then(() => items);
-		});
-}
 
 const createOrder = mutationWithClientMutationId({
 	name: 'CreateOrder',
