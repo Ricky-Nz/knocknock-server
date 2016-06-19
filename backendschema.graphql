@@ -8,6 +8,7 @@ type Address implements Node {
   userId: String
   postalCode: String
   address: String
+  unitNumber: String
   contact: String
 }
 

@@ -30,6 +30,10 @@ export default function (nodeInterface) {
 				type: GraphQLString,
 				resolve: (obj) => obj.address
 			},
+			unitNumber: {
+				type: GraphQLString,
+				resolve: (obj) => obj.unit_number
+			},
 			contact: {
 				type: GraphQLString,
 				resolve: (obj) => obj.contact_no

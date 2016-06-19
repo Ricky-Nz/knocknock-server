@@ -3,6 +3,7 @@ import express from 'express';
 import graphqlHTTP from 'express-graphql';
 import multer  from 'multer';
 import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 import { AppSchema } from './schema';
 import path from 'path';
 import jwt from 'jsonwebtoken';
@@ -37,25 +38,41 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 //{expires: new Date(Date.now() + 900000)}
 
 express()
-  .post('/api/stripe/charge', urlencodedParser, jsonParser, (req, res) => {
-    payByStripe(req.body.token)
-      .then(customer => res.json(customer))
-      .catch(error => res.status(400).send(error));
-  })
+  .use(cookieParser())
   .post('/api/login', urlencodedParser, jsonParser, ({body}, res) => {
     Users.findOne({where:{contact_no:body.username}})
     .then(user => {
-      if (!user) return res.json({error: 'username or password not corrrect1'});
+      if (!user) return res.status(400).send('username or password not correct');
 
       return verifyPassword(body.password, user.encrypted_password)
-        .then(() => res.json({token: generateToken(user.id)}))
-        .catch(() => res.json({error: 'username or password not corrrect2'}))
+        .then(() => {
+          res.cookie('token', generateToken(user.id));
+          res.json({
+            needSetup: !user.first_name || !user.last_name
+          });
+        })
+        .catch(error => res.status(400).send(error))
     })
-    .catch((error) => res.json({error: error}))
+    .catch(error => res.status(400).send(error))
+  })
+  .post('/api/register', urlencodedParser, jsonParser, ({body}, res) => {
+    Users.findOne({where:{contact_no:body.username}})
+    .then(user => {
+      if (user) return res.status(400).send('phone number taken');
+
+      return Users.create({
+        contact_no: body.username,
+        encrypted_password: body.password
+      }).then(user => {
+        res.cookie('token', generateToken(user.id));
+        res.sendStatus(200);
+      });
+    })
+    .catch(error => res.status(400).send(error))
   })
 	.use('/graphql', storage.single('file'))
   .use('/graphql', (req, res, next) => {
-    verifyToken(req.headers.authorization)
+    verifyToken(req.cookies.token)
       .then(userId => {
         req.userId = userId;
         next();
@@ -75,5 +92,5 @@ express()
       stack: error.stack
     })
   })))
-  .use(express.static(path.join(__dirname, 'public')))
+  .use(express.static(path.join(__dirname, 'apppublic')))
   .listen(PORT, () => console.log(`GraphQL server running on http://localhost:${PORT}`));

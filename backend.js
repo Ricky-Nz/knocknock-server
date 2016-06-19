@@ -22,5 +22,5 @@ express()
   	graphiql: true,
   	rootValue: { request: req }
   })))
-  .use(express.static(path.join(__dirname, 'public')))
+  .use(express.static(path.join(__dirname, 'backendpublic')))
   .listen(PORT, () => console.log(`GraphQL server running on http://localhost:${PORT}`));

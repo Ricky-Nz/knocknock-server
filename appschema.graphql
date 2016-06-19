@@ -28,6 +28,7 @@ type Address implements Node {
   userId: String
   postalCode: String
   address: String
+  unitNumber: String
   contact: String
 }
 
@@ -115,6 +116,7 @@ type Cloth implements Node {
 input CreateAddressInput {
   postalCode: String!
   address: String!
+  unitNumber: String!
   contact: String!
   clientMutationId: String!
 }
@@ -385,6 +387,7 @@ input UpdateAddressInput {
   id: String!
   postalCode: String
   address: String
+  unitNumber: String
   contact: String
   clientMutationId: String!
 }
@@ -398,6 +401,7 @@ input UpdateProfileInput {
   newPassword: String
   firstName: String
   lastName: String
+  password: String
   plusAccount: String
   clientMutationId: String!
 }

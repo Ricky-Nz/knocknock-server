@@ -57,6 +57,9 @@ const updateProfile = mutationWithClientMutationId({
     lastName: {
       type: GraphQLString
     },
+    password: {
+    	type: GraphQLString
+    },
     plusAccount: {
       type: GraphQLString
     }
@@ -67,13 +70,14 @@ const updateProfile = mutationWithClientMutationId({
 			resolve: ({localId}) => Users.findById(localId)
 		}
 	},
-	mutateAndGetPayload: ({newPassword, firstName, lastName, plusAccount}, {userId}, {rootValue}) =>
+	mutateAndGetPayload: ({newPassword, firstName, lastName, password, plusAccount}, {userId}, {rootValue}) =>
 		processFileUpload('knocknock-avatar', rootValue.request.file)
 			.then(upload => {
 				return Users.update({
 					...updateField('encrypted_password', newPassword),
 					...updateField('first_name', firstName),
 					...updateField('last_name', lastName),
+					...updateField('encrypted_password', password),
 					...updateField('plus_account', plusAccount),
 					...upload&&{
 						profile_image_url_small: upload.imageUrl

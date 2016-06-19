@@ -25,6 +25,9 @@ const createAddress = mutationWithClientMutationId({
 		address: {
 			type: new GraphQLNonNull(GraphQLString)
 		},
+		unitNumber: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
 		contact: {
 			type: new GraphQLNonNull(GraphQLString)
 		}
@@ -42,11 +45,12 @@ const createAddress = mutationWithClientMutationId({
 			resolve: (address) => Users.findById(address.user_id)
 		}
 	},
-	mutateAndGetPayload: ({postalCode, address, contact}, {userId}) =>
+	mutateAndGetPayload: ({postalCode, address, unitNumber, contact}, {userId}) =>
 		UserAddresses.create({
 			user_id: userId,
 			postal_code: postalCode,
 			address: address,
+			unit_number: unitNumber,
 			name: address,
 			contact_no: contact
 		})
@@ -64,6 +68,9 @@ const updateAddress = mutationWithClientMutationId({
 		address: {
 			type: GraphQLString
 		},
+		unitNumber: {
+			type: GraphQLString
+		},
 		contact: {
 			type: GraphQLString
 		}
@@ -74,11 +81,12 @@ const updateAddress = mutationWithClientMutationId({
 			resolve: ({localId}) => UserAddresses.findById(localId)
 		}
 	},
-	mutateAndGetPayload: ({id, postalCode, address, contact}, {userId}) => {
+	mutateAndGetPayload: ({id, postalCode, address, unitNumber, contact}, {userId}) => {
 		const {id: localId } = fromGlobalId(id);
 		return UserAddresses.update({
 				...updateField('postal_code', postalCode),
 				...updateField('address', address),
+				...updateField('unit_number', unitNumber),
 				...updateField('contact_no', contact)
 			}, {where:{$and:{
 				id: localId,
