@@ -4,7 +4,6 @@ import { GraphQLLoginUser, GraphQLAddress, GraphQLAddressEdge } from '../query';
 import { UserAddresses, Users } from '../../service/database';
 import { updateField } from '../utils';
 
-// id			
 // user_id			
 // name			
 // address			

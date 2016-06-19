@@ -20,7 +20,8 @@
 .DS_Store
 
 config.js
-
+backendschema.json
+appschema.json
 
 ################################################
 # Local Configuration
@@ -46,7 +47,6 @@ gcloud-cert.json
 uploads/
 schema/schema.graphql
 schema/schema.json
-*.json
 
 
 ################################################

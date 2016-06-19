@@ -1,0 +1,8 @@
+{
+  "apps" : [{
+    "name"        : "knockknock-backend-server",
+    "script"      : "./backend.js",
+    "exec_interpreter" : "babel-node",
+    "exec_mode"        : "fork"
+  }]
+}
