@@ -33,7 +33,7 @@ export default function (nodeInterface) {
 			},
 			asteriskNumber: {
 				type: GraphQLString,
-				resolve: (obj) => `${obj.first6}xxxxxx${obj.last4}`
+				resolve: (obj) => `xxxx xxxx xxxx ${obj.last4.slice(0, 4)}`
 			},
 			expireOn: {
 				type: GraphQLString,

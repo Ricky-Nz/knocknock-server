@@ -3,6 +3,26 @@ schema {
   mutation: Mutation
 }
 
+input AddCreditCardInput {
+  tokenId: String!
+  stripeCardId: String!
+  brand: String!
+  cvcCheck: String!
+  last4: String!
+  name: String!
+  country: String
+  expMonth: String
+  expYear: String
+  funding: String
+  clientMutationId: String!
+}
+
+type AddCreditCardPayload {
+  creditCardEdge: CreditCardEdge
+  user: LoginUser
+  clientMutationId: String!
+}
+
 type Address implements Node {
   id: ID!
   userId: String
@@ -211,6 +231,10 @@ type Mutation {
   deleteAddress(input: DeleteAddressInput!): DeleteAddressPayload
   cancelOrder(input: CancelOrderInput!): CancelOrderPayload
   createOrder(input: CreateOrderInput!): CreateOrderPayload
+  topUpByStripeCardId(input: TopUpByStripeCardIdInput!): TopUpByStripeCardIdPayload
+  topUpByStripeToken(input: TopUpByStripeTokenInput!): TopUpByStripeTokenPayload
+  addCreditCard(input: AddCreditCardInput!): AddCreditCardPayload
+  removeCreditCard(input: RemoveCreditCardInput!): RemoveCreditCardPayload
 }
 
 interface Node {
@@ -316,12 +340,45 @@ type Query {
   node(id: ID!): Node
 }
 
+input RemoveCreditCardInput {
+  id: String!
+  clientMutationId: String!
+}
+
+type RemoveCreditCardPayload {
+  deletedId: String!
+  user: LoginUser
+  clientMutationId: String!
+}
+
 type TimeSlot implements Node {
   id: ID!
   date: String
   time: String
   quantity: Int
   enabled: Boolean
+}
+
+input TopUpByStripeCardIdInput {
+  amount: Int!
+  cardId: String!
+  clientMutationId: String!
+}
+
+type TopUpByStripeCardIdPayload {
+  user: LoginUser
+  clientMutationId: String!
+}
+
+input TopUpByStripeTokenInput {
+  amount: Int!
+  tokenId: String!
+  clientMutationId: String!
+}
+
+type TopUpByStripeTokenPayload {
+  user: LoginUser
+  clientMutationId: String!
 }
 
 input UpdateAddressInput {

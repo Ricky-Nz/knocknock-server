@@ -7,6 +7,7 @@ import { AppSchema } from './schema';
 import path from 'path';
 import jwt from 'jsonwebtoken';
 import { Users } from './service/database';
+import { stripAddCard, payByStripe } from './service/payment';
 import { verifyPassword } from './schema/utils';
 
 const PORT = process.env.PORT||3000;
@@ -36,7 +37,12 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 //{expires: new Date(Date.now() + 900000)}
 
 express()
-  .post('/login', urlencodedParser, jsonParser, ({body}, res) => {
+  .post('/api/stripe/charge', urlencodedParser, jsonParser, (req, res) => {
+    payByStripe(req.body.token)
+      .then(customer => res.json(customer))
+      .catch(error => res.status(400).send(error));
+  })
+  .post('/api/login', urlencodedParser, jsonParser, ({body}, res) => {
     Users.findOne({where:{contact_no:body.username}})
     .then(user => {
       if (!user) return res.json({error: 'username or password not corrrect1'});
