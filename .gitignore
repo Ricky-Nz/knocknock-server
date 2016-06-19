@@ -19,7 +19,6 @@
 
 .DS_Store
 
-config.js
 backendschema.json
 appschema.json
 
