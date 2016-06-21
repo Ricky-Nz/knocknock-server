@@ -1,7 +1,7 @@
-// import { Users } from '../service/database';
+import { UserCredits } from '../service/database';
 
-// Users.findAll({where:{credit:2448.75}})
-// 	.then(result => result.map(({dataValues}) => console.log(dataValues)));
+UserCredits.findAll({where:{approved_by:'paypal'}})
+	.then(result => result.map(({dataValues}) => console.log(dataValues)));
 
 
 	   //  token: function(token) {
@@ -18,10 +18,8 @@
 				// http.send(JSON.stringify({token:token.card.id}));
 	   //  }
 
-var stripe = require("stripe")(
-  "sk_test_TXuRIWwqiRZq4PgtAdlL14wp"
-);
+// import { requestPaypalExpressUrl } from '../service/payment/paypal';
 
-stripe.customers.listCards('cus_8fM3LisAMXTxIv', function(err, cards) {
-  console.log(cards);
-});
+// requestPaypalExpressUrl({amount: 20.5, currency: 'SGD'})
+// 	.then(response => console.log(response))
+// 	.catch(err => console.log(err));

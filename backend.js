@@ -9,12 +9,6 @@ const PORT = process.env.PORT||3000;
 const storage = multer({ dest: 'uploads/' })
 
 express()
-	.use((req, res, next) => {
-	  res.header("Access-Control-Allow-Origin", "*");
-	  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-	  next();
-	})
-	.options('/graphql', (req, res) => res.json(true))
 	.use('/graphql', storage.single('file'))
   .use('/graphql', graphqlHTTP(req => ({
   	schema: BackendSchema,

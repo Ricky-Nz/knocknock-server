@@ -224,6 +224,7 @@ type LoginUser implements Node {
   order(id: String!): Order
   address(postalCode: String): String
   timeSlots(date: String!): [TimeSlot]
+  paypalPayUrl: String
 }
 
 type Mutation {
@@ -235,6 +236,7 @@ type Mutation {
   createOrder(input: CreateOrderInput!): CreateOrderPayload
   topUpByStripeCardId(input: TopUpByStripeCardIdInput!): TopUpByStripeCardIdPayload
   topUpByStripeToken(input: TopUpByStripeTokenInput!): TopUpByStripeTokenPayload
+  requrestPaypalTopUp(input: RequrestPaypalTopUpInput!): RequrestPaypalTopUpPayload
   addCreditCard(input: AddCreditCardInput!): AddCreditCardPayload
   removeCreditCard(input: RemoveCreditCardInput!): RemoveCreditCardPayload
 }
@@ -349,6 +351,17 @@ input RemoveCreditCardInput {
 
 type RemoveCreditCardPayload {
   deletedId: String!
+  user: LoginUser
+  clientMutationId: String!
+}
+
+input RequrestPaypalTopUpInput {
+  amount: Float!
+  currency: String!
+  clientMutationId: String!
+}
+
+type RequrestPaypalTopUpPayload {
   user: LoginUser
   clientMutationId: String!
 }

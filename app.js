@@ -7,8 +7,8 @@ import cookieParser from 'cookie-parser';
 import { AppSchema } from './schema';
 import path from 'path';
 import jwt from 'jsonwebtoken';
-import { Users } from './service/database';
-import { stripAddCard, payByStripe } from './service/payment';
+import { Users, UserCredits } from './service/database';
+import { completePaypalExpressPayment } from './service/payment';
 import { verifyPassword } from './schema/utils';
 
 const PORT = process.env.PORT||3000;
@@ -61,15 +61,38 @@ express()
       if (user) return res.status(400).send('phone number taken');
 
       return Users.create({
-        contact_no: body.username,
-        encrypted_password: body.password
-      }).then(user => {
-        res.cookie('token', generateToken(user.id));
-        res.sendStatus(200);
-      });
+          contact_no: body.username,
+          encrypted_password: body.password
+        }).then(user => {
+          res.cookie('token', generateToken(user.id));
+          res.sendStatus(200);
+        });
     })
     .catch(error => res.status(400).send(error))
   })
+  .use('/payment/success', function (req, res, next) {
+    completePaypalExpressPayment({token: req.query.token, PayerID: req.query.PayerID})
+      .then(({token, amount, currency, refNo}) =>
+        UserCredits.findOne({where:{paypal_ref_no: token}})
+          .then(credits =>
+            credits.update({
+              paypal_ref_no: refNo,
+              status: 1,
+              approved_on: new Date(),
+              approved_by: 'paypal'
+            })
+            .then(() => Users.findById(credits.user_id))
+            .then(user => user.increment({credit: parseFloat(amount)}))
+            .catch(error => next(error))
+          )
+          .catch(error => next(error))
+      )
+      .then(() => next())
+      .catch(error => next(error));
+  }, express.static(path.join(__dirname, 'apppublic', 'success.html')))
+  .use('/payment/failure', function (req, res) {
+    next();
+  }, express.static(path.join(__dirname, 'apppublic', 'failure.html')))
 	.use('/graphql', storage.single('file'))
   .use('/graphql', (req, res, next) => {
     verifyToken(req.cookies.token)

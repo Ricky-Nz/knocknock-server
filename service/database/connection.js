@@ -1,10 +1,8 @@
 import Sequelize from 'sequelize';
-import config from '../../config';
+import { RDS } from '../../config';
 
-const db = config.rds;
-
-export default new Sequelize(db.test, db.username, db.password, {
-  host: db.host,
-  dialect: db.type,
-  pool: db.pool
+export default new Sequelize(RDS.test, RDS.username, RDS.password, {
+  host: RDS.host,
+  dialect: RDS.type,
+  pool: RDS.pool
 });

@@ -1,9 +1,9 @@
-import { GraphQLString, GraphQLNonNull, GraphQLInt, GraphQLList, GraphQLBoolean } from 'graphql';
+import { GraphQLString, GraphQLNonNull, GraphQLInt, GraphQLFloat, GraphQLList, GraphQLBoolean } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'graphql-relay';
 import { GraphQLLoginUser, GraphQLAddress, GraphQLAddressEdge, GraphQLOrderItemInput,
 	GraphQLOrderEdge } from '../query';
 import { Users, UserCredits, UserCreditCards } from '../../service/database';
-import { payByStripeCardId, payByStripeToken } from '../../service/payment';
+import { payByStripeCardId, payByStripeToken, completePaypalExpressPayment, requestPaypalExpressUrl } from '../../service/payment';
 
 // { id: 'ch_18NwJQFNOwmsxf6nDypxWtDU',
 //   object: 'charge',
@@ -64,6 +64,24 @@ import { payByStripeCardId, payByStripeToken } from '../../service/payment';
 //   statement_descriptor: null,
 //   status: 'succeeded' }
 
+function processStripeReponse({amount, source, status, description}, userId) {
+	console.log(status);
+	return Users.findById(userId)
+		.then(user => user.increment({credit: parseFloat(amount)}))
+		.then(() => UserCredits.create({
+		  user_id: userId,
+		  amount: amount,
+		  paypal_ref_no: source.id,
+		  top_up: true,
+		  created_on: new Date(),
+		  payment_mode: 'creditcard',
+		  status: status === 'succeeded' ? 1 : 0,
+		  approved_on: new Date(),
+		  approved_by: 'Stripe',
+		  remarks: description
+		}));
+}
+
 const topUpByStripeCardId = mutationWithClientMutationId({
 	name: 'TopUpByStripeCardId',
 	inputFields: {
@@ -87,21 +105,21 @@ const topUpByStripeCardId = mutationWithClientMutationId({
 
 				const {id: localCardId} = fromGlobalId(cardId);
 				return UserCreditCards.findOne({where:{$and:{
-					user_id: userId,
-					id: localCardId
-				}}})
-				.then(card => payByStripeCardId({
-					customerId: user.stripe_customer_id,
-					cardId: card.stripe_card_id,
-					amount,
-					description: `TOPUP USER: ${user.contact_no}`
-				}))
-				.then(response =>
-					user.update({
-						credit: parseFloat(user.credit) + response.amount
+						user_id: userId,
+						id: localCardId
+					}}})
+					.then(card => {
+						if (!card) throw 'card not found';
+
+						return payByStripeCardId({
+							customerId: user.stripe_customer_id,
+							cardId: card.stripe_card_id,
+							amount,
+							description: `TOPUP USER: ${user.contact_no}`
+						});
 					})
-				)
-				.then(result => ({userId}));
+					.then(response => processStripeReponse(response, userId))
+					.then(() => ({userId}));
 			})
 });
 
@@ -122,36 +140,54 @@ const topUpByStripeToken = mutationWithClientMutationId({
 		}
 	},
 	mutateAndGetPayload: ({amount, tokenId}, {userId}) =>
-		Users.findById(userId)
-			.then(user => {
-				return payByStripeToken({
-					amount,
-					description: `TOPUP user: ${userId}`,
-					tokenId
+		payByStripeToken({
+			amount,
+			description: `TOPUP user: ${userId}`,
+			tokenId
+		})
+		.then(response => processStripeReponse(response, userId))
+		.then(() => ({userId}))
+});
+
+const requrestPaypalTopUp = mutationWithClientMutationId({
+	name: 'RequrestPaypalTopUp',
+	inputFields: {
+		amount: {
+			type: new GraphQLNonNull(GraphQLFloat)
+		},
+		currency: {
+			type: new GraphQLNonNull(GraphQLString)
+		}
+	},
+	outputFields: {
+		user: {
+			type: GraphQLLoginUser,
+			resolve: ({userId, url}) =>
+				Users.findById(userId).then(user => {
+					user.paypalPayUrl = url;
+					return user;
 				})
-				.then(response => 
-					user.update({
-						credit: parseFloat(user.credit) + response.amount
-					})
-					.then(() => UserCredits.create({
-					  user_id: userId,
-					  amount: response.amount,
-					  paypal_ref_no: response.source.id,
-					  top_up: true,
-					  created_on: new Date(),
-					  payment_mode: 'creditcard',
-					  status: response.status === 'succeeded' ? 1 : 0,
-					  approved_on: new Date(),
-					  approved_by: 'Stripe',
-					  remarks: response.description
-					}))
-				)
-				.then(result => ({userId}));
-			})
+		}
+	},
+	mutateAndGetPayload: ({amount, currency}, {userId}) =>
+		requestPaypalExpressUrl({amount, currency})
+			.then(({url, token}) =>
+				UserCredits.create({
+				  user_id: userId,
+				  amount: amount,
+				  paypal_ref_no: token,
+				  top_up: true,
+				  created_on: new Date(),
+				  payment_mode: 'paypal',
+				  status: 0
+				})
+				.then(() => ({url, userId}))
+			)
 });
 
 export default {
 	topUpByStripeCardId,
-	topUpByStripeToken
+	topUpByStripeToken,
+	requrestPaypalTopUp
 };
 

@@ -280,6 +280,10 @@ export default function (nodeInterface, {
           date = formatTime(date, 8);
           return OrderSlots.findAll({where:{date}});
         }
+      },
+      paypalPayUrl: {
+        type: GraphQLString,
+        resolve: (obj) => obj.paypalPayUrl
       }
 		},
 		interfaces: [nodeInterface]

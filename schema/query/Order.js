@@ -125,7 +125,7 @@ export default function (nodeInterface, {
       },
       pickupTime: {
         type: GraphQLString,
-        resolve: (obj) => obj.pickup_time
+        resolve: (obj) => obj.pickup_time&&obj.pickup_time.toString().slice(0, 5)
       },
       pickupContact: {
         type: GraphQLString,
