@@ -1,7 +1,7 @@
 import { GraphQLObjectType, GraphQLList, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField, connectionArgs, fromGlobalId, toGlobalId } from 'graphql-relay';
 import { PromotionBanners, Users, Orders, UserCredits, UserAddresses, UserCreditCards, UserVouchers,
-  SubCategories, Items, BlockedDates, BlockedTimes, OrderSlots } from '../../service/database';
+  SubCategories, Items, BlockedDates, BlockedTimes, OrderSlots, Vouchers } from '../../service/database';
 import { modelConnection, verifyPassword, indentDate, formatTime } from '../utils';
 import { getAddressByPostalCode } from '../../service/location';
 
@@ -51,6 +51,7 @@ export default function (nodeInterface, {
   GraphQLOrder,
 	GraphQLCategory,
   GraphQLTimeSlot,
+  GraphQLAssignedVoucher,
   GraphQLAddressConnection,
 	GraphQLOrderConnection,
 	GraphQLCreditCardConnection,
@@ -163,6 +164,25 @@ export default function (nodeInterface, {
         },
         resolve: (user, {all, search, ...args}) =>
           modelConnection(UserVouchers, {where:{user_id: user.id}, order: 'created_on DESC'}, args)
+      },
+      availableVouchers: {
+        type: new GraphQLList(GraphQLAssignedVoucher),
+        resolve: (user) => UserVouchers.findAll({where:{
+            used: false,
+            user_id: user.id
+          }})
+          .then(assignedVouchers => {
+            return assignedVouchers;
+            
+            const voucherIds = assignedVouchers.map(item => item.voucher_id);
+            Vouchers.findAll({where:{id: {$in: voucherIds}}})
+              .then(vouchers => {
+                return assignedVouchers.filter(assignVoucher => {
+                  const voucher = vouchers.find(item => item.id === assignVoucher.voucher_id);
+                  return !voucher.disabled&&(voucher.expire_on > new Date());
+                });
+              });
+          })
       },
       addresses: {
         type: GraphQLAddressConnection,

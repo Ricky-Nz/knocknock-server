@@ -16,6 +16,7 @@
     "babel-preset-stage-0": "6.5.0",
     "bcrypt": "^0.8.6",
     "body-parser": "^1.15.1",
+    "braintree": "^1.39.0",
     "chance": "^1.0.3",
     "classnames": "2.2.4",
     "cookie-parser": "^1.4.3",

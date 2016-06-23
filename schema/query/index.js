@@ -338,6 +338,7 @@ export const {
   GraphQLOrder,
   GraphQLCategory,
   GraphQLTimeSlot,
+  GraphQLAssignedVoucher,
   GraphQLOrderConnection,
   GraphQLAddressConnection,
   GraphQLCreditCardConnection,

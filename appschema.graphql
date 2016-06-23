@@ -209,6 +209,7 @@ type LoginUser implements Node {
   creditRecords(after: String, first: Int, before: String, last: Int): CreditRecordConnection
   creditCards(after: String, first: Int, before: String, last: Int): CreditCardConnection
   vouchers(after: String, first: Int, before: String, last: Int): AssignedVoucherConnection
+  availableVouchers: [AssignedVoucher]
   addresses(after: String, first: Int, before: String, last: Int): AddressConnection
   toPayCount: Int!
   voucherCount: Int!
@@ -234,6 +235,9 @@ type Mutation {
   deleteAddress(input: DeleteAddressInput!): DeleteAddressPayload
   cancelOrder(input: CancelOrderInput!): CancelOrderPayload
   createOrder(input: CreateOrderInput!): CreateOrderPayload
+  payOrderByCredit(input: PayOrderByCreditInput!): PayOrderByCreditPayload
+  payOrderByPaypal(input: PayOrderByPaypalInput!): PayOrderByPaypalPayload
+  payOrderByStrip(input: PayOrderByStripInput!): PayOrderByStripPayload
   topUpByStripeCardId(input: TopUpByStripeCardIdInput!): TopUpByStripeCardIdPayload
   topUpByStripeToken(input: TopUpByStripeTokenInput!): TopUpByStripeTokenPayload
   requrestPaypalTopUp(input: RequrestPaypalTopUpInput!): RequrestPaypalTopUpPayload
@@ -320,6 +324,44 @@ type PageInfo {
   hasPreviousPage: Boolean!
   startCursor: String
   endCursor: String
+}
+
+input PayOrderByCreditInput {
+  orderId: String!
+  voucherId: String
+  promoCodeId: String
+  clientMutationId: String!
+}
+
+type PayOrderByCreditPayload {
+  order: Order
+  clientMutationId: String!
+}
+
+input PayOrderByPaypalInput {
+  orderId: String!
+  voucherId: String
+  promoCodeId: String
+  clientMutationId: String!
+}
+
+type PayOrderByPaypalPayload {
+  user: LoginUser
+  clientMutationId: String!
+}
+
+input PayOrderByStripInput {
+  orderId: String!
+  tokenId: String
+  cardId: String
+  voucherId: String
+  promoCodeId: String
+  clientMutationId: String!
+}
+
+type PayOrderByStripPayload {
+  order: Order
+  clientMutationId: String!
 }
 
 type PromoCode implements Node {

@@ -1,4 +1,4 @@
-import { Orders, OrderTransactions, UserVouchers, PromoCodes } from '../../service/database';
+import { Orders, OrderTransactions, UserVouchers, PromoCodes } from '../service/database';
 
 export function processOrderPayment({userId, orderId, voucherId, promoCodeId}, makePayment) {
 	const {id: localOrderId} = fromGlobalId(orderId);
