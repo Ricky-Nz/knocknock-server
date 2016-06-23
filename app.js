@@ -10,6 +10,7 @@ import jwt from 'jsonwebtoken';
 import { Users, UserCredits } from './service/database';
 import { completePaypalExpressPayment } from './service/payment';
 import { verifyPassword } from './schema/utils';
+import { processOrderPayment } from './schema/paymentUtils';
 
 const PORT = process.env.PORT||3000;
 const storage = multer({ dest: 'uploads/' })
@@ -72,21 +73,32 @@ express()
   })
   .use('/payment/success', function (req, res, next) {
     completePaypalExpressPayment({token: req.query.token, PayerID: req.query.PayerID})
-      .then(({token, amount, currency, refNo}) =>
-        UserCredits.findOne({where:{paypal_ref_no: token}})
-          .then(credits =>
-            credits.update({
-              paypal_ref_no: refNo,
-              status: 1,
-              approved_on: new Date(),
-              approved_by: 'paypal'
-            })
-            .then(() => Users.findById(credits.user_id))
-            .then(user => user.increment({credit: parseFloat(amount)}))
+      .then(({token, amount, currency, refNo}) => {
+        if (req.query.orderId) {
+          const {userId, orderId, voucherId, promoCodeId} = req.query;
+          return processOrderPayment({userId, orderId, voucherId, promoCodeId}, ({localOrderId, toPayPrice}) => {
+              return new Promise((resolve) => resolve({
+                  success: true,
+                  paymentMode: 'paypal',
+                  paymentRefToken: refNo
+                }));
+            });
+        } else {
+          return UserCredits.findOne({where:{paypal_ref_no: token}})
+            .then(credits =>
+              credits.update({
+                paypal_ref_no: refNo,
+                status: 1,
+                approved_on: new Date(),
+                approved_by: 'paypal'
+              })
+              .then(() => Users.findById(credits.user_id))
+              .then(user => user.increment({credit: parseFloat(amount)}))
+              .catch(error => next(error))
+            )
             .catch(error => next(error))
-          )
-          .catch(error => next(error))
-      )
+        }
+      })
       .then(() => next())
       .catch(error => next(error));
   }, express.static(path.join(__dirname, 'apppublic', 'success.html')))

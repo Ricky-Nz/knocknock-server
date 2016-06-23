@@ -46,7 +46,6 @@ import { modelConnection } from '../utils';
 export default function (nodeInterface, {
   GraphQLAddressConnection,
   GraphQLAssignedVoucherConnection,
-  GraphQLTransactionConnection,
   GraphQLCreditRecordConnection,
   GraphQLOrderConnection,
   GraphQLOrder

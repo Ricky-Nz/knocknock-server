@@ -1,9 +1,9 @@
-import { UserCredits } from '../service/database';
+import { OrderTransactions, Users } from '../service/database';
 
-UserCredits.findAll({where:{approved_by:'paypal'}})
+OrderTransactions.findAll()
 	.then(result => result.map(({dataValues}) => console.log(dataValues)));
-
-
+	
+// 5XW71267S5505635Y
 	   //  token: function(token) {
 	   //  	console.log(token.card.id);
 				// var http = new XMLHttpRequest();

@@ -1,9 +1,9 @@
-import { GraphQLObjectType, GraphQLList, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
+import { GraphQLObjectType, GraphQLList, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLInt, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField, fromGlobalId, connectionArgs } from 'graphql-relay';
 import { Users, Orders, Workers, Admins, Items, SubCategories, OrderSlots, UserCredits,
   OrderStatuses, UserFeedbacks, PromotionBanners, PromoCodes, Factories, Vouchers } from '../../service/database';
 import { getAddressByPostalCode } from '../../service/location';
-import { modelConnection, formatTime } from '../utils';
+import { modelConnection, formatSelectDate } from '../utils';
 
 export default function (nodeInterface, {
   GraphQLUser,
@@ -16,7 +16,6 @@ export default function (nodeInterface, {
   GraphQLWorkerConnection,
   GraphQLAdminConnection,
   GraphQLOrderConnection,
-  GraphQLTransactionConnection,
   GraphQLClothConnection,
   GraphQLCategoryConnection,
   GraphQLTimeSlotTemplateConnection,
@@ -148,49 +147,24 @@ export default function (nodeInterface, {
       orders: {
         type: GraphQLOrderConnection,
         args: {
-          userId: {
-            type: GraphQLString
+          year: {
+            type: new GraphQLNonNull(GraphQLInt)
           },
-          search: {
-            type: GraphQLString
+          month: {
+            type: new GraphQLNonNull(GraphQLInt)
           },
-          statusIds: {
-            type: new GraphQLList(GraphQLString)
-          },
-          afterDate: {
-            type: GraphQLString
-          },
-          beforeDate: {
-            type: GraphQLString
-          },
-          ...connectionArgs
+          dayOfMonth: {
+            type: new GraphQLNonNull(GraphQLInt)
+          }
         },
-        resolve: (obj, {userId, search, statusIds, afterDate, beforeDate, ...args}) => {
-          let where = {order_status_id:{$notIn:[8, 9]}};
-          if (userId) {
-            const {id: localUseriId} = fromGlobalId(userId);
-            where.user_id = localUseriId;
-          }
-          if (search) {
-            where.id = search;
-          }
+        resolve: (obj, {year, month, dayOfMonth}) => {
+          const { start, end } = formatSelectDate(year, month, dayOfMonth);
+          let where = {$or: [
+            {order_status_id: 1, pickup_date: {$gte: start, $lt: end}},
+            {order_status_id: 6, drop_off_date: {$gte: start, $lt: end}}
+          ]};
 
-          where.order_status_id['$in'] = (statusIds||[]).map(id => {
-            const {id: localId} = fromGlobalId(id);
-            return localId;
-          });
-
-          if (afterDate) {
-            where.pickup_date = {'$gte': formatTime(afterDate)};
-          }
-          if (beforeDate) {
-            if (!where.pickup_date) {
-              where.pickup_date = {};
-            }
-            where.pickup_date['$lt'] = formatTime(beforeDate);
-          }
-
-          return modelConnection(Orders, {where, order: 'id DESC'}, args);
+          return modelConnection(Orders, {where, order: 'id DESC'}, {first: 1000});
         }
       },
       histories: {

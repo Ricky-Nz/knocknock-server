@@ -4,7 +4,8 @@ import { PAYPAL } from '../../config';
 
 export function requestPaypalExpressUrl({
 	amount,
-	currency
+	currency,
+	params
 }) {
 	return new Promise(function (resolve, reject) {
 		request.post({
@@ -15,7 +16,7 @@ export function requestPaypalExpressUrl({
 				PAYMENTREQUEST_0_PAYMENTACTION: 'SALE',
 				PAYMENTREQUEST_0_AMT: amount,
 				PAYMENTREQUEST_0_CURRENCYCODE: currency,
-				RETURNURL: PAYPAL.successRedirect,
+				RETURNURL: `${PAYPAL.successRedirect}${params?('?'+qs.stringify(params)):''}`,
 				CANCELURL: PAYPAL.failureRedirect
 			}
 		}, (err, res, body) => {

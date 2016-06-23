@@ -65,7 +65,6 @@ import { payByStripeCardId, payByStripeToken, completePaypalExpressPayment, requ
 //   status: 'succeeded' }
 
 function processStripeReponse({amount, source, status, description}, userId) {
-	console.log(status);
 	return Users.findById(userId)
 		.then(user => user.increment({credit: parseFloat(amount)}))
 		.then(() => UserCredits.create({

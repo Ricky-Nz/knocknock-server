@@ -1,9 +1,9 @@
 import { GraphQLObjectType, GraphQLNonNull, GraphQLInt, GraphQLString, GraphQLInputObjectType } from 'graphql';
 import { nodeDefinitions, fromGlobalId, toGlobalId } from 'graphql-relay';
 import { Users, Admins, Workers, UserAddresses, Items, SubCategories,
-  Vouchers, Orders, OrderDetails, OrderTransactions, OrderSlots, DistrictTimeSlots,
-  Factories, PromoCodes, PromoionBanners, UserFeedbacks, OrderStatuses,
-  UserCredits, UserCreditCards } from '../../service/database';
+  Vouchers, Orders, OrderDetails, OrderTransactions, OrderSlots, DefaultDistrictTimeSlots,
+  Factories, PromoCodes, PromotionBanners, UserFeedbacks, OrderStatuses,
+  UserCredits, UserVouchers, UserCreditCards } from '../../service/database';
 import addressQuery from './Address';
 import adminQuery from './Admin';
 import bannerQuery from './Banner';
@@ -16,7 +16,6 @@ import orderItemQuery from './OrderItem';
 import promoCodeQuery from './PromoCode';
 import timeSlotQuery from './TimeSlot';
 import timeSlotTemplateQuery from './TimeSlotTemplate';
-import transactionQuery from './Transaction';
 import userQuery from './User';
 import viewerQuery from './Viewer';
 import voucherQuery from './Voucher';
@@ -79,15 +78,13 @@ const { nodeInterface, nodeField } = nodeDefinitions(
     } else if (type === 'Voucher') {
       return Vouchers.findById(id);
     } else if (type === 'AssignedVoucher') {
-      return AssignedVoucher.findById(id);
+      return UserVouchers.findById(id);
     } else if (type === 'Order') {
       return Orders.findById(id);
     } else if (type === 'OrderItem') {
       return OrderDetails.findById(id);
-    } else if (type === 'Transaction') {
-      return OrderTransactions.findById(id);
     } else if (type === 'TimeSlotTemplate') {
-      return DistrictTimeSlots.findById(id);
+      return DefaultDistrictTimeSlots.findById(id);
     } else if (type === 'TimeSlot') {
       return OrderSlots.findById(id);
     } else if (type === 'Factory') {
@@ -95,7 +92,7 @@ const { nodeInterface, nodeField } = nodeDefinitions(
     } else if (type === 'PromoCode') {
       return PromoCodes.findById(id);
     } else if (type === 'Banner') {
-      return PromoionBanners.findById(id);
+      return PromotionBanners.findById(id);
     } else if (type === 'Feedback') {
       return UserFeedbacks.findById(id);
     } else if (type === 'OrderStatus') {
@@ -113,45 +110,43 @@ const { nodeInterface, nodeField } = nodeDefinitions(
     	return GraphQLViewer;
     } else if (obj instanceof LoginUser) {
       return GraphQLLoginUser;
-    } else if (obj instanceof Users) {
+    } else if (obj instanceof Users.Instance) {
   		return GraphQLUser;
-  	} else if (obj instanceof Admins) {
+  	} else if (obj instanceof Admins.Instance) {
       return GraphQLAdmin;
-    } else if (obj instanceof Workers) {
+    } else if (obj instanceof Workers.Instance) {
       return GraphQLWorker;
-    } else if (obj instanceof UserAddresses) {
+    } else if (obj instanceof UserAddresses.Instance) {
       return GraphQLAddress;
-    } else if (obj instanceof Items) {
+    } else if (obj instanceof Items.Instance) {
       return GraphQLCloth;
-    } else if (obj instanceof SubCategories) {
+    } else if (obj instanceof SubCategories.Instance) {
       return GraphQLClothCategory;
-    } else if (obj instanceof Vouchers) {
+    } else if (obj instanceof Vouchers.Instance) {
       return GraphQLVoucher;
-    } else if (obj instanceof AssignedVoucher) {
+    } else if (obj instanceof UserVouchers.Instance) {
       return GraphQLAssignedVoucher;
-    } else if (obj instanceof Orders) {
+    } else if (obj instanceof Orders.Instance) {
       return GraphQLOrder;
-    } else if (obj instanceof OrderDetails) {
+    } else if (obj instanceof OrderDetails.Instance) {
       return GraphQLOrderItem;
-    } else if (obj instanceof OrderTransactions) {
-      return GraphQLTransaction;
-    } else if (obj instanceof DistrictTimeSlots) {
+    } else if (obj instanceof DefaultDistrictTimeSlots.Instance) {
       return GraphQLTimeSlotTemplate;
-    } else if (obj instanceof OrderSlots) {
+    } else if (obj instanceof OrderSlots.Instance) {
       return GraphQLTimeSlot;
-    } else if (obj instanceof Factories) {
+    } else if (obj instanceof Factories.Instance) {
       return GraphQLFactory;
-    } else if (obj instanceof PromoCodes) {
+    } else if (obj instanceof PromoCodes.Instance) {
       return GraphQLPromoCode;
-    } else if (obj instanceof PromoionBanners) {
+    } else if (obj instanceof PromotionBanners.Instance) {
       return GraphQLBanner;
-    } else if (obj instanceof UserFeedbacks) {
+    } else if (obj instanceof UserFeedbacks.Instance) {
       return GraphQLFeedback;
-    } else if (obj instanceof OrderStatuses) {
+    } else if (obj instanceof OrderStatuses.Instance) {
       return GraphQLOrderStatus;
-    } else if (obj instanceof UserCredits) {
+    } else if (obj instanceof UserCredits.Instance) {
       return GraphQLCreditRecord;
-    } else if (obj instanceof UserCreditCards) {
+    } else if (obj instanceof UserCreditCards.Instance) {
       return GraphQLCreditCard;
     } else {
   		return null;
@@ -240,12 +235,6 @@ export const {
 } = timeSlotQuery(nodeInterface);
 
 export const {
-  nodeType: GraphQLTransaction,
-  connectionType: GraphQLTransactionConnection,
-  edgeType: GraphQLTransactionEdge
-} = transactionQuery(nodeInterface);
-
-export const {
   nodeType: GraphQLCategory,
   connectionType: GraphQLCategoryConnection,
   edgeType: GraphQLCategoryEdge
@@ -293,7 +282,6 @@ export const {
 } = userQuery(nodeInterface, {
   GraphQLAddressConnection,
   GraphQLAssignedVoucherConnection,
-  GraphQLTransactionConnection,
   GraphQLCreditRecordConnection,
   GraphQLOrderConnection,
   GraphQLOrder
@@ -330,7 +318,6 @@ export const {
   GraphQLWorkerConnection,
   GraphQLAdminConnection,
   GraphQLOrderConnection,
-  GraphQLTransactionConnection,
   GraphQLClothConnection,
   GraphQLCategoryConnection,
   GraphQLTimeSlotTemplateConnection,

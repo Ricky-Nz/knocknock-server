@@ -7,8 +7,13 @@ import { connectionFromPromisedArraySlice, cursorToOffset, fromGlobalId } from '
 import { DBOrder, Items, Orders } from '../service/database';
 import Chance from 'chance';
 
-export function toPrice(price) {
-  return price?parseFloat(price).toFixed(2):null;
+export function formatPrice(price, display) {
+  const formatPrice = parseFloat(price).toFixed(2);
+  if (display) {
+    return formatPrice;
+  }
+  
+  return parseFloat(formatPrice);
 }
 
 export function indentDate(str, max) {
@@ -29,6 +34,16 @@ export function generateCode(argument) {
 
 export function toDisplayDate(date) {
   return moment(date).format("MMM Do YYYY");
+}
+
+export function formatSelectDate(year, month, dayOfMonth) {
+  let start = moment([year, month, dayOfMonth]);
+  let end = moment([year, month, dayOfMonth]);
+
+  return {
+    start: start.toDate(),
+    end: end.add(1, 'd').toDate()
+  };
 }
 
 export function formatTime(date, hour=0, minute=0, second=0, millisecond=0) {
