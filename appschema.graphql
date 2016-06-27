@@ -213,8 +213,10 @@ type LoginUser implements Node {
   addresses(after: String, first: Int, before: String, last: Int): AddressConnection
   toPayCount: Int!
   voucherCount: Int!
-  pickupBlockDates(year: Int!, month: Int!): [String]
-  pickupTimes(dateId: String!): [String]
+  blockedPickupDayOfMonth(year: Int!, month: Int!): [Int]
+  blockedDropOffDayOfMonth(year: Int!, month: Int!): [Int]
+  pickupTimes: [TimeSlot]
+  dropOffTimes: [TimeSlot]
   credits: Float
   firstName: String
   lastName: String
@@ -225,7 +227,6 @@ type LoginUser implements Node {
   promoCode(code: String!): PromoCode
   order(id: String!): Order
   address(postalCode: String): String
-  timeSlots(date: String!): [TimeSlot]
   paypalPayUrl: String
 }
 
@@ -438,9 +439,8 @@ type SetOrderDeliveryDatePayload {
 
 type TimeSlot implements Node {
   id: ID!
-  date: String
-  time: String
-  quantity: Int
+  displayTime: String
+  hour: Int
   enabled: Boolean
 }
 

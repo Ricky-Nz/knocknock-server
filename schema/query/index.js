@@ -1,7 +1,7 @@
 import { GraphQLObjectType, GraphQLNonNull, GraphQLInt, GraphQLString, GraphQLInputObjectType } from 'graphql';
 import { nodeDefinitions, fromGlobalId, toGlobalId } from 'graphql-relay';
 import { Users, Admins, Workers, UserAddresses, Items, SubCategories,
-  Vouchers, Orders, OrderDetails, OrderTransactions, OrderSlots, DefaultDistrictTimeSlots,
+  Vouchers, Orders, OrderDetails, OrderTransactions,
   Factories, PromoCodes, PromotionBanners, UserFeedbacks, OrderStatuses,
   UserCredits, UserVouchers, UserCreditCards } from '../../service/database';
 import addressQuery from './Address';
@@ -15,7 +15,6 @@ import orderQuery from './Order';
 import orderItemQuery from './OrderItem';
 import promoCodeQuery from './PromoCode';
 import timeSlotQuery from './TimeSlot';
-import timeSlotTemplateQuery from './TimeSlotTemplate';
 import userQuery from './User';
 import viewerQuery from './Viewer';
 import voucherQuery from './Voucher';
@@ -28,6 +27,28 @@ import creditCardQuery from './CreditCard';
 
 class Viewer {}
 class LoginUser {}
+
+export const getTimeSlots = function() {
+  const hour = new Date().getHours() + 1;
+
+  return {
+    1: new TimeSlot(1, '9:00 ~ 11:00', 9, hour < 9),
+    2: new TimeSlot(2, '11:00 ~ 13:00', 11, hour < 11),
+    3: new TimeSlot(3, '13:00 ~ 15:00', 13, hour < 13),
+    4: new TimeSlot(4, '15:00 ~ 17:00', 15, hour < 15),
+    5: new TimeSlot(5, '17:00 ~ 19:00', 17, hour < 17),
+    6: new TimeSlot(6, '19:00 ~ 21:00', 19, hour < 19)
+  };
+}
+
+export class TimeSlot {
+  constructor(id, displayTime, hour, enabled){
+    this.id = id;
+    this.displayTime = displayTime;
+    this.hour = hour;
+    this.enabled = enabled;
+  }
+}
 
 export const GraphQLOrderItemInput = new GraphQLInputObjectType({
   name: 'OrderItemInput',
@@ -83,10 +104,8 @@ const { nodeInterface, nodeField } = nodeDefinitions(
       return Orders.findById(id);
     } else if (type === 'OrderItem') {
       return OrderDetails.findById(id);
-    } else if (type === 'TimeSlotTemplate') {
-      return DefaultDistrictTimeSlots.findById(id);
     } else if (type === 'TimeSlot') {
-      return OrderSlots.findById(id);
+      return getTimeSlots()[id];
     } else if (type === 'Factory') {
       return Factories.findById(id);
     } else if (type === 'PromoCode') {
@@ -130,9 +149,7 @@ const { nodeInterface, nodeField } = nodeDefinitions(
       return GraphQLOrder;
     } else if (obj instanceof OrderDetails.Instance) {
       return GraphQLOrderItem;
-    } else if (obj instanceof DefaultDistrictTimeSlots.Instance) {
-      return GraphQLTimeSlotTemplate;
-    } else if (obj instanceof OrderSlots.Instance) {
+    } else if (obj instanceof TimeSlot) {
       return GraphQLTimeSlot;
     } else if (obj instanceof Factories.Instance) {
       return GraphQLFactory;
@@ -221,12 +238,6 @@ export const {
   connectionType: GraphQLFactoryConnection,
   edgeType: GraphQLFactoryEdge
 } = factoryQuery(nodeInterface);
-
-export const {
-  nodeType: GraphQLTimeSlotTemplate,
-  connectionType: GraphQLTimeSlotTemplateConnection,
-  edgeType: GraphQLTimeSlotTemplateEdge
-} = timeSlotTemplateQuery(nodeInterface);
 
 export const {
   nodeType: GraphQLTimeSlot,
@@ -320,7 +331,6 @@ export const {
   GraphQLOrderConnection,
   GraphQLClothConnection,
   GraphQLCategoryConnection,
-  GraphQLTimeSlotTemplateConnection,
   GraphQLTimeSlotConnection,
   GraphQLFactoryConnection,
   GraphQLPromoCodeConnection,
@@ -333,6 +343,7 @@ export const {
 export const {
   nodeType: GraphQLLoginUser
 } = loginUserQuery(nodeInterface, {
+  getTimeSlots,
   GraphQLBanner,
   GraphQLCloth,
   GraphQLOrder,

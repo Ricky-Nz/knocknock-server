@@ -4,6 +4,7 @@ import graphqlHTTP from 'express-graphql';
 import multer  from 'multer';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
+import request from 'request';
 import { AppSchema } from './schema';
 import path from 'path';
 import jwt from 'jsonwebtoken';
@@ -40,6 +41,38 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 express()
   .use(cookieParser())
+  .post('/api/fblogin', urlencodedParser, jsonParser, ({body}, res) => {
+    request({
+      uri: 'https://graph.facebook.com/me',
+      qs: {
+        fields: 'id,email,first_name,last_name,picture{url}',
+        access_token: body.token
+      },
+      json: true
+    }, (err, response, {id, email, first_name, last_name, picture}) => {
+      if (err || !id) return res.status(400).send('login failed');
+
+      Users.findOne({where:{email}})
+        .then(user => {
+          if (user) return user;
+
+          return Users.create({
+            email,
+            first_name,
+            last_name,
+            profile_image_url_small: picture.data&&picture.data.url
+          });
+        })
+        .then(user => {
+          res.cookie('token', generateToken(user.id));
+          res.json({
+            bindContact: !user.is_verified,
+            setupProfile: !user.first_name || !user.last_name
+          });
+        })
+        .catch(err => res.status(400).send('login failed'));
+    });
+  })
   .post('/api/login', urlencodedParser, jsonParser, ({body}, res) => {
     Users.findOne({where:{$or: [
       {contact_no:body.username},

@@ -639,9 +639,8 @@ type Query {
 
 type TimeSlot implements Node {
   id: ID!
-  date: String
-  time: String
-  quantity: Int
+  displayTime: String
+  hour: Int
   enabled: Boolean
 }
 

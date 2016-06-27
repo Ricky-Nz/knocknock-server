@@ -1,7 +1,7 @@
 import { GraphQLObjectType, GraphQLList, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField, connectionArgs, fromGlobalId, toGlobalId } from 'graphql-relay';
 import { PromotionBanners, Users, Orders, UserCredits, UserAddresses, UserCreditCards, UserVouchers,
-  SubCategories, Items, BlockedDates, BlockedTimes, OrderSlots, Vouchers, PromoCodes } from '../../service/database';
+  SubCategories, Items, Vouchers, PromoCodes, BlockedDates } from '../../service/database';
 import { modelConnection, verifyPassword, indentDate, formatTime } from '../utils';
 import { getAddressByPostalCode } from '../../service/location';
 
@@ -46,6 +46,7 @@ import { getAddressByPostalCode } from '../../service/location';
   //   plus_account: null },
 
 export default function (nodeInterface, {
+  getTimeSlots,
 	GraphQLBanner,
 	GraphQLCloth,
   GraphQLOrder,
@@ -216,8 +217,8 @@ export default function (nodeInterface, {
             used: false
           }}})
       },
-      pickupBlockDates: {
-        type: new GraphQLList(GraphQLString),
+      blockedPickupDayOfMonth: {
+        type: new GraphQLList(GraphQLInt),
         args: {
           year: {
             type: new GraphQLNonNull(GraphQLInt)
@@ -227,24 +228,38 @@ export default function (nodeInterface, {
           }
         },
         resolve: (user, {year, month}) =>
-          BlockedDates.findAll({where:{$and:{
+          BlockedDates.findAll({where:{
             is_pickup: true,
             block_fullday: true,
-            date: {$like:`${year}-${indentDate(month)}%`}
-          }}, attributes:['date', 'id']}).then(dates => dates.map(date => `${date.date}$${date.id}`))
+            date: {$like: `${year}-${month<10?('0'+month):month}%`}
+          }})
+          .then(blockedDates => blockedDates.map(date => parseInt(date.date.split('-')[2])))
       },
-      pickupTimes: {
-        type: new GraphQLList(GraphQLString),
+      blockedDropOffDayOfMonth: {
+        type: new GraphQLList(GraphQLInt),
         args: {
-          dateId: {
-            type: new GraphQLNonNull(GraphQLString)
+          year: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          month: {
+            type: new GraphQLNonNull(GraphQLInt)
           }
         },
-        resolve: (user, {dateId}) =>
-          BlockedTimes.findAll({where:{$and:{
-            blocked_date_id: dateId
-          }}, attributes:['start_time', 'end_time', 'blocked_fullday']})
-            .then(dates => dates.map(time => `${time.start_time}$${time.end_time}$${time.blocked_fullday}`))
+        resolve: (user, {year, month}) =>
+          BlockedDates.findAll({where:{
+            is_dropoff: true,
+            block_fullday: true,
+            date: {$like: `${year}-${month<10?('0'+month):month}%`}
+          }})
+          .then(blockedDates => blockedDates.map(date => parseInt(date.date.split('-')[2])))
+      },
+      pickupTimes: {
+        type: new GraphQLList(GraphQLTimeSlot),
+        resolve: (user) => getTimeSlots()
+      },
+      dropOffTimes: {
+        type: new GraphQLList(GraphQLTimeSlot),
+        resolve: (user) => getTimeSlots()
       },
       credits: {
       	type: GraphQLFloat,
@@ -313,18 +328,6 @@ export default function (nodeInterface, {
           }
         },
         resolve: (obj, {postalCode}) => postalCode?getAddressByPostalCode(postalCode):null
-      },
-      timeSlots: {
-        type: new GraphQLList(GraphQLTimeSlot),
-        args: {
-          date: {
-            type: new GraphQLNonNull(GraphQLString)
-          }
-        },
-        resolve: (obj, {date}) => {
-          date = formatTime(date, 8);
-          return OrderSlots.findAll({where:{date}});
-        }
       },
       paypalPayUrl: {
         type: GraphQLString,

@@ -1,6 +1,6 @@
-// import { OrderSlots } from '../service/database';
+// import { BlockedTimes } from '../service/database';
 
-// OrderSlots.findAll({order: 'date'})
+// BlockedTimes.findAll()
 // 	.then(result => result.map(({dataValues}) => console.log(dataValues)));
 	
 // 5XW71267S5505635Y
@@ -24,7 +24,11 @@
 // 	.then(response => console.log(response))
 // 	.catch(err => console.log(err));
 
-import { sendSMS } from '../service/notification';
+class Test {
+	constructor({rr, ff}){
+		this.rr = rr;
+		this.ff = ff;
+	}
+}
 
-sendSMS({number:'96452556', message:'RUIQI'})
-	.then(respones => console.log('succe'));
+console.log(new Test({rr:'rui',ff:'qi'}))

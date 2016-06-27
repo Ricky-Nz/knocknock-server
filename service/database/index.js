@@ -1,11 +1,9 @@
 export { default as Admins } from './Admins';
-export { default as DefaultDistrictTimeSlots } from './DefaultDistrictTimeSlots';
 export { default as Factories } from './Factories';
 export { default as Items } from './Items';
 export { default as OrderDetails } from './OrderDetails';
 export { default as OrderStatuses } from './OrderStatuses';
 export { default as Orders } from './Orders';
-export { default as OrderSlots } from './OrderSlots';
 export { default as OrderTransactions } from './OrderTransactions';
 export { default as Permissions } from './Permissions';
 export { default as PromoCodes } from './PromoCodes';

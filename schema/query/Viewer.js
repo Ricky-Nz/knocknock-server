@@ -18,7 +18,6 @@ export default function (nodeInterface, {
   GraphQLOrderConnection,
   GraphQLClothConnection,
   GraphQLCategoryConnection,
-  GraphQLTimeSlotTemplateConnection,
   GraphQLTimeSlotConnection,
   GraphQLFactoryConnection,
   GraphQLPromoCodeConnection,

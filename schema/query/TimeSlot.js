@@ -12,21 +12,17 @@ export default function (nodeInterface) {
 	  name: 'TimeSlot',
 	  fields: {
 	  	id: globalIdField('TimeSlot'),
-			date: {
+			displayTime: {
 				type: GraphQLString,
-				resolve: (obj) => obj.date
+				resolve: (obj) => obj.displayTime
 			},
-			time: {
-				type: GraphQLString,
-				resolve: (obj) => obj.time
-			},
-			quantity: {
+			hour: {
 				type: GraphQLInt,
-				resolve: (obj) => obj.quantity
+				resolve: (obj) => obj.hour
 			},
 			enabled: {
 				type: GraphQLBoolean,
-				resolve: (obj) => obj.quantity > 0
+				resolve: (obj) => obj.enabled
 			}
 	  },
 	  interfaces: [nodeInterface]
