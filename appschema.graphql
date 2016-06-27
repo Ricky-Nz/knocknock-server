@@ -130,11 +130,9 @@ type CreateAddressPayload {
 input CreateOrderInput {
   express: Boolean
   note: String
-  pickupDate: String!
-  pickupTime: String!
-  pickupAddress: String!
-  pickupPostalCode: String!
-  pickupContactNo: String!
+  date: String!
+  hour: String!
+  addressId: String!
   orderItems: [OrderItemInput]
   clientMutationId: String!
 }
@@ -200,6 +198,8 @@ type DeleteAddressPayload {
 
 type LoginUser implements Node {
   id: ID!
+  verified: Boolean
+  profileComplete: Boolean
   orders(after: String, first: Int, before: String, last: Int): OrderConnection
   histories(after: String, first: Int, before: String, last: Int): OrderConnection
   toPayOrders(after: String, first: Int, before: String, last: Int): OrderConnection
@@ -215,13 +215,14 @@ type LoginUser implements Node {
   voucherCount: Int!
   pickupBlockDates(year: Int!, month: Int!): [String]
   pickupTimes(dateId: String!): [String]
-  credits: String
+  credits: Float
   firstName: String
   lastName: String
   email: String
   contact: String
   plusAccount: String
   avatarUrl: String
+  promoCode(code: String!): PromoCode
   order(id: String!): Order
   address(postalCode: String): String
   timeSlots(date: String!): [TimeSlot]
@@ -230,14 +231,17 @@ type LoginUser implements Node {
 
 type Mutation {
   updateProfile(input: UpdateProfileInput!): UpdateProfilePayload
+  requestPhoneNumberVerify(input: RequestPhoneNumberVerifyInput!): RequestPhoneNumberVerifyPayload
+  verifyPhoneNumber(input: VerifyPhoneNumberInput!): VerifyPhoneNumberPayload
   createAddress(input: CreateAddressInput!): CreateAddressPayload
   updateAddress(input: UpdateAddressInput!): UpdateAddressPayload
   deleteAddress(input: DeleteAddressInput!): DeleteAddressPayload
   cancelOrder(input: CancelOrderInput!): CancelOrderPayload
   createOrder(input: CreateOrderInput!): CreateOrderPayload
+  setOrderDeliveryDate(input: SetOrderDeliveryDateInput!): SetOrderDeliveryDatePayload
   payOrderByCredit(input: PayOrderByCreditInput!): PayOrderByCreditPayload
   payOrderByPaypal(input: PayOrderByPaypalInput!): PayOrderByPaypalPayload
-  payOrderByStrip(input: PayOrderByStripInput!): PayOrderByStripPayload
+  payOrderByStripe(input: PayOrderByStripeInput!): PayOrderByStripePayload
   topUpByStripeCardId(input: TopUpByStripeCardIdInput!): TopUpByStripeCardIdPayload
   topUpByStripeToken(input: TopUpByStripeTokenInput!): TopUpByStripeTokenPayload
   requrestPaypalTopUp(input: RequrestPaypalTopUpInput!): RequrestPaypalTopUpPayload
@@ -350,7 +354,7 @@ type PayOrderByPaypalPayload {
   clientMutationId: String!
 }
 
-input PayOrderByStripInput {
+input PayOrderByStripeInput {
   orderId: String!
   tokenId: String
   cardId: String
@@ -359,7 +363,7 @@ input PayOrderByStripInput {
   clientMutationId: String!
 }
 
-type PayOrderByStripPayload {
+type PayOrderByStripePayload {
   order: Order
   clientMutationId: String!
 }
@@ -397,6 +401,17 @@ type RemoveCreditCardPayload {
   clientMutationId: String!
 }
 
+input RequestPhoneNumberVerifyInput {
+  countryCode: String!
+  number: String!
+  clientMutationId: String!
+}
+
+type RequestPhoneNumberVerifyPayload {
+  user: LoginUser
+  clientMutationId: String!
+}
+
 input RequrestPaypalTopUpInput {
   amount: Float!
   currency: String!
@@ -405,6 +420,19 @@ input RequrestPaypalTopUpInput {
 
 type RequrestPaypalTopUpPayload {
   user: LoginUser
+  clientMutationId: String!
+}
+
+input SetOrderDeliveryDateInput {
+  orderId: String!
+  addressId: String!
+  date: String!
+  hour: Int!
+  clientMutationId: String!
+}
+
+type SetOrderDeliveryDatePayload {
+  order: Order
   clientMutationId: String!
 }
 
@@ -472,6 +500,16 @@ type UserRef {
   lastName: String
   email: String
   avatarUrl: String
+}
+
+input VerifyPhoneNumberInput {
+  code: String!
+  clientMutationId: String!
+}
+
+type VerifyPhoneNumberPayload {
+  user: LoginUser
+  clientMutationId: String!
 }
 
 type Voucher implements Node {

@@ -1,7 +1,7 @@
 import { GraphQLObjectType, GraphQLList, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField, connectionArgs, fromGlobalId, toGlobalId } from 'graphql-relay';
 import { PromotionBanners, Users, Orders, UserCredits, UserAddresses, UserCreditCards, UserVouchers,
-  SubCategories, Items, BlockedDates, BlockedTimes, OrderSlots, Vouchers } from '../../service/database';
+  SubCategories, Items, BlockedDates, BlockedTimes, OrderSlots, Vouchers, PromoCodes } from '../../service/database';
 import { modelConnection, verifyPassword, indentDate, formatTime } from '../utils';
 import { getAddressByPostalCode } from '../../service/location';
 
@@ -49,6 +49,7 @@ export default function (nodeInterface, {
 	GraphQLBanner,
 	GraphQLCloth,
   GraphQLOrder,
+  GraphQLPromoCode,
 	GraphQLCategory,
   GraphQLTimeSlot,
   GraphQLAssignedVoucher,
@@ -62,6 +63,14 @@ export default function (nodeInterface, {
 		name: 'LoginUser',
 		fields: {
 			id: globalIdField('LoginUser'),
+      verified: {
+        type: GraphQLBoolean,
+        resolve: (user) => user.is_verified
+      },
+      profileComplete: {
+        type: GraphQLBoolean,
+        resolve: (user) => user.firstName&&user.lastName
+      },
 	  	orders: {
 	  		type: GraphQLOrderConnection,
 	  		args: {
@@ -173,7 +182,7 @@ export default function (nodeInterface, {
           }})
           .then(assignedVouchers => {
             return assignedVouchers;
-            
+
             const voucherIds = assignedVouchers.map(item => item.voucher_id);
             Vouchers.findAll({where:{id: {$in: voucherIds}}})
               .then(vouchers => {
@@ -238,8 +247,8 @@ export default function (nodeInterface, {
             .then(dates => dates.map(time => `${time.start_time}$${time.end_time}$${time.blocked_fullday}`))
       },
       credits: {
-      	type: GraphQLString,
-      	resolve: (user) => `$${user.credit}`
+      	type: GraphQLFloat,
+      	resolve: (user) => user.credit
       },
       firstName: {
         type: GraphQLString,
@@ -264,6 +273,22 @@ export default function (nodeInterface, {
       avatarUrl: {
         type: GraphQLString,
         resolve: (user) => user.profile_image_url_small
+      },
+      promoCode: {
+        type: GraphQLPromoCode,
+        args: {
+          code: {
+            type: new GraphQLNonNull(GraphQLString)
+          }
+        },
+        resolve: (user, {code}) =>
+          PromoCodes.findOne({where:{
+            name:code
+          }})
+          .then(code => {
+            if (!code) throw 'code not found';
+            return code;
+          })
       },
       order: {
         type: GraphQLOrder,

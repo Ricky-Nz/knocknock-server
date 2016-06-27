@@ -4,6 +4,7 @@ import { GraphQLUserEdge, GraphQLLoginUser, GraphQLViewer } from '../query';
 import { Users } from '../../service/database';
 import { processFileUpload, updateField } from '../utils';
 import { deleteFile } from '../../service/datastorage';
+import { generateOTP, sendSMS } from '../../service/notification';
 
 // id      
 // first_name      
@@ -86,6 +87,70 @@ const updateProfile = mutationWithClientMutationId({
 			})
 });
 
+const requestPhoneNumberVerify = mutationWithClientMutationId({
+	name: 'RequestPhoneNumberVerify',
+	inputFields: {
+		countryCode: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+    number: {
+      type: new GraphQLNonNull(GraphQLString)
+    }
+	},
+	outputFields: {
+		user: {
+			type: GraphQLLoginUser,
+			resolve: ({userId}) => Users.findById(userId)
+		}
+	},
+	mutateAndGetPayload: ({countryCode, number}, {userId}) => {
+		const {otp, expire} = generateOTP();
+		return sendSMS({country: countryCode, number, message: `Your verification code is ${otp}`})
+			.then(() => Users.update({
+				contact_no: `${countryCode}${number}`,
+				verification_code: otp,
+				verification_code_expiry: expire
+			}, {where: {id: userId}}))
+			.then(() => ({userId}))
+	}
+});
+
+const verifyPhoneNumber = mutationWithClientMutationId({
+	name: 'VerifyPhoneNumber',
+	inputFields: {
+    code: {
+    	type: new GraphQLNonNull(GraphQLString)
+    }
+	},
+	outputFields: {
+		user: {
+			type: GraphQLLoginUser,
+			resolve: ({userId}) => Users.findById(userId)
+		}
+	},
+	mutateAndGetPayload: ({code}, {userId}) =>
+		Users.findOne({where:{
+			id: userId,
+			verification_code: code,
+			verification_code_expiry: {$gt: new Date()}
+		}})
+		.then(user => {
+			if (!user) throw 'verify code not correct';
+			
+			if (!user.is_verified) {
+				return user.update({
+					is_verified: true,
+					verification_code: null,
+					verification_code_expiry: null
+				});
+			}
+		})
+		.then(() => ({userId}))
+});
+
 export default {
-	updateProfile
+	updateProfile,
+	requestPhoneNumberVerify,
+	verifyPhoneNumber
 };
+

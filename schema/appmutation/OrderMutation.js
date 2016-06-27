@@ -1,10 +1,11 @@
-import { GraphQLString, GraphQLNonNull, GraphQLList, GraphQLBoolean } from 'graphql';
+import { GraphQLString, GraphQLNonNull, GraphQLList, GraphQLInt, GraphQLBoolean } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'graphql-relay';
 import { GraphQLLoginUser, GraphQLAddress, GraphQLAddressEdge, GraphQLOrderItemInput,
 	GraphQLOrderEdge, GraphQLOrder } from '../query';
-import { Users, Orders, OrderStatuses, OrderDetails, OrderTransactions, UserVouchers, PromoCodes } from '../../service/database';
+import { Users, Orders, OrderStatuses, OrderDetails, OrderTransactions,
+	UserAddresses, UserVouchers, PromoCodes } from '../../service/database';
 import { payByStripeCardId, payByStripeToken, completePaypalExpressPayment, requestPaypalExpressUrl } from '../../service/payment';
-import { formatTime, formatPrice, prepareOrderItems } from '../utils';
+import { formatTime, formatPrice, prepareOrderItems, formatOrderTime } from '../utils';
 import { processOrderPayment } from '../paymentUtils';
 
 const cancelOrder = mutationWithClientMutationId({
@@ -36,6 +37,71 @@ const cancelOrder = mutationWithClientMutationId({
 	}
 });
 
+const setOrderDeliveryDate = mutationWithClientMutationId({
+	name: 'SetOrderDeliveryDate',
+	inputFields: {
+		orderId: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+		addressId: {
+			type: new GraphQLNonNull(GraphQLString)
+		},
+    date: {
+      type: new GraphQLNonNull(GraphQLString)
+    },
+    hour: {
+      type: new GraphQLNonNull(GraphQLInt)
+    }
+	},
+	outputFields: {
+		order: {
+			type: GraphQLOrder,
+			resolve: ({localOrderId}) => Orders.findById(localOrderId)
+		}
+	},
+	mutateAndGetPayload: ({orderId, addressId, date, hour}, {userId}) => {
+		const {id: localOrderId} = fromGlobalId(orderId);
+		if (!Date.parse(date)) throw 'illegal date format';
+		if (hour < 0 || hour > 23) throw 'hour must between 0 and 23';
+
+		return Orders.findOne({where:{
+				user_id: userId,
+				id: localOrderId
+			}})
+			.then(order => {
+				if (!order) throw 'order not found';
+
+				return OrderStatuses.findById(order_status_id)
+					.then(orderStatus => {
+						if (!orderStatus) throw 'order status not found';
+						if (orderStatus.stage === 4) throw 'order status not right';
+
+						return OrderStatuses.findOne({where:{stage: 5}})
+							.then(nextStatus => {
+								if (!nextStatus) throw 'next status not found';
+
+								const {id: localAddressId} = fromGlobalId(addressId);
+								return UserAddresses.findById(localAddressId)
+									.then(address => {
+										if (!address) throw 'address not found';
+
+										return order.update({
+											drop_off_address: address.address,
+											drop_off_postal_code: address.postal_code,
+											drop_off_unit_number: address.unit_number,
+											drop_off_contact_no: address.contact_no,
+											drop_off_date: formatTime(date, hour),
+											drop_off_time: formatOrderTime(hour),
+											order_status_id: nextStatus.id
+										});
+									})
+									.then(() => ({localOrderId}));
+							});
+					});
+			});
+	}
+});
+
 const createOrder = mutationWithClientMutationId({
 	name: 'CreateOrder',
 	inputFields: {
@@ -45,20 +111,14 @@ const createOrder = mutationWithClientMutationId({
     note: {
       type: GraphQLString
     },
-    pickupDate: {
+    date: {
       type: new GraphQLNonNull(GraphQLString)
     },
-    pickupTime: {
+    hour: {
       type: new GraphQLNonNull(GraphQLString)
     },
-    pickupAddress: {
+    addressId: {
       type: new GraphQLNonNull(GraphQLString)
-    },
-    pickupPostalCode: {
-      type: new GraphQLNonNull(GraphQLString)
-    },
-    pickupContactNo: {
-    	type: new GraphQLNonNull(GraphQLString)
     },
 		orderItems: {
 			type: new GraphQLList(GraphQLOrderItemInput)
@@ -77,31 +137,42 @@ const createOrder = mutationWithClientMutationId({
 			resolve: (order) => Users.findById(order.user_id)
 		}
 	},
-	mutateAndGetPayload: ({express, note, pickupDate,
-		pickupTime, pickupAddress, pickupPostalCode, pickupContactNo, orderItems}, {userId}) => {
+	mutateAndGetPayload: ({express, note, date, hour, addressId, orderItems}, {userId}) => {
+		if (!Date.parse(date)) throw 'illegal date format';
+		if (hour < 0 || hour > 23) throw 'hour must between 0 and 23';
 
 		return OrderStatuses.findOne({where:{stage:0}})
-			.then(status => Orders.create({
-				user_id: userId,
-				express_order: express,
-				description: note,
-				order_status_id: status.id,
-				pickup_date: formatTime(pickupDate),
-				pickup_time: pickupTime,
-				pickup_address: pickupAddress,
-				pickup_postal_code: pickupPostalCode,
-				pickup_contact_no: pickupContactNo,
-				created_on: new Date()
-			}))
-			.then(order => {
-				if (!orderItems || orderItems.length === 0) {
-					return order;
-				} else {
-					return prepareOrderItems(order.id, orderItems)
-						.then(items => OrderDetails.bulkCreate(items))
-						.then(() => order);
-				}
-			})
+			.then(status => {
+				const {id: localAddressId} = fromGlobalId(addressId);
+
+				return UserAddresses.findById(localAddressId)
+					.then(address => {
+						if (!address) throw 'address not found';
+
+						return Orders.create({
+							user_id: userId,
+							express_order: express,
+							description: note,
+							order_status_id: status.id,
+							pickup_address: address.address,
+							pickup_postal_code: address.postal_code,
+							pickup_unit_number: address.unit_number,
+							pickup_contact_no: address.contact_no,
+							pickup_date: formatTime(date, hour),
+							pickup_time: formatOrderTime(hour),
+							created_on: new Date()
+						})
+						.then(order => {
+							if (!orderItems || orderItems.length === 0) {
+								return order;
+							} else {
+								return prepareOrderItems(order.id, orderItems)
+									.then(items => OrderDetails.bulkCreate(items))
+									.then(() => order);
+							}
+						});
+					});
+			});
 	}
 });
 
@@ -168,8 +239,8 @@ const payOrderByPaypal = mutationWithClientMutationId({
 			.then(({url, token}) => ({url, userId}))
 });
 
-const payOrderByStrip = mutationWithClientMutationId({
-	name: 'PayOrderByStrip',
+const payOrderByStripe = mutationWithClientMutationId({
+	name: 'PayOrderByStripe',
 	inputFields: {
 		orderId: {
 			type: new GraphQLNonNull(GraphQLString)
@@ -243,8 +314,9 @@ const payOrderByStrip = mutationWithClientMutationId({
 export default {
 	cancelOrder,
 	createOrder,
+	setOrderDeliveryDate,
 	payOrderByCredit,
 	payOrderByPaypal,
-	payOrderByStrip
+	payOrderByStripe
 };
 

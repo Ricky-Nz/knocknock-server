@@ -336,6 +336,7 @@ export const {
   GraphQLBanner,
   GraphQLCloth,
   GraphQLOrder,
+  GraphQLPromoCode,
   GraphQLCategory,
   GraphQLTimeSlot,
   GraphQLAssignedVoucher,

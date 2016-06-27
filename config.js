@@ -29,3 +29,9 @@ export const PAYPAL = {
 		VERSION: 93
 	}
 };
+
+export const TWILIO = {
+	accountSid: 'ACfe2db008aa0360cc7c7c90bfc3e034fa',
+	authToken: 'ccd139e4b5caef6526978f90abeb3801',
+	MessagingServiceSid: 'MG68ad4d4d369c9312cae1dfb6b1cb2a99'
+};

@@ -141,7 +141,7 @@ export default function (nodeInterface, {
       },
       displayDropOffAddress: {
         type: GraphQLString,
-        resolve: (obj) => `${obj.drop_off_address||''}, ${obj.drop_off_unit_number||''} ${obj.drop_off_postal_code||''}`
+        resolve: (obj) => obj.drop_off_address?`${obj.drop_off_address||''}, ${obj.drop_off_unit_number||''} ${obj.drop_off_postal_code||''}`:null
       },
       pickupAddress: {
         type: GraphQLString,

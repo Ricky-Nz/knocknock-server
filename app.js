@@ -41,7 +41,10 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 express()
   .use(cookieParser())
   .post('/api/login', urlencodedParser, jsonParser, ({body}, res) => {
-    Users.findOne({where:{contact_no:body.username}})
+    Users.findOne({where:{$or: [
+      {contact_no:body.username},
+      {email:body.username}
+    ]}})
     .then(user => {
       if (!user) return res.status(400).send('username or password not correct');
 
@@ -49,27 +52,37 @@ express()
         .then(() => {
           res.cookie('token', generateToken(user.id));
           res.json({
-            needSetup: !user.first_name || !user.last_name
+            bindContact: !user.is_verified,
+            setupProfile: !user.first_name || !user.last_name
           });
         })
         .catch(error => res.status(400).send(error))
     })
     .catch(error => res.status(400).send(error))
   })
-  .post('/api/register', urlencodedParser, jsonParser, ({body}, res) => {
-    Users.findOne({where:{contact_no:body.username}})
-    .then(user => {
-      if (user) return res.status(400).send('phone number taken');
+  .get('/api/check', urlencodedParser, ({query}, res) => {
+    Users.findOne({where:{email:query.email}})
+      .then(user => {
+        if (user) return res.status(400).send('email already taken');
 
-      return Users.create({
-          contact_no: body.username,
-          encrypted_password: body.password
-        }).then(user => {
-          res.cookie('token', generateToken(user.id));
-          res.sendStatus(200);
-        });
-    })
-    .catch(error => res.status(400).send(error))
+        res.sendStatus(200);
+      })
+      .catch(error => res.status(400).send(error))
+  })
+  .post('/api/register', urlencodedParser, jsonParser, ({body}, res) => {
+    Users.findOne({where:{email:body.username}})
+      .then(user => {
+        if (user) return res.status(400).send('email already taken');
+
+        return Users.create({
+            email: body.username,
+            encrypted_password: body.password
+          }).then(user => {
+            res.cookie('token', generateToken(user.id));
+            res.sendStatus(200);
+          });
+      })
+      .catch(error => res.status(400).send(error))
   })
   .use('/payment/success', function (req, res, next) {
     completePaypalExpressPayment({token: req.query.token, PayerID: req.query.PayerID})

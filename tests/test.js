@@ -1,7 +1,7 @@
-import { OrderTransactions, Users } from '../service/database';
+// import { OrderSlots } from '../service/database';
 
-OrderTransactions.findAll()
-	.then(result => result.map(({dataValues}) => console.log(dataValues)));
+// OrderSlots.findAll({order: 'date'})
+// 	.then(result => result.map(({dataValues}) => console.log(dataValues)));
 	
 // 5XW71267S5505635Y
 	   //  token: function(token) {
@@ -23,3 +23,8 @@ OrderTransactions.findAll()
 // requestPaypalExpressUrl({amount: 20.5, currency: 'SGD'})
 // 	.then(response => console.log(response))
 // 	.catch(err => console.log(err));
+
+import { sendSMS } from '../service/notification';
+
+sendSMS({number:'96452556', message:'RUIQI'})
+	.then(respones => console.log('succe'));

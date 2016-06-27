@@ -7,6 +7,14 @@ import { connectionFromPromisedArraySlice, cursorToOffset, fromGlobalId } from '
 import { DBOrder, Items, Orders } from '../service/database';
 import Chance from 'chance';
 
+export function formatOrderTime(hour) {
+  if (hour < 10) {
+    return `0${hour}:00:00`;
+  } else {
+    return `${hour}:00:00`;
+  }
+}
+
 export function formatPrice(price, display) {
   const formatPrice = parseFloat(price).toFixed(2);
   if (display) {
@@ -14,11 +22,6 @@ export function formatPrice(price, display) {
   }
   
   return parseFloat(formatPrice);
-}
-
-export function indentDate(str, max) {
-  str = str.toString();
-  return str.length < max ? pad("0" + str, max) : str;
 }
 
 export function updateField(fieldName, value) {
