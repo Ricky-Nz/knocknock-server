@@ -69,7 +69,7 @@ function processStripeReponse({amount, source, status, description}, userId) {
 		.then(user => user.increment({credit: parseFloat(amount / 100)}))
 		.then(() => UserCredits.create({
 		  user_id: userId,
-		  amount: amount,
+		  amount: amount / 100,
 		  paypal_ref_no: source.id,
 		  top_up: true,
 		  created_on: new Date(),
