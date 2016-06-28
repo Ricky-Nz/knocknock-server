@@ -142,59 +142,62 @@ export function processFileUpload(bucket, file) {
 	});
 }
 
+export function priceTimes(price, times) {
+  const intPrice = parseInt(parseFloat(price) * 100) * parseInt(times);
+  return parseFloat((intPrice / 100).toFixed(2));
+}
+
 export function prepareOrderItems(localOrderId, orderItems) {
   const clothIds = orderItems.map(item => {
-    const {id} = fromGlobalId(item.productId);
+    const {id} = fromGlobalId(item.id);
     return id;
   });
 
   return Items.findAll({where:{id:{$in:clothIds}}})
     .then(clothes => {
-      const items =  orderItems.map(({productId, quantity, washType}) => {
-        const {id: localClothId} = fromGlobalId(productId);
+      const orderDetails = [];
+      let totalPrice = 0;
+      for (const index in orderItems) {
+        const {id, wash, dry, iron} = orderItems[index];
+        const {id: localClothId} = fromGlobalId(id);
         const cloth = clothes.find(cloth => cloth.id == localClothId);
 
-        let itemPrice;
-        switch(washType) {
-          case 'wash':
-            if (cloth.have_discount_wash_iron_price) {
-              itemPrice = cloth.discount_wash_iron_price;
-            } else {
-              itemPrice = cloth.wash_iron_price;
-            }
-            break;
-          case 'dry':
-            if (cloth.have_discount_dry_clean_price) {
-              itemPrice = cloth.discount_dry_clean_price;
-            } else {
-              itemPrice = cloth.dry_clean_price;
-            }
-            break;
-          case 'iron':
-            if (cloth.have_discount_iron_price) {
-              itemPrice = cloth.discount_iron_price;
-            } else {
-              itemPrice = cloth.iron_price;
-            }
-            break;
+        if (wash > 0) {
+          const price = priceTimes(cloth.have_discount_wash_iron_price?cloth.discount_wash_iron_price:cloth.wash_iron_price, wash);
+          orderDetails.push({
+            order_id: localOrderId,
+            item_id: localClothId,
+            quantity: wash,
+            laundry_type: 'wash',
+            price
+          });
+          totalPrice += price;
         }
-
-        return {
-          order_id: localOrderId,
-          item_id: localClothId,
-          quantity,
-          laundry_type: washType,
-          price: itemPrice
-        };
-      });
-
-      let totalPrice = 0;
-      for (const index in items) {
-        const item = items[index];
-        totalPrice += (parseInt(item.quantity) * parseFloat(item.price));
+        if (dry > 0) {
+          const price = priceTimes(cloth.have_discount_dry_clean_price?cloth.discount_dry_clean_price:cloth.dry_clean_price, dry);
+          orderDetails.push({
+            order_id: localOrderId,
+            item_id: localClothId,
+            quantity: dry,
+            laundry_type: 'dry',
+            price
+          });
+          totalPrice += price;
+        }
+        if (iron > 0) {
+          const price = priceTimes(cloth.have_discount_iron_price?cloth.discount_iron_price:cloth.iron_price, iron);
+          orderDetails.push({
+            order_id: localOrderId,
+            item_id: localClothId,
+            quantity: iron,
+            laundry_type: 'iron',
+            price
+          });
+          totalPrice += price;
+        }
       }
 
       return Orders.update({total_price: totalPrice}, {where:{id:localOrderId}})
-        .then(() => items);
+        .then(() => orderDetails);
     });
 }

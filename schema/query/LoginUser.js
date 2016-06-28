@@ -50,6 +50,7 @@ export default function (nodeInterface, {
 	GraphQLBanner,
 	GraphQLCloth,
   GraphQLOrder,
+  GraphQLAddress,
   GraphQLPromoCode,
 	GraphQLCategory,
   GraphQLTimeSlot,
@@ -202,6 +203,18 @@ export default function (nodeInterface, {
         resolve: (user, args) =>
           modelConnection(UserAddresses, {where:{user_id: user.id}, order: 'created_on DESC'}, args)
       },
+      userAddress: {
+        type: GraphQLAddress,
+        args: {
+          id: {
+            type: new GraphQLNonNull(GraphQLString)
+          }
+        },
+        resolve: (user, {id}) => {
+          const {id: localId} = fromGlobalId(id);
+          return UserAddresses.findOne({where:{user_id:user.id, id: localId}});
+        }
+      },
       toPayCount: {
       	type: new GraphQLNonNull(GraphQLInt),
       	resolve: (user) => Orders.count({where:{$and:{
@@ -253,13 +266,14 @@ export default function (nodeInterface, {
           }})
           .then(blockedDates => blockedDates.map(date => parseInt(date.date.split('-')[2])))
       },
-      pickupTimes: {
+      timeSlots: {
         type: new GraphQLList(GraphQLTimeSlot),
-        resolve: (user) => getTimeSlots()
-      },
-      dropOffTimes: {
-        type: new GraphQLList(GraphQLTimeSlot),
-        resolve: (user) => getTimeSlots()
+        args: {
+          date: {
+            type: new GraphQLNonNull(GraphQLString)
+          }
+        },
+        resolve: (user, {date}) => getTimeSlots(date)
       },
       credits: {
       	type: GraphQLFloat,

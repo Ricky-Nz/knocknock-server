@@ -28,17 +28,24 @@ import creditCardQuery from './CreditCard';
 class Viewer {}
 class LoginUser {}
 
-export const getTimeSlots = function() {
-  const hour = new Date().getHours() + 1;
+export const getTimeSlots = function(date) {
+  const target = new Date(date);
+  const now = new Date();
+  let hour = 0;
+  if ((target.getFullYear() === now.getFullYear())
+    && (target.getMonth() === now.getMonth())
+    && (target.getDate() === now.getDate())) {
+    hour = now.getHours() + 1;
+  }
 
-  return {
-    1: new TimeSlot(1, '9:00 ~ 11:00', 9, hour < 9),
-    2: new TimeSlot(2, '11:00 ~ 13:00', 11, hour < 11),
-    3: new TimeSlot(3, '13:00 ~ 15:00', 13, hour < 13),
-    4: new TimeSlot(4, '15:00 ~ 17:00', 15, hour < 15),
-    5: new TimeSlot(5, '17:00 ~ 19:00', 17, hour < 17),
-    6: new TimeSlot(6, '19:00 ~ 21:00', 19, hour < 19)
-  };
+  return [
+    new TimeSlot(0, '9:00 ~ 11:00', 9, hour < 11),
+    new TimeSlot(1, '11:00 ~ 13:00', 11, hour < 13),
+    new TimeSlot(2, '13:00 ~ 15:00', 13, hour < 15),
+    new TimeSlot(3, '15:00 ~ 17:00', 15, hour < 17),
+    new TimeSlot(4, '17:00 ~ 19:00', 17, hour < 19),
+    new TimeSlot(5, '19:00 ~ 21:00', 19, hour < 21)
+  ];
 }
 
 export class TimeSlot {
@@ -53,14 +60,17 @@ export class TimeSlot {
 export const GraphQLOrderItemInput = new GraphQLInputObjectType({
   name: 'OrderItemInput',
   fields: {
-    productId: {
+    id: {
       type: new GraphQLNonNull(GraphQLString)
     },
-    quantity: {
-      type: new GraphQLNonNull(GraphQLInt)
+    wash: {
+      type: GraphQLInt
     },
-    washType: {
-      type: new GraphQLNonNull(GraphQLString)
+    dry: {
+      type: GraphQLInt
+    },
+    iron: {
+      type: GraphQLInt
     }
   }
 });
@@ -347,6 +357,7 @@ export const {
   GraphQLBanner,
   GraphQLCloth,
   GraphQLOrder,
+  GraphQLAddress,
   GraphQLPromoCode,
   GraphQLCategory,
   GraphQLTimeSlot,

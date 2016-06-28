@@ -587,9 +587,10 @@ type OrderItemEdge {
 }
 
 input OrderItemInput {
-  productId: String!
-  quantity: Int!
-  washType: String!
+  id: String!
+  wash: Int
+  dry: Int
+  iron: Int
 }
 
 type OrderStatus implements Node {

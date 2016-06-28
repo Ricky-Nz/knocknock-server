@@ -131,7 +131,7 @@ input CreateOrderInput {
   express: Boolean
   note: String
   date: String!
-  hour: String!
+  hour: Int!
   addressId: String!
   orderItems: [OrderItemInput]
   clientMutationId: String!
@@ -211,12 +211,12 @@ type LoginUser implements Node {
   vouchers(after: String, first: Int, before: String, last: Int): AssignedVoucherConnection
   availableVouchers: [AssignedVoucher]
   addresses(after: String, first: Int, before: String, last: Int): AddressConnection
+  userAddress(id: String!): Address
   toPayCount: Int!
   voucherCount: Int!
   blockedPickupDayOfMonth(year: Int!, month: Int!): [Int]
   blockedDropOffDayOfMonth(year: Int!, month: Int!): [Int]
-  pickupTimes: [TimeSlot]
-  dropOffTimes: [TimeSlot]
+  timeSlots(date: String!): [TimeSlot]
   credits: Float
   firstName: String
   lastName: String
@@ -313,9 +313,10 @@ type OrderItemEdge {
 }
 
 input OrderItemInput {
-  productId: String!
-  quantity: Int!
-  washType: String!
+  id: String!
+  wash: Int
+  dry: Int
+  iron: Int
 }
 
 type OrderStatus implements Node {

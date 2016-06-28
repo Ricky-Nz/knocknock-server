@@ -1,6 +1,6 @@
 import { GraphQLString, GraphQLNonNull, GraphQLInt, GraphQLFloat, GraphQLList, GraphQLBoolean } from 'graphql';
 import { mutationWithClientMutationId, offsetToCursor, fromGlobalId } from 'graphql-relay';
-import { GraphQLLoginUser, GraphQLAddress, GraphQLAddressEdge, GraphQLOrderItemInput,
+import { GraphQLLoginUser, GraphQLAddress, GraphQLAddressEdge,
 	GraphQLOrderEdge } from '../query';
 import { Users, UserCredits, UserCreditCards } from '../../service/database';
 import { payByStripeCardId, payByStripeToken, completePaypalExpressPayment, requestPaypalExpressUrl } from '../../service/payment';

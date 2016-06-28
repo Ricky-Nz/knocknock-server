@@ -1,7 +1,7 @@
-// import { BlockedTimes } from '../service/database';
+import { OrderDetails } from '../service/database';
 
-// BlockedTimes.findAll()
-// 	.then(result => result.map(({dataValues}) => console.log(dataValues)));
+OrderDetails.findAll()
+	.then(result => result.map(({dataValues}) => console.log(dataValues.laundry_type)));
 	
 // 5XW71267S5505635Y
 	   //  token: function(token) {
@@ -23,12 +23,3 @@
 // requestPaypalExpressUrl({amount: 20.5, currency: 'SGD'})
 // 	.then(response => console.log(response))
 // 	.catch(err => console.log(err));
-
-class Test {
-	constructor({rr, ff}){
-		this.rr = rr;
-		this.ff = ff;
-	}
-}
-
-console.log(new Test({rr:'rui',ff:'qi'}))

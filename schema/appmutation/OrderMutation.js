@@ -115,7 +115,7 @@ const createOrder = mutationWithClientMutationId({
       type: new GraphQLNonNull(GraphQLString)
     },
     hour: {
-      type: new GraphQLNonNull(GraphQLString)
+      type: new GraphQLNonNull(GraphQLInt)
     },
     addressId: {
       type: new GraphQLNonNull(GraphQLString)
