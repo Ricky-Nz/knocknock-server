@@ -103,16 +103,23 @@ const requestPhoneNumberVerify = mutationWithClientMutationId({
 			resolve: ({userId}) => Users.findById(userId)
 		}
 	},
-	mutateAndGetPayload: ({countryCode, number}, {userId}) => {
-		const {otp, expire} = generateOTP();
-		return sendSMS({country: countryCode, number, message: `Your verification code is ${otp}`})
-			.then(() => Users.update({
-				contact_no: `${countryCode}${number}`,
-				verification_code: otp,
-				verification_code_expiry: expire
-			}, {where: {id: userId}}))
-			.then(() => ({userId}))
-	}
+	mutateAndGetPayload: ({countryCode, number}, {userId}) =>
+		Users.findOne({where:{$or:[
+			{contact_no: number},
+			{contact_no: `${countryCode}${number}`}
+		]}})
+		.then(user => {
+			if (user) throw 'phone number already binded';
+
+			const {otp, expire} = generateOTP();
+			return sendSMS({country: countryCode, number, message: `Your verification code is ${otp}`})
+				.then(() => Users.update({
+					contact_no: `${countryCode}${number}`,
+					verification_code: otp,
+					verification_code_expiry: expire
+				}, {where: {id: userId}}))
+				.then(() => ({userId}));
+		})
 });
 
 const verifyPhoneNumber = mutationWithClientMutationId({

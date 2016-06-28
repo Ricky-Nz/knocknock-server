@@ -1,7 +1,7 @@
-import { OrderDetails } from '../service/database';
+import { Users } from '../service/database';
 
-OrderDetails.findAll()
-	.then(result => result.map(({dataValues}) => console.log(dataValues.laundry_type)));
+Users.findAll()
+	.then(result => result.map(({dataValues}) => console.log(dataValues.contact_no)));
 	
 // 5XW71267S5505635Y
 	   //  token: function(token) {

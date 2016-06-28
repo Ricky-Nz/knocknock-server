@@ -71,10 +71,10 @@ const setOrderDeliveryDate = mutationWithClientMutationId({
 			.then(order => {
 				if (!order) throw 'order not found';
 
-				return OrderStatuses.findById(order_status_id)
+				return OrderStatuses.findById(order.order_status_id)
 					.then(orderStatus => {
 						if (!orderStatus) throw 'order status not found';
-						if (orderStatus.stage === 4) throw 'order status not right';
+						if (orderStatus.stage !== 4) throw 'order status not right';
 
 						return OrderStatuses.findOne({where:{stage: 5}})
 							.then(nextStatus => {
