@@ -1,7 +1,7 @@
-import { Users } from '../service/database';
+import { Orders } from '../service/database';
 
-Users.findAll()
-	.then(result => result.map(({dataValues}) => console.log(dataValues.contact_no)));
+Orders.findAll({where:{order_status_id:13}})
+	.then(result => result.map(({dataValues}) => console.log(dataValues.order_status_id)));
 	
 // 5XW71267S5505635Y
 	   //  token: function(token) {
@@ -23,3 +23,17 @@ Users.findAll()
 // requestPaypalExpressUrl({amount: 20.5, currency: 'SGD'})
 // 	.then(response => console.log(response))
 // 	.catch(err => console.log(err));
+
+// { id: 1, status: 'Pending Worker', stage: 0 }
+// { id: 2, status: 'Worker found', stage: 1 }
+// { id: 3, status: 'Awaiting pick up', stage: 2 }
+// { id: 4, status: 'Laundry in progress', stage: 3 }
+// { id: 5, status: 'Laundry Complete', stage: 4 }
+// { id: 6, status: 'Awaiting drop off', stage: 5 }
+// { id: 7, status: 'Laundry dropped off', stage: 6 }
+// { id: 8, status: 'Order complete', stage: 7 }
+// { id: 9, status: 'Deleted', stage: 8 }
+// { id: 10, status: 'Pickup Failed', stage: 9 }
+// { id: 11, status: 'Drop off Failed', stage: 10 }
+// { id: 12, status: 'Picked Up', stage: 22 }
+// { id: 13, status: 'Awaiting Loading', stage: 35 }

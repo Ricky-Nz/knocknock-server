@@ -531,6 +531,7 @@ interface Node {
 type Order implements Node {
   id: ID!
   displayId: Int
+  displayDate: String
   userId: String
   express: Boolean
   paid: Boolean

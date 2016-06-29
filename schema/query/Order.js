@@ -79,6 +79,10 @@ export default function (nodeInterface, {
         type: GraphQLInt,
         resolve: (obj) => obj.id
       },
+      displayDate: {
+        type: GraphQLString,
+        resolve: (obj) => toDisplayDate(obj.created_on)
+      },
       userId: {
         type: GraphQLString,
         resolve: (obj) => toGlobalId('User', obj.user_id)

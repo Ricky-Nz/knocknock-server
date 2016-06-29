@@ -1,7 +1,7 @@
 import { GraphQLObjectType, GraphQLList, GraphQLInt, GraphQLBoolean, GraphQLNonNull, GraphQLString, GraphQLFloat } from 'graphql';
 import { connectionDefinitions, globalIdField, connectionArgs, fromGlobalId, toGlobalId } from 'graphql-relay';
 import { PromotionBanners, Users, Orders, UserCredits, UserAddresses, UserCreditCards, UserVouchers,
-  SubCategories, Items, Vouchers, PromoCodes, BlockedDates } from '../../service/database';
+  SubCategories, Items, Vouchers, PromoCodes, BlockedDates, OrderStatuses } from '../../service/database';
 import { modelConnection, verifyPassword, indentDate, formatTime } from '../utils';
 import { getAddressByPostalCode } from '../../service/location';
 
@@ -61,6 +61,36 @@ export default function (nodeInterface, {
 	GraphQLCreditRecordConnection,
 	GraphQLAssignedVoucherConnection
 }) {
+  function findOrderByStage(user, args, stages, additionalSelection) {
+    return OrderStatuses.findAll({where:{stage:{$in:stages}}, attributes: ['id']})
+      .then(statuses =>
+        modelConnection(Orders, {where:{$and:{
+          user_id: user.id,
+          order_status_id: {$in: statuses.map(item => item.id)},
+          ...additionalSelection
+        }}, order: 'id DESC'}, args)
+      )
+  }
+
+  function findAvailableVouchers(user) {
+    return UserVouchers.findAll({where:{
+        used: false,
+        user_id: user.id
+      }})
+      .then(assignedVouchers => {
+        return assignedVouchers;
+
+        const voucherIds = assignedVouchers.map(item => item.voucher_id);
+        Vouchers.findAll({where:{id: {$in: voucherIds}}})
+          .then(vouchers => {
+            return assignedVouchers.filter(assignVoucher => {
+              const voucher = vouchers.find(item => item.id === assignVoucher.voucher_id);
+              return !voucher.disabled&&(voucher.expire_on > new Date());
+            });
+          });
+      });
+  }
+
 	const nodeType = new GraphQLObjectType({
 		name: 'LoginUser',
 		fields: {
@@ -78,34 +108,38 @@ export default function (nodeInterface, {
 	  		args: {
 	  			...connectionArgs
 	  		},
-	  		resolve: (user, args) =>
-	  			modelConnection(Orders, {where:{$and:{
-	  				order_status_id:{$notIn:[8, 9]},
-	  				user_id: user.id
-	  			}}, order: 'id DESC'}, args)
+	  		resolve: (user, args) => findOrderByStage(user, args, [0, 1, 2, 3, 4, 5, 6, 22, 35])
 	  	},
 	  	histories: {
 	  		type: GraphQLOrderConnection,
 	  		args: {
 	  			...connectionArgs
 	  		},
-	  		resolve: (user, args) =>
-	  			modelConnection(Orders, {where:{$and:{
-	  				order_status_id:{$in:[8, 9]},
-	  				user_id: user.id
-	  			}}, order: 'id DESC'}, args)
+	  		resolve: (user, args) => findOrderByStage(user, args, [7, 8, 9, 10])
 	  	},
 	  	toPayOrders: {
 	  		type: GraphQLOrderConnection,
 	  		args: {
 	  			...connectionArgs
 	  		},
-	  		resolve: (user, args) =>
-	  			modelConnection(Orders, {where:{$and:{
-	      		paid:false,
-	      		user_id: user.id
-	  			}}, order: 'id DESC'}, args)
+	  		resolve: (user, args) => findOrderByStage(user, args, [3, 4, 5, 6, 7], {paid: false})
 	  	},
+      toPayCount: {
+        type: new GraphQLNonNull(GraphQLInt),
+        resolve: (user) =>
+          OrderStatuses.findAll({where:{stage:{$in:[3, 4, 5, 6, 7]}}, attributes: ['id']})
+            .then(statuses =>
+              Orders.count({where:{$and:{
+                  paid: false,
+                  user_id: user.id,
+                  order_status_id: {$in: statuses.map(item => item.id)},
+                }}})
+            )
+      },
+      voucherCount: {
+        type: new GraphQLNonNull(GraphQLInt),
+        resolve: (user) => findAvailableVouchers(user).then(vouchers => (vouchers&&vouchers.length)||0)
+      },
       banners: {
         type: new GraphQLList(GraphQLBanner),
         resolve: (user) =>
@@ -178,22 +212,7 @@ export default function (nodeInterface, {
       },
       availableVouchers: {
         type: new GraphQLList(GraphQLAssignedVoucher),
-        resolve: (user) => UserVouchers.findAll({where:{
-            used: false,
-            user_id: user.id
-          }})
-          .then(assignedVouchers => {
-            return assignedVouchers;
-
-            const voucherIds = assignedVouchers.map(item => item.voucher_id);
-            Vouchers.findAll({where:{id: {$in: voucherIds}}})
-              .then(vouchers => {
-                return assignedVouchers.filter(assignVoucher => {
-                  const voucher = vouchers.find(item => item.id === assignVoucher.voucher_id);
-                  return !voucher.disabled&&(voucher.expire_on > new Date());
-                });
-              });
-          })
+        resolve: (user) => findAvailableVouchers(user)
       },
       addresses: {
         type: GraphQLAddressConnection,
@@ -214,21 +233,6 @@ export default function (nodeInterface, {
           const {id: localId} = fromGlobalId(id);
           return UserAddresses.findOne({where:{user_id:user.id, id: localId}});
         }
-      },
-      toPayCount: {
-      	type: new GraphQLNonNull(GraphQLInt),
-      	resolve: (user) => Orders.count({where:{$and:{
-	      		paid:false,
-	      		user_id: user.id
-	      	}}})
-      },
-      voucherCount: {
-        type: new GraphQLNonNull(GraphQLInt),
-        resolve: (user) =>
-          UserVouchers.count({where:{$and:{
-            user_id: user.id,
-            used: false
-          }}})
       },
       blockedPickupDayOfMonth: {
         type: new GraphQLList(GraphQLInt),

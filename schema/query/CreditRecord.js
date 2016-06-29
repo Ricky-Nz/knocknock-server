@@ -34,7 +34,7 @@ export default function (nodeInterface, {GraphQLUserRef}) {
 			},
 			createdAt: {
 				type: GraphQLString,
-				resolve: (obj) => obj.created_on&&toDisplayDate(obj.created_on)
+				resolve: (obj) => obj.created_on&&toDisplayDate(obj.created_on, true)
 			},
 			paymentMode: {
 				type: GraphQLString,

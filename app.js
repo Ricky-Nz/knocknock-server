@@ -74,14 +74,21 @@ express()
     });
   })
   .post('/api/login', urlencodedParser, jsonParser, ({body}, res) => {
+    if (!body.username || !body.password) {
+      return res.status(400).send('username or password can not be empty');
+    }
+
+    const username = body.username.toLowerCase();
+    const password = body.password.toLowerCase();
+
     Users.findOne({where:{$or: [
-      {contact_no:body.username},
-      {email:body.username}
+      {contact_no: username},
+      {email: username}
     ]}})
     .then(user => {
       if (!user) return res.status(400).send('username or password not correct');
 
-      return verifyPassword(body.password, user.encrypted_password)
+      return verifyPassword(password, user.encrypted_password)
         .then(() => {
           res.cookie('token', generateToken(user.id));
           res.json({
@@ -103,13 +110,20 @@ express()
       .catch(error => res.status(400).send(error))
   })
   .post('/api/register', urlencodedParser, jsonParser, ({body}, res) => {
-    Users.findOne({where:{email:body.username}})
+    if (!body.username || !body.password) {
+      return res.status(400).send('username or password can not be empty');
+    }
+
+    const email = body.username.toLowerCase();
+    const password = body.password.toLowerCase();
+
+    Users.findOne({where:{email}})
       .then(user => {
         if (user) return res.status(400).send('email already taken');
 
         return Users.create({
-            email: body.username,
-            encrypted_password: body.password
+            email,
+            encrypted_password: password
           }).then(user => {
             res.cookie('token', generateToken(user.id));
             res.sendStatus(200);

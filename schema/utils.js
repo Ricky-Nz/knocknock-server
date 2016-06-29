@@ -35,8 +35,8 @@ export function generateCode(argument) {
   return chance.string({pool: 'poiuytrewqasdfghjklmnbvcxz1234567890', length: 12});
 }
 
-export function toDisplayDate(date) {
-  return moment(date).format("MMM Do YYYY");
+export function toDisplayDate(date, time) {
+  return moment(date).format(`MMM Do YYYY ${time?', hh:mm':''}`);
 }
 
 export function formatSelectDate(year, month, dayOfMonth) {
