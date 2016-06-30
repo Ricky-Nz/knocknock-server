@@ -68,7 +68,7 @@ const updateProfile = mutationWithClientMutationId({
 	outputFields: {
 		user: {
 			type: GraphQLLoginUser,
-			resolve: ({localId}) => Users.findById(localId)
+			resolve: ({userId}) => Users.findById(userId)
 		}
 	},
 	mutateAndGetPayload: ({newPassword, firstName, lastName, password, plusAccount}, {userId}, {rootValue}) =>
@@ -85,6 +85,7 @@ const updateProfile = mutationWithClientMutationId({
 					}
 				}, {where:{id: userId}});
 			})
+			.then(() => ({userId}))
 });
 
 const requestPhoneNumberVerify = mutationWithClientMutationId({
@@ -109,7 +110,7 @@ const requestPhoneNumberVerify = mutationWithClientMutationId({
 			{contact_no: `${countryCode}${number}`}
 		]}})
 		.then(user => {
-			if (user) throw 'phone number already binded';
+			// if (user) throw 'phone number already binded';
 
 			const {otp, expire} = generateOTP();
 			return sendSMS({country: countryCode, number, message: `Your verification code is ${otp}`})

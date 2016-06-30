@@ -101,7 +101,11 @@ express()
     .catch(error => res.status(400).send(error))
   })
   .get('/api/check', urlencodedParser, ({query}, res) => {
-    Users.findOne({where:{email:query.email}})
+    if (!query.email) return res.status(400).send('check email can not be empty');
+
+    const email = query.email.toLowerCase();
+
+    Users.findOne({where:{email}})
       .then(user => {
         if (user) return res.status(400).send('email already taken');
 

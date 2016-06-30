@@ -1,7 +1,7 @@
-import { Orders } from '../service/database';
+import { Users } from '../service/database';
 
-Orders.findAll({where:{order_status_id:13}})
-	.then(result => result.map(({dataValues}) => console.log(dataValues.order_status_id)));
+Users.findAll({where:{email:'oo@gmail.com'}})
+	.then(result => result.map(({dataValues}) => console.log(dataValues)));
 	
 // 5XW71267S5505635Y
 	   //  token: function(token) {
